@@ -1,0 +1,40 @@
+{
+  "name": "sen",
+  "description": "API with SQL, Express & NemJS",
+  "keywords": [
+    "api",
+    "javascript",
+    "node",
+    "express",
+    "sql"
+  ],
+  "scripts": {
+    "start": "nodemon server",
+    "test": "jest"
+  },
+  "license": "Apache-2.0 License",
+  "main": "server.js",
+  "repository": "github:philippebeck/sen",
+  "bugs": "https://github.com/philippebeck/sen/issues",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.17.2",
+    "formidable": "^2.1.1",
+    "google-recaptcha": "^1.1.0",
+    "helmet": "^5.0.2",
+    "nemjs": "^1.6.2",
+    "sequelize": "^6.35.1"
+  },
+  "author": {
+    "name": "Philippe Beck",
+    "email": "philippe@philippebeck.net",
+    "url": "https://philippebeck.net"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
+  }
+}
