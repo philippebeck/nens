@@ -1,8 +1,8 @@
 "use strict";
 
-const express   = require("express");
-const helmet    = require("helmet");
-const cors      = require("cors");
+const express = require("express");
+const helmet  = require("helmet");
+const cors    = require("cors");
 
 const articleRoute  = require("./route/ArticleRoute");
 const authRoute     = require("./route/AuthRoute");
