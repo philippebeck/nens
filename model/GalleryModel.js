@@ -3,7 +3,8 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 /**
- * Define the Gallery Model
+ * ? GALLERY MODEL
+ * * Define the Gallery Model
  *
  * @param {Sequelize} Sequelize - the Sequelize instance
  * @param {DataTypes} DataTypes - the DataTypes instance
@@ -34,6 +35,8 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: false,
       unique: true
     }
+  }, {
+    timestamps: false
   });
 
   return GalleryModel;

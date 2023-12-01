@@ -3,7 +3,8 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 /**
- * Define the Link Model
+ * ? LINK MODEL
+ * * Define the Link Model
  *
  * @param {Sequelize} Sequelize - the Sequelize instance
  * @param {DataTypes} DataTypes - the DataTypes instance
@@ -34,6 +35,8 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     }
+  }, {
+    timestamps: false
   });
 
   return LinkModel;

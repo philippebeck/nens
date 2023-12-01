@@ -3,7 +3,8 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 /**
- * Define the Image Model
+ * ? IMAGE MODEL
+ * * Define the Image Model
  *
  * @param {Sequelize} Sequelize - the Sequelize instance
  * @param {DataTypes} DataTypes - the DataTypes instance
@@ -33,6 +34,8 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     }
+  }, {
+    timestamps: false
   });
 
   return ImageModel;

@@ -3,7 +3,8 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 /**
- * Define the Article Model
+ * ? ARTICLE MODEL
+ * * Define the Article Model
  *
  * @param {Sequelize} Sequelize - the Sequelize instance
  * @param {DataTypes} DataTypes - the DataTypes instance
@@ -61,6 +62,8 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false
     }
+  }, {
+    timestamps: false
   });
 
   return ArticleModel;

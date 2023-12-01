@@ -3,7 +3,8 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 /**
- * Define the Order Model
+ * ? ORDER MODEL
+ * * Define the Order Model
  *
  * @param {Sequelize} Sequelize - the Sequelize instance
  * @param {DataTypes} DataTypes - the DataTypes instance
@@ -53,6 +54,8 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false
     }
+  }, {
+    timestamps: false
   });
 
   return OrderModel;

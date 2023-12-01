@@ -3,7 +3,8 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 /**
- * Define the User Model
+ * ? USER MODEL
+ * * Define the User Model
  *
  * @param {Sequelize} Sequelize - the Sequelize instance
  * @param {DataTypes} DataTypes - the DataTypes instance
@@ -55,6 +56,8 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false
     }
+  }, {
+    timestamps: false
   });
 
   return UserModel;
