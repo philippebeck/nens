@@ -32,7 +32,7 @@ CREATE TABLE Images
   name        VARCHAR(100)  NOT NULL    UNIQUE,
   description VARCHAR(200)  NOT NULL,
   gallery_id  SMALLINT      UNSIGNED    NOT NULL,
-  CONSTRAINT  fk_gallery_id FOREIGN KEY (gallery_id)  REFERENCES Gallery(id)
+  CONSTRAINT  fk_gallery_id FOREIGN KEY (gallery_id)  REFERENCES Galleries(id)
 )
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -42,20 +42,6 @@ CREATE TABLE Links
   name  VARCHAR(100)  NOT NULL  UNIQUE,
   url   VARCHAR(200)  NOT NULL  UNIQUE,
   cat   VARCHAR(20)   NOT NULL
-)
-ENGINE=INNODB DEFAULT CHARSET=utf8;
-
-CREATE TABLE Orders
-(
-  id          SMALLINT     UNSIGNED    PRIMARY KEY AUTO_INCREMENT,
-  products    JSON         NOT NULL,
-  total       DECIMAL      NOT NULL,
-  payment_id  VARCHAR(50)  NOT NULL,
-  status      VARCHAR(10)  NOT NULL,
-  user_id     SMALLINT     NOT NULL,
-  created     DATETIME     NOT NULL,
-  updated     DATETIME     NOT NULL,
-  CONSTRAINT  fk_user_id   FOREIGN KEY (user_id)   REFERENCES User(id)
 )
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -82,5 +68,19 @@ CREATE TABLE Users
   role    VARCHAR(10)   NOT NULL,
   created DATETIME      NOT NULL,
   updated DATETIME      NOT NULL
+)
+ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+CREATE TABLE Orders
+(
+  id          SMALLINT     UNSIGNED     PRIMARY KEY AUTO_INCREMENT,
+  products    JSON         NOT NULL,
+  total       DECIMAL      NOT NULL,
+  payment_id  VARCHAR(50)  NOT NULL,
+  status      VARCHAR(10)  NOT NULL,
+  user_id     SMALLINT     UNSIGNED     NOT NULL,
+  created     DATETIME     NOT NULL,
+  updated     DATETIME     NOT NULL,
+  CONSTRAINT  fk_user_id   FOREIGN KEY  (user_id)   REFERENCES Users(id)
 )
 ENGINE=INNODB DEFAULT CHARSET=utf8;
