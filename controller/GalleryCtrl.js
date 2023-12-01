@@ -17,10 +17,13 @@ const Image   = db.image;
 //! ******************** CHECKERS ********************
 
 /**
- * CHECK GALLERY DATA
- * @param {string} name 
- * @param {string} author 
- * @param {object} res 
+ * ? CHECK GALLERY DATA
+ * * Checks the gallery data for valid name and author.
+ *
+ * @param {string} name - The name of the gallery.
+ * @param {string} author - The author of the gallery.
+ * @param {object} res - The response object.
+ * @return {object} A message indicating that the gallery data is invalid.
  */
 exports.checkGalleryData = (name, author, res) => {
   const MAX = process.env.STRING_MAX;
@@ -36,11 +39,14 @@ exports.checkGalleryData = (name, author, res) => {
 }
 
 /**
- * CHECK GALLERY UNIQUE
- * @param {string} name 
- * @param {object} gallery 
- * @param {object} res 
- * @returns
+ * ? CHECK GALLERY UNIQUE
+ * * Checks if the given name is unique in the gallery.
+ *
+ * @param {string} name - The name to be checked.
+ * @param {object} gallery - The gallery object.
+ * @param {object} res - The response object.
+ * @return {object} A message indicating that the name is not unique.
+ * @throws {Error} If the name is not unique.
  */
 exports.checkGalleryUnique = (name, gallery, res) => {
   if (gallery.name === name) {
@@ -49,11 +55,13 @@ exports.checkGalleryUnique = (name, gallery, res) => {
 }
 
 /**
- * CHECK GALLERIES FOR UNIQUE
- * @param {string} id 
- * @param {array} galleries 
- * @param {string} name 
- * @param {object} res 
+ * ? CHECK GALLERIES FOR UNIQUE
+ * * Checks if the given name is unique in the array of galleries.
+ * 
+ * @param {type} id - The ID to compare with the galleries' IDs.
+ * @param {type} galleries - The array of galleries to check.
+ * @param {type} name - The name parameter to pass to the "checkGalleryUnique" function.
+ * @param {type} res - The res parameter to pass to the "checkGalleryUnique" function.
  */
 exports.checkGalleriesForUnique = (id, galleries, name, res) => {
   for (let gallery of galleries) {
@@ -66,9 +74,13 @@ exports.checkGalleriesForUnique = (id, galleries, name, res) => {
 //! ******************** PUBLIC ********************
 
 /**
- * LIST GALLERIES
- * @param {object} req 
- * @param {object} res 
+ * ? LIST GALLERIES
+ * * Retrieves a list of all galleries.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The list of galleries in JSON format.
+ * @throws {Error} If the galleries are not found in the database.
  */
 exports.listGalleries = (req, res) => {
   Gallery
@@ -78,9 +90,13 @@ exports.listGalleries = (req, res) => {
 }
 
 /**
- * READ A GALLERY
- * @param {object} req 
- * @param {object} res 
+ * ? READ GALLERY
+ * * Retrieves a gallery by its ID and sends it as a JSON response.
+ *
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @return {object} The retrieved gallery as a JSON response.
+ * @throws {Error} If the gallery is not found in the database.
  */
 exports.readGallery = (req, res) => {
   Gallery
@@ -92,10 +108,14 @@ exports.readGallery = (req, res) => {
 //! ******************** PRIVATE ********************
 
 /**
- * CREATE GALLERY
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? CREATE GALLERY
+ * * Creates a new gallery.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next middleware function
+ * @return {Object} A message indicating that the gallery was created.
+ * @throws {Error} If the gallery was not created.
  */
 exports.createGallery = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -127,10 +147,14 @@ exports.createGallery = (req, res, next) => {
 }
 
 /**
- * UPDATE GALLERY
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? UPDATE GALLERY
+ * * Update the gallery with the given request data.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {Object} A message indicating that the gallery was updated.
+ * @throws {Error} If the gallery is not updated.
  */
 exports.updateGallery = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -158,9 +182,13 @@ exports.updateGallery = (req, res, next) => {
 }
 
 /**
- * DELETE GALLERY
- * @param {object} req 
- * @param {object} res 
+ * ? DELETE GALLERY
+ * * Deletes a gallery and its associated images.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @return {Object} A message indicating that the gallery was deleted.
+ * @throws {Error} If the gallery is not deleted.
  */
 exports.deleteGallery = (req, res) => {
   Image

@@ -13,9 +13,13 @@ const User  = db.user;
 //! ******************** SETTERS ********************
 
 /**
- * SET MAILER
- * @param {string} fields 
- * @param {object} res 
+ * ? SET MAILER
+ * * Sets the mailer and sends an email.
+ *
+ * @param {Object} fields - The fields used to generate the email message.
+ * @param {Object} res - The response object used to send the HTTP response.
+ * @return {Object} A message indicating that the email was sent.
+ * @throws {Error} If an error occurs while sending the email.
  */
 exports.setMailer = (fields, res) => {
   const mailer = nem.getMailer();
@@ -32,11 +36,13 @@ exports.setMailer = (fields, res) => {
 }
 
 /**
- * SET MESSAGE
- * @param {number} total 
- * @param {string} payment_id 
- * @param {array} products 
- * @returns 
+ * ? SET MESSAGE
+ * * Sets the message content for an order.
+ *
+ * @param {number} total - The total amount of the order.
+ * @param {string} payment_id - The ID of the payment.
+ * @param {Array} products - An array of products in the order.
+ * @return {Object} message - The message object containing the subject, text, and html properties.
  */
 exports.setMessage = (total, payment_id, products) => {
   let message = {};
@@ -72,9 +78,13 @@ exports.setMessage = (total, payment_id, products) => {
 //! ******************** PRIVATE ********************
 
 /**
- * LIST ORDERS
- * @param {object} req 
- * @param {object} res 
+ * ? LIST ORDERS
+ * * Retrieves a list of orders.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The list of orders.
+ * @throws {Error} If the orders are not found in the database.
  */
 exports.listOrders = (req, res) => {
   Order
@@ -94,9 +104,13 @@ exports.listOrders = (req, res) => {
 };
 
 /**
- * LIST USER ORDERS
- * @param {object} req 
- * @param {object} res 
+ * ? LIST USER ORDERS
+ * * Retrieves a list of orders for a specific user.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The list of user orders.
+ * @throws {Error} If the orders are not found in the database.
  */
 exports.listUserOrders = (req, res) => {
   Order
@@ -106,10 +120,14 @@ exports.listUserOrders = (req, res) => {
 };
 
 /**
- * CREATE ORDER
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? CREATE ORDER
+ * * Creates an order based on the request data.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {Object} A message indicating that the order was created.
+ * @throws {Error} If an error occurs while creating the order.
  */
 exports.createOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -137,10 +155,14 @@ exports.createOrder = (req, res, next) => {
 };
 
 /**
- * UPDATE ORDER
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? UPDATE ORDER
+ * * Updates an order.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {function} next - The next middleware function.
+ * @return {Object} A message indicating that the order was updated.
+ * @throws {Error} If the order is not updated.
  */
 exports.updateOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -156,9 +178,13 @@ exports.updateOrder = (req, res, next) => {
 };
 
 /**
- * DELETE ORDER
- * @param {object} req 
- * @param {object} res 
+ * ? DELETE ORDER
+ * * Deletes an order.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} A message indicating that the order was deleted.
+ * @throws {Error} If the order is not deleted.
  */
 exports.deleteOrder = (req, res) => {
   Order

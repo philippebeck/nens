@@ -16,9 +16,12 @@ const User      = db.user;
 //! ******************** CHECKER ********************
 
 /**
- * CHECK AUTH DATA
- * @param {string} email 
- * @param {object} res 
+ * ? CHECK AUTH DATA
+ * * Validates the provided email and sends an error response if the email is invalid.
+ *
+ * @param {string} email - The email to be validated.
+ * @param {object} res - The response object used to send the error response.
+ * @return {object} - The error response containing a message.
  */
 exports.checkAuthData = (email, res) => {
   if (!nem.checkEmail(email)) {
@@ -29,15 +32,17 @@ exports.checkAuthData = (email, res) => {
 //! ******************** GETTER ********************
 
 /**
- * GET USER
- * @param {string} name 
- * @param {string} email 
- * @param {string} image 
- * @param {string} pass 
- * @param {string} role 
- * @param {string} created 
- * @param {string} updated 
- * @returns 
+ * ? GET USER
+ * * Returns a user object with the provided details.
+ *
+ * @param {string} name - The name of the user.
+ * @param {string} email - The email of the user.
+ * @param {string} image - The image URL of the user.
+ * @param {string} pass - The password of the user.
+ * @param {string} role - The role of the user.
+ * @param {string} created - The date of creation of the user.
+ * @param {string} updated - The date of last update of the user.
+ * @return {Object} - The user object with the provided details.
  */
 exports.getUser = (name, email, image, pass, role, created, updated) => {
 
@@ -55,9 +60,13 @@ exports.getUser = (name, email, image, pass, role, created, updated) => {
 //! ******************** SETTER ********************
 
 /**
- * SET MAILER
- * @param {string} fields 
- * @param {object} res 
+ * ? SET MAILER
+ * * Set the mailer and send an email.
+ *
+ * @param {Object} fields - The fields for the email.
+ * @param {Object} res - The response object.
+ * @return {Object} A message indicating that the email was sent.
+ * @throws {Error} If an error occurs while sending the email.
  */
 exports.setMailer = (fields, res) => {
   const mailer = nem.getMailer();
@@ -74,10 +83,12 @@ exports.setMailer = (fields, res) => {
 }
 
 /**
- * SET MESSAGE
- * @param {array} fields 
- * @param {string} pass 
- * @returns 
+ * ? SET MESSAGE
+ * * Sets a message in the fields object and returns the modified fields object.
+ *
+ * @param {object} fields - The fields object to modify.
+ * @param {string} pass - The password to include in the message.
+ * @return {object} The modified fields object.
  */
 exports.setMessage = (fields, pass) => {
   fields.html = `
@@ -91,9 +102,13 @@ exports.setMessage = (fields, pass) => {
 //! ******************** PUBLIC ********************
 
 /**
- * READ AVATAR
- * @param {object} req 
- * @param {object} res 
+ * ? READ AVATAR
+ * * Retrieves the avatar information for a specific user.
+ *
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @return {object} The avatar information for the user.
+ * @throws {Error} If the user is not found in the database.
  */
 exports.readAvatar = (req, res) => {
   User
@@ -111,10 +126,14 @@ exports.readAvatar = (req, res) => {
 }
 
 /**
- * CHECK RECAPTCHA
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? CHECK RECAPTCHA
+ * * Checks the validity of a recaptcha response.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {Object} The validity of the recaptcha response.
+ * @throws {Error} If the recaptcha response is invalid.
  */
 exports.checkRecaptcha = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -135,10 +154,13 @@ exports.checkRecaptcha = (req, res, next) => {
 }
 
 /**
- * LOGIN USER
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? LOGIN USER
+ * * Login a user.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next middleware function
+ * @throws {Error} If the user is not found in the database.
  */
 exports.loginUser = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -152,10 +174,14 @@ exports.loginUser = (req, res, next) => {
 }
 
 /**
- * FORGOT PASSWORD
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? FORGOT PASSWORD
+ * * Handles the forgot password functionality.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {Object} A message indicating that the password was sent.
+ * @throws {Error} If the user is not found in the database.
  */
 exports.forgotPass = (req, res, next) => {
   form.parse(req, (err, fields) => {

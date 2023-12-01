@@ -12,11 +12,14 @@ const Link = db.link;
 //! ******************** CHECKERS ********************
 
 /**
- * CHECK LINK DATA
- * @param {string} name 
- * @param {string} url 
- * @param {string} cat 
- * @param {object} res 
+ * ? CHECK LINK DATA
+ * * Validates the link data provided and returns an error message if any validation fails.
+ *
+ * @param {string} name - The name of the link.
+ * @param {string} url - The URL of the link.
+ * @param {string} cat - The category of the link.
+ * @param {object} res - The response object.
+ * @return {object} The error message if any validation fails.
  */
 exports.checkLinkData = (name, url, cat, res) => {
   const MAX = process.env.STRING_MAX;
@@ -32,12 +35,14 @@ exports.checkLinkData = (name, url, cat, res) => {
 }
 
 /**
- * CHECK LINK UNIQUE
- * @param {string} name 
- * @param {string} url 
- * @param {object} link 
- * @param {object} res 
- * @returns
+ * ? CHECK LINK UNIQUE
+ * * Checks if the given link name & URL are unique.
+ *
+ * @param {string} name - The name of the link to check uniqueness for.
+ * @param {string} url - The URL of the link to check uniqueness for.
+ * @param {object} link - The link object to compare against.
+ * @param {object} res - The response object to send the result to.
+ * @return {object} - The response object with the appropriate status & message.
  */
 exports.checkLinkUnique = (name, url, link, res) => {
   if (link.name === name) {
@@ -50,11 +55,13 @@ exports.checkLinkUnique = (name, url, link, res) => {
 }
 
 /**
- * CHECK LINKS FOR UNIQUE
- * @param {string} id 
- * @param {array} links 
- * @param {object} fields 
- * @param {object} res 
+ * ? CHECK LINKS FOR UNIQUE
+ * * Checks the links for uniqueness based on the given ID.
+ *
+ * @param {string} id - The ID to compare against the links.
+ * @param {Array} links - An array of links to check.
+ * @param {Object} fields - An object containing the fields to check against the links.
+ * @param {Object} res - The response object to handle the result.
  */
 exports.checkLinksForUnique = (id, links, fields, res) => {
   for (let link of links) {
@@ -67,9 +74,13 @@ exports.checkLinksForUnique = (id, links, fields, res) => {
 //! ******************** PUBLIC ********************
 
 /**
- * LIST LINK
- * @param {object} req 
- * @param {object} res 
+ * ? LIST LINKS
+ * * Retrieves a list of links.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} A JSON object containing the list of links.
+ * @throws {Error} If the links are not found in the database.
  */
 exports.listLinks = (req, res) => {
   Link
@@ -81,11 +92,14 @@ exports.listLinks = (req, res) => {
 //! ******************** PRIVATE ********************
 
 /**
- * CREATE LINK
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
- * @returns
+ * ? CREATE LINK
+ * * Creates a link based on the request data.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next middleware function
+ * @return {Object} A message indicating that the link was created.
+ * @throws {Error} If the link is not created.
  */
 exports.createLink = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -109,11 +123,14 @@ exports.createLink = (req, res, next) => {
 };
 
 /**
- * UPDATE LINK
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
- * @returns
+ * ? UPDATE LINK
+ * * Updates a link in the database.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {Object} A message indicating that the link was updated.
+ * @throws {Error} If the link is not updated.
  */
 exports.updateLink = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -136,9 +153,13 @@ exports.updateLink = (req, res, next) => {
 };
 
 /**
- * DELETE LINK
- * @param {object} req 
- * @param {object} res 
+ * ? DELETE LINK
+ * * Deletes a link.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} - A message indicating that the link was deleted.
+ * @throws {Error} If the link is not deleted.
  */
 exports.deleteLink = (req, res) => {
   Link
