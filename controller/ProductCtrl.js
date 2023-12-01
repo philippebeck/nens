@@ -1,9 +1,9 @@
 "use strict";
 
+const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
-const db          = require("../model");
 
 require("dotenv").config();
 
@@ -13,7 +13,7 @@ const PRODUCTS_THUMB  = process.env.THUMB_URL + "products/";
 const form    = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
 const Product = db.product;
 
-//! ****************************** CHECKERS ******************************
+//! ******************** CHECKERS ********************
 
 /**
  * CHECK PRODUCT DATA
@@ -76,7 +76,7 @@ exports.checkProductsForUnique = (id, products, fields, res) => {
   }
 }
 
-//! ****************************** GETTERS ******************************
+//! ******************** GETTERS ********************
 
 /**
  * GET PRODUCT
@@ -106,7 +106,7 @@ exports.getProduct = (name, description, image, alt, price, options, cat, create
   }
 }
 
-//! ****************************** SETTER ******************************
+//! ******************** SETTER ********************
 
 /**
  * SET IMAGE
@@ -126,7 +126,7 @@ exports.setImage = (name, newFilename) => {
   );
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
  * LIST PRODUCTS
@@ -147,12 +147,12 @@ exports.listProducts = (req, res) => {
  */
 exports.readProduct = (req, res) => {
   Product
-    .findOne({ where: { id: req.params.id }})
+    .findByPk(req.params.id)
     .then((product) => res.status(200).json(product))
     .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
 }
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
  * CREATE PRODUCT
@@ -234,7 +234,7 @@ exports.updateProduct = (req, res, next) => {
  */
 exports.deleteProduct = (req, res) => {
   Product
-    .findOne({ where: { id: req.params.id }})
+    .findByPk(req.params.id)
     .then(product => {
       fs.unlink(PRODUCTS_THUMB + product.image, () => {
         fs.unlink(PRODUCTS_IMG + product.image, () => {
