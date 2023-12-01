@@ -5,14 +5,13 @@ const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
 
-const UserModel     = require("../model/UserModel");
-const CommentModel  = require("../model/CommentModel");
-const ReviewModel   = require("../model/ReviewModel");
+const UserModel = require("../model/UserModel");
 
 require("dotenv").config();
 
-const USERS_IMG = process.env.IMG_URL + "users/";
+const USERS_IMG   = process.env.IMG_URL + "users/";
 const USERS_THUMB = process.env.THUMB_URL + "users/";
+
 const form = formidable({ uploadDir: USERS_IMG, keepExtensions: true });
 
 //! ****************************** CHECKERS ******************************
@@ -32,7 +31,7 @@ exports.checkUserData = (name, email, role, res) => {
   const MIN = process.env.STRING_MIN;
 
   let alert = "";
-  
+
   if (!nem.checkRange(role, MIN, MAX)) alert = process.env.CHECK_ROLE;
   if (!nem.checkEmail(email)) alert = process.env.CHECK_EMAIL;
   if (!nem.checkRange(name, MIN, MAX)) alert = process.env.CHECK_NAME;
@@ -49,8 +48,8 @@ exports.checkUserData = (name, email, role, res) => {
  * @return {object} - The response object with an error message if the password is invalid.
  */
 exports.checkUserPass = (pass, res) => {
-  if (!nem.checkPass(pass)) { 
-    return res.status(403).json({ message: process.env.CHECK_PASS }) 
+  if (!nem.checkPass(pass)) {
+    return res.status(403).json({ message: process.env.CHECK_PASS })
   }
 }
 
@@ -85,10 +84,10 @@ exports.checkUserUnique = (name, email, user, res) => {
  * @param {Object} res - The response object to send the result of the uniqueness check.
  */
 exports.checkUsersForUnique = (id, users, fields, res) => {
-  for (let user of users) { 
-    if (!user._id.equals(id)) { 
-      this.checkUserUnique(fields.name, fields.email, user, res) 
-    } 
+  for (let user of users) {
+    if (!user._id.equals(id)) {
+      this.checkUserUnique(fields.name, fields.email, user, res)
+    }
   }
 }
 
@@ -179,14 +178,14 @@ exports.getUserNoPass = (name, email, image, role, updated) => {
 exports.setMessage = (fields, res) => {
   const mailer = nem.getMailer();
 
-  (async function(){
+  (async function () {
     try {
       let mail = nem.getMessage(fields);
 
-      await mailer.sendMail(mail, function() {
+      await mailer.sendMail(mail, function () {
         res.status(202).json({ message: process.env.USER_MESSAGE });
       });
-    } catch(e){ console.error(e); }
+    } catch (e) { console.error(e); }
   })();
 }
 
@@ -297,9 +296,9 @@ exports.listUsers = (req, res) => {
  */
 exports.readUser = (req, res) => {
   UserModel
-  .findById(req.params.id)
-  .then((user) => res.status(200).json(user))
-  .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
+    .findById(req.params.id)
+    .then((user) => res.status(200).json(user))
+    .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
 }
 
 /**
@@ -329,27 +328,27 @@ exports.updateUser = (req, res, next) => {
           this.checkUserPass(fields.pass, res);
 
           bcrypt
-          .hash(fields.pass, 10)
-          .then((hash) => { 
-            let user = this.getUserWithPass(fields.name, fields.email, image, hash, fields.role, fields.updated);
+            .hash(fields.pass, 10)
+            .then((hash) => {
+              let user = this.getUserWithPass(fields.name, fields.email, image, hash, fields.role, fields.updated);
 
-            UserModel
-              .findByIdAndUpdate(req.params.id, { ...user, _id: req.params.id })
-              .then(() => {
-                if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => {});
-                res.status(200).json({ message: process.env.USER_UPDATED });
-              })
-              .catch(() => res.status(400).json({ message: process.env.USER_NOT_UPDATED }));
-          })
-          .catch(() => res.status(400).json({ message: process.env.USER_NOT_PASS }));
-      
-        } else { 
+              UserModel
+                .findByIdAndUpdate(req.params.id, { ...user, _id: req.params.id })
+                .then(() => {
+                  if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
+                  res.status(200).json({ message: process.env.USER_UPDATED });
+                })
+                .catch(() => res.status(400).json({ message: process.env.USER_NOT_UPDATED }));
+            })
+            .catch(() => res.status(400).json({ message: process.env.USER_NOT_PASS }));
+
+        } else {
           let user = this.getUserNoPass(fields.name, fields.email, image, fields.role, fields.updated);
 
           UserModel
             .findByIdAndUpdate(req.params.id, { ...user, _id: req.params.id })
             .then(() => {
-              if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => {});
+              if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
               res.status(200).json({ message: process.env.USER_UPDATED });
             })
             .catch(() => res.status(400).json({ message: process.env.USER_NOT_UPDATED }));
@@ -373,22 +372,10 @@ exports.deleteUser = (req, res) => {
     .then(user => {
       fs.unlink(USERS_THUMB + user.image, () => {
 
-        CommentModel
-          .deleteMany({ user: req.params.id })
-          .then(() =>
-
-            ReviewModel
-              .deleteMany({ user: req.params.id })
-              .then(() => 
-
-                UserModel
-                  .findByIdAndDelete(req.params.id)
-                  .then(() => res.status(204).json({ message: process.env.USER_DELETED }))
-                  .catch(() => res.status(400).json({ message: process.env.USER_NOT_DELETED }))
-              )
-              .catch(() => res.status(400).json({ message: process.env.REVIEWS_NOT_DELETED }))
-          )
-          .catch(() => res.status(400).json({ message: process.env.COMMENTS_NOT_DELETED }))
+        UserModel
+          .findByIdAndDelete(req.params.id)
+          .then(() => res.status(204).json({ message: process.env.USER_DELETED }))
+          .catch(() => res.status(400).json({ message: process.env.USER_NOT_DELETED }))
       })
     })
     .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));

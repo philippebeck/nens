@@ -4,13 +4,13 @@ const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
 
-const ProductModel  = require("../model/ProductModel");
-const ReviewModel   = require("../model/ReviewModel");
+const ProductModel = require("../model/ProductModel");
 
 require("dotenv").config();
 
-const PRODUCTS_IMG = process.env.IMG_URL + "products/";
-const PRODUCTS_THUMB = process.env.THUMB_URL + "products/";
+const PRODUCTS_IMG    = process.env.IMG_URL + "products/";
+const PRODUCTS_THUMB  = process.env.THUMB_URL + "products/";
+
 const form = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
 
 //! ****************************** CHECKERS ******************************
@@ -36,7 +36,7 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
 
   if (!nem.checkRange(cat, STR_MIN, STR_MAX)) alert = process.env.CHECK_CAT;
   if (!nem.checkRange(price, PRICE_MIN, PRICE_MAX)) alert = process.env.CHECK_PRICE;
-  if (!nem.checkRange(alt, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME; 
+  if (!nem.checkRange(alt, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
   if (!nem.checkRange(description, TXT_MIN, TXT_MAX)) alert = process.env.CHECK_TEXT;
   if (!nem.checkRange(name, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
 
@@ -70,8 +70,8 @@ exports.checkProductUnique = (name, description, product, res) => {
  */
 exports.checkProductsForUnique = (id, products, fields, res) => {
   for (let product of products) {
-    if (!product._id.equals(id)) { 
-      this.checkProductUnique(fields.name, fields.description, product, res) 
+    if (!product._id.equals(id)) {
+      this.checkProductUnique(fields.name, fields.description, product, res)
     }
   }
 }
@@ -119,9 +119,9 @@ exports.setImage = (name, newFilename) => {
 
   nem.setThumbnail(input, process.env.THUMB_URL + output);
   nem.setThumbnail(
-    input, 
-    process.env.IMG_URL + output, 
-    process.env.IMG_WIDTH, 
+    input,
+    process.env.IMG_URL + output,
+    process.env.IMG_WIDTH,
     process.env.IMG_HEIGHT
   );
 }
@@ -147,9 +147,9 @@ exports.listProducts = (req, res) => {
  */
 exports.readProduct = (req, res) => {
   ProductModel
-  .findById(req.params.id)
-  .then((product) => res.status(200).json(product))
-  .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
+    .findById(req.params.id)
+    .then((product) => res.status(200).json(product))
+    .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
 }
 
 //! ****************************** PRIVATE ******************************
@@ -218,7 +218,7 @@ exports.updateProduct = (req, res, next) => {
         ProductModel
           .findByIdAndUpdate(req.params.id, { ...product, _id: req.params.id })
           .then(() => {
-            if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => {});
+            if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => { });
             res.status(200).json({ message: process.env.PRODUCT_UPDATED });
           })
           .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_UPDATED }));
@@ -239,16 +239,10 @@ exports.deleteProduct = (req, res) => {
       fs.unlink(PRODUCTS_THUMB + product.image, () => {
         fs.unlink(PRODUCTS_IMG + product.image, () => {
 
-          ReviewModel
-            .deleteMany({ product: req.params.id })
-            .then(() => 
-
-              ProductModel
-                .findByIdAndDelete(req.params.id)
-                .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
-                .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_DELETED }))
-            )
-            .catch(() => res.status(400).json({ message: process.env.REVIEWS_NOT_DELETED }))
+          ProductModel
+            .findByIdAndDelete(req.params.id)
+            .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
+            .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_DELETED }))
         })
       })
     })

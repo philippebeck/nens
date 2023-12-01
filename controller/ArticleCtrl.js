@@ -5,13 +5,13 @@ const fs          = require("fs");
 const nem         = require("nemjs");
 
 const ArticleModel  = require("../model/ArticleModel");
-const CommentModel  = require("../model/CommentModel");
 const UserModel     = require("../model/UserModel");
 
 require("dotenv").config();
 
-const ARTICLES_IMG = process.env.IMG_URL + "articles/";
-const ARTICLES_THUMB = process.env.THUMB_URL + "articles/";
+const ARTICLES_IMG    = process.env.IMG_URL + "articles/";
+const ARTICLES_THUMB  = process.env.THUMB_URL + "articles/";
+
 const form = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
 
 //! ****************************** CHECKERS ******************************
@@ -67,8 +67,8 @@ exports.checkArticleUnique = (name, text, article, res) => {
  */
 exports.checkArticlesForUnique = (id, articles, fields, res) => {
   for (let article of articles) {
-    if (!article._id.equals(id)) { 
-      this.checkArticleUnique(fields.name, fields.text, article, res) 
+    if (!article._id.equals(id)) {
+      this.checkArticleUnique(fields.name, fields.text, article, res)
     }
   }
 }
@@ -141,9 +141,9 @@ exports.setImage = (name, newFilename) => {
 
   nem.setThumbnail(input, process.env.THUMB_URL + output);
   nem.setThumbnail(
-    input, 
-    process.env.IMG_URL + output, 
-    process.env.IMG_WIDTH, 
+    input,
+    process.env.IMG_URL + output,
+    process.env.IMG_WIDTH,
     process.env.IMG_HEIGHT
   );
 }
@@ -167,7 +167,7 @@ exports.listArticles = (req, res) => {
           articles = nem.getArrayWithUsername(articles, users);
           res.status(200).json(articles);
         })
-      .catch(() => res.status(404).json({ message: process.env.USERS_NOT_FOUND }));
+        .catch(() => res.status(404).json({ message: process.env.USERS_NOT_FOUND }));
     })
     .catch(() => res.status(404).json({ message: process.env.ARTICLES_NOT_FOUND }));
 }
@@ -179,19 +179,19 @@ exports.listArticles = (req, res) => {
  */
 exports.readArticle = (req, res) => {
   ArticleModel
-  .findById(req.params.id)
-  .then((article) => {
+    .findById(req.params.id)
+    .then((article) => {
 
-    UserModel
-      .findById(article.user)
-      .then((user) => {
+      UserModel
+        .findById(article.user)
+        .then((user) => {
 
-        article.user = user.name;
-        res.status(200).json(article);
-      })
-      .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
-  })
-  .catch(() => res.status(404).json({ message: process.env.ARTICLE_NOT_FOUND }));
+          article.user = user.name;
+          res.status(200).json(article);
+        })
+        .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
+    })
+    .catch(() => res.status(404).json({ message: process.env.ARTICLE_NOT_FOUND }));
 }
 
 //! ****************************** PRIVATE ******************************
@@ -260,7 +260,7 @@ exports.updateArticle = (req, res, next) => {
         ArticleModel
           .findByIdAndUpdate(req.params.id, { ...article, _id: req.params.id })
           .then(() => {
-            if (files.image) fs.unlink(ARTICLES_IMG + files.image.newFilename, () => {});
+            if (files.image) fs.unlink(ARTICLES_IMG + files.image.newFilename, () => { });
             res.status(200).json({ message: process.env.ARTICLE_UPDATED });
           })
           .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_UPDATED }));
@@ -281,16 +281,10 @@ exports.deleteArticle = (req, res) => {
       fs.unlink(ARTICLES_THUMB + article.image, () => {
         fs.unlink(ARTICLES_IMG + article.image, () => {
 
-          CommentModel
-            .deleteMany({ article: req.params.id })
-            .then(() =>
-
-              ArticleModel
-                .findByIdAndDelete(req.params.id)
-                .then(() => res.status(204).json({ message: process.env.ARTICLE_DELETED }))
-                .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_DELETED }))
-            )
-            .catch(() => res.status(400).json({ message: process.env.COMMENT_DELETE_MANY }));
+          ArticleModel
+            .findByIdAndDelete(req.params.id)
+            .then(() => res.status(204).json({ message: process.env.ARTICLE_DELETED }))
+            .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_DELETED }))
         });
       })
     })
