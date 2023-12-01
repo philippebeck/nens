@@ -89,21 +89,19 @@ exports.checkArticlesForUnique = (id, articles, fields, res) => {
  * @param {string} text - The text of the article.
  * @param {string} image - The image of the article.
  * @param {string} alt - The alt text for the image.
- * @param {string} user - The user who created the article.
  * @param {number} likes - The number of likes the article has.
  * @param {string} cat - The category of the article.
  * @param {Date} created - The date and time the article was created.
  * @param {Date} updated - The date and time the article was last updated.
  * @return {object} An object containing the details of the article.
  */
-exports.getArticleCreated = (name, text, image, alt, user, likes, cat, created, updated) => {
+exports.getArticleCreated = (name, text, image, alt, likes, cat, created, updated) => {
 
   return {
     name: name,
     text: text,
     image: image,
     alt: alt,
-    user: user,
     likes: likes,
     cat: cat,
     created: created,
@@ -221,7 +219,7 @@ exports.createArticle = (req, res, next) => {
         this.setImage(image, files.image.newFilename);
 
         let article = this.getArticleCreated(
-          fields.name, fields.text, image, fields.alt, fields.user, likes, fields.cat, fields.created, fields.updated
+          fields.name, fields.text, image, fields.alt, likes, fields.cat, fields.created, fields.updated
         );
 
         Article

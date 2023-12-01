@@ -87,11 +87,9 @@ exports.checkProductsForUnique = (id, products, fields, res) => {
  * @param {number} price 
  * @param {array} options 
  * @param {string} cat 
- * @param {string} created 
- * @param {string} updated 
  * @returns 
  */
-exports.getProduct = (name, description, image, alt, price, options, cat, created, updated) => {
+exports.getProduct = (name, description, image, alt, price, options, cat) => {
 
   return {
     name: name,
@@ -100,9 +98,7 @@ exports.getProduct = (name, description, image, alt, price, options, cat, create
     alt: alt,
     price: price,
     options: options,
-    cat: cat,
-    created: created,
-    updated: updated
+    cat: cat
   }
 }
 
@@ -176,7 +172,7 @@ exports.createProduct = (req, res, next) => {
         this.setImage(image, files.image.newFilename);
 
         let product = this.getProduct(
-          fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat, fields.created, fields.updated
+          fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat
         );
 
         Product
@@ -213,7 +209,7 @@ exports.updateProduct = (req, res, next) => {
         if (files.image) this.setImage(image, files.image.newFilename);
 
         let options = nem.getArrayFromString(fields.options);
-        let product = this.getProduct(fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat, fields.created, fields.updated);
+        let product = this.getProduct(fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat);
 
         Product
           .update(product, { where: { id: req.params.id }})
