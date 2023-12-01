@@ -3,15 +3,15 @@
 const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
-
-const ProductModel = require("../model/ProductModel");
+const db          = require("../model");
 
 require("dotenv").config();
 
 const PRODUCTS_IMG    = process.env.IMG_URL + "products/";
 const PRODUCTS_THUMB  = process.env.THUMB_URL + "products/";
 
-const form = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
+const form    = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
+const Product = db.product;
 
 //! ****************************** CHECKERS ******************************
 
@@ -70,7 +70,7 @@ exports.checkProductUnique = (name, description, product, res) => {
  */
 exports.checkProductsForUnique = (id, products, fields, res) => {
   for (let product of products) {
-    if (!product._id.equals(id)) {
+    if (!product.id.equals(id)) {
       this.checkProductUnique(fields.name, fields.description, product, res)
     }
   }
@@ -134,8 +134,8 @@ exports.setImage = (name, newFilename) => {
  * @param {object} res 
  */
 exports.listProducts = (req, res) => {
-  ProductModel
-    .find()
+  Product
+    .findAll()
     .then((products) => res.status(200).json(products))
     .catch(() => res.status(404).json({ message: process.env.PRODUCTS_NOT_FOUND }));
 };
@@ -146,8 +146,8 @@ exports.listProducts = (req, res) => {
  * @param {object} res 
  */
 exports.readProduct = (req, res) => {
-  ProductModel
-    .findById(req.params.id)
+  Product
+    .findOne({ where: { id: req.params.id }})
     .then((product) => res.status(200).json(product))
     .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
 }
@@ -166,8 +166,8 @@ exports.createProduct = (req, res, next) => {
 
     this.checkProductData(fields.name, fields.description, fields.alt, fields.price, fields.cat, res);
 
-    ProductModel
-      .find()
+    Product
+      .findAll()
       .then((products) => {
         for (let product of products) { this.checkProductUnique(fields.name, fields.description, product, res) }
 
@@ -175,12 +175,12 @@ exports.createProduct = (req, res, next) => {
         let image   = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         this.setImage(image, files.image.newFilename);
 
-        let product = new ProductModel(this.getProduct(
+        let product = this.getProduct(
           fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat, fields.created, fields.updated
-        ));
+        );
 
-        product
-          .save()
+        Product
+          .create(product)
           .then(() => {
             fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => {
               res.status(201).json({ message: process.env.PRODUCT_CREATED })
@@ -204,8 +204,8 @@ exports.updateProduct = (req, res, next) => {
 
     this.checkProductData(fields.name, fields.description, fields.alt, fields.price, fields.cat, res);
 
-    ProductModel
-      .find()
+    Product
+      .findAll()
       .then((products) => {
         this.checkProductsForUnique(req.params.id, products, fields, res);
 
@@ -215,8 +215,8 @@ exports.updateProduct = (req, res, next) => {
         let options = nem.getArrayFromString(fields.options);
         let product = this.getProduct(fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat, fields.created, fields.updated);
 
-        ProductModel
-          .findByIdAndUpdate(req.params.id, { ...product, _id: req.params.id })
+        Product
+          .update(product, { where: { id: req.params.id }})
           .then(() => {
             if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => { });
             res.status(200).json({ message: process.env.PRODUCT_UPDATED });
@@ -233,14 +233,14 @@ exports.updateProduct = (req, res, next) => {
  * @param {object} res 
  */
 exports.deleteProduct = (req, res) => {
-  ProductModel
-    .findById(req.params.id)
+  Product
+    .findOne({ where: { id: req.params.id }})
     .then(product => {
       fs.unlink(PRODUCTS_THUMB + product.image, () => {
         fs.unlink(PRODUCTS_IMG + product.image, () => {
 
-          ProductModel
-            .findByIdAndDelete(req.params.id)
+          Product
+            .destroy({ where: { id: req.params.id }})
             .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
             .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_DELETED }))
         })
