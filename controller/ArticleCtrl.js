@@ -1,28 +1,30 @@
 "use strict";
 
+const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
-
-const ArticleModel  = require("../model/ArticleModel");
-const UserModel     = require("../model/UserModel");
 
 require("dotenv").config();
 
 const ARTICLES_IMG    = process.env.IMG_URL + "articles/";
 const ARTICLES_THUMB  = process.env.THUMB_URL + "articles/";
 
-const form = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
+const Article = db.article;
+const form    = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
 
-//! ****************************** CHECKERS ******************************
+//! ******************** CHECKERS ********************
 
 /**
- * CHECK ARTICLE DATA
- * @param {string} name 
- * @param {string} text 
- * @param {string} alt 
- * @param {string} cat 
- * @param {object} res 
+ * ? CHECK ARTICLE DATA
+ * * Checks the validity of article data.
+ *
+ * @param {string} name - The name of the article.
+ * @param {string} text - The text of the article.
+ * @param {string} alt - The alternative text for the article.
+ * @param {string} cat - The category of the article.
+ * @param {Object} res - The response object.
+ * @return {object} The response object with an error message if the article is not correct.
  */
 exports.checkArticleData = (name, text, alt, cat, res) => {
   const STR_MAX = process.env.STRING_MAX;
@@ -41,12 +43,14 @@ exports.checkArticleData = (name, text, alt, cat, res) => {
 }
 
 /**
- * CHECK ARTICLE UNIQUE
- * @param {string} name 
- * @param {string} text 
- * @param {object} article 
- * @param {object} res 
- * @returns
+ * ? CHECK ARTICLE UNIQUE
+ * * Checks if an article is unique based on its name & text.
+ *
+ * @param {string} name - The name of the article.
+ * @param {string} text - The text of the article.
+ * @param {object} article - The existing article to compare with.
+ * @param {object} res - The response object used to send the result.
+ * @return {object} The response object with an error message if the article is not unique.
  */
 exports.checkArticleUnique = (name, text, article, res) => {
   if (article.name === name) {
@@ -59,34 +63,38 @@ exports.checkArticleUnique = (name, text, article, res) => {
 }
 
 /**
- * CHECK ARTICLES FOR UNIQUE
- * @param {string} id 
- * @param {array} articles 
- * @param {object} fields 
- * @param {object} res 
+ * ? CHECK ARTICLES FOR UNIQUE
+ * * Checks the articles for uniqueness based on the given id.
+ *
+ * @param {string} id - The id to compare against.
+ * @param {Array} articles - The array of articles to check.
+ * @param {Object} fields - The object containing the fields to check against.
+ * @param {Object} res - The response object.
  */
 exports.checkArticlesForUnique = (id, articles, fields, res) => {
   for (let article of articles) {
-    if (!article._id.equals(id)) {
+    if (!article.id.equals(id)) {
       this.checkArticleUnique(fields.name, fields.text, article, res)
     }
   }
 }
 
-//! ****************************** GETTERS ******************************
+//! ******************** GETTERS ********************
 
 /**
- * GET ARTICLE CREATED
- * @param {string} name 
- * @param {string} text 
- * @param {string} image 
- * @param {string} alt 
- * @param {string} user 
- * @param {array} likes 
- * @param {string} cat 
- * @param {string} created 
- * @param {string} updated 
- * @returns 
+ * ? GET ARTICLE CREATED
+ * * Returns an object containing the details of an article.
+ *
+ * @param {string} name - The name of the article.
+ * @param {string} text - The text of the article.
+ * @param {string} image - The image of the article.
+ * @param {string} alt - The alt text for the image.
+ * @param {string} user - The user who created the article.
+ * @param {number} likes - The number of likes the article has.
+ * @param {string} cat - The category of the article.
+ * @param {Date} created - The date and time the article was created.
+ * @param {Date} updated - The date and time the article was last updated.
+ * @return {object} An object containing the details of the article.
  */
 exports.getArticleCreated = (name, text, image, alt, user, likes, cat, created, updated) => {
 
@@ -104,15 +112,17 @@ exports.getArticleCreated = (name, text, image, alt, user, likes, cat, created, 
 }
 
 /**
- * GET ARTICLE UPDATED
- * @param {string} name 
- * @param {string} text 
- * @param {string} image 
- * @param {string} alt 
- * @param {array} likes 
- * @param {string} cat 
- * @param {string} updated 
- * @returns 
+ * ? GET ARTICLE UPDATED
+ * * Returns an object containing updated article information.
+ *
+ * @param {string} name - The name of the article.
+ * @param {string} text - The text content of the article.
+ * @param {string} image - The URL of the article image.
+ * @param {string} alt - The alternative text for the article image.
+ * @param {number} likes - The number of likes that the article has.
+ * @param {string} cat - The category that the article belongs to.
+ * @param {Date} updated - The updated date of the article.
+ * @return {object} - An object containing the updated article information.
  */
 exports.getArticleUpdated = (name, text, image, alt, likes, cat, updated) => {
 
@@ -127,13 +137,14 @@ exports.getArticleUpdated = (name, text, image, alt, likes, cat, updated) => {
   }
 }
 
-//! ****************************** SETTER ******************************
+//! ******************** SETTER ********************
 
 /**
- * SET IMAGE
- * @param {string} name 
- * @param {string} newFilename 
- * @returns 
+ * ? SET IMAGE
+ * * Sets the image for an article.
+ *
+ * @param {string} name - The name of the article.
+ * @param {string} newFilename - The new filename of the image.
  */
 exports.setImage = (name, newFilename) => {
   let input   = "articles/" + newFilename;
@@ -148,59 +159,51 @@ exports.setImage = (name, newFilename) => {
   );
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
- * LIST ARTICLES
- * @param {object} req 
- * @param {object} res 
+ * ? LIST ARTICLES
+ * * Retrieves a list of articles.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The JSON response containing the list of articles.
+ * @throws {Error} If the articles are not found in the database.
  */
 exports.listArticles = (req, res) => {
-  ArticleModel
-    .find()
-    .then((articles) => {
-
-      UserModel
-        .find()
-        .then((users) => {
-
-          articles = nem.getArrayWithUsername(articles, users);
-          res.status(200).json(articles);
-        })
-        .catch(() => res.status(404).json({ message: process.env.USERS_NOT_FOUND }));
-    })
+  Article
+    .findAll()
+    .then((articles) => { res.status(200).json(articles) })
     .catch(() => res.status(404).json({ message: process.env.ARTICLES_NOT_FOUND }));
 }
 
 /**
- * READ A ARTICLE
- * @param {object} req 
- * @param {object} res 
+ * ? READ ARTICLE
+ * * Retrieves an article by its ID & sends it as a JSON response.
+ *
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @return {Object} The retrieved article as a JSON response.
+ * @throws {Error} If the article is not found in the database.
  */
 exports.readArticle = (req, res) => {
-  ArticleModel
-    .findById(req.params.id)
-    .then((article) => {
-
-      UserModel
-        .findById(article.user)
-        .then((user) => {
-
-          article.user = user.name;
-          res.status(200).json(article);
-        })
-        .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
-    })
+  Article
+    .findByPk(req.params.id)
+    .then((article) => { res.status(200).json(article) })
     .catch(() => res.status(404).json({ message: process.env.ARTICLE_NOT_FOUND }));
 }
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
- * CREATE ARTICLE
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? CREATE ARTICLE
+ * * Creates an article based on the request data.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next function in the middleware chain
+ * @return {Object} A message indicating that the article was created.
+ * @throws {Error} If the article is not created in the database.
  */
 exports.createArticle = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -208,8 +211,8 @@ exports.createArticle = (req, res, next) => {
 
     this.checkArticleData(fields.name, fields.text, fields.alt, fields.cat, res);
 
-    ArticleModel
-      .find()
+    Article
+      .findAll()
       .then((articles) => {
         for (let article of articles) { this.checkArticleUnique(fields.name, fields.text, article, res) }
 
@@ -217,12 +220,12 @@ exports.createArticle = (req, res, next) => {
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         this.setImage(image, files.image.newFilename);
 
-        let article = new ArticleModel(this.getArticleCreated(
+        let article = this.getArticleCreated(
           fields.name, fields.text, image, fields.alt, fields.user, likes, fields.cat, fields.created, fields.updated
-        ));
+        );
 
-        article
-          .save()
+        Article
+          .create(article)
           .then(() => {
             fs.unlink(ARTICLES_IMG + files.image.newFilename, () => {
               res.status(201).json({ message: process.env.ARTICLE_CREATED })
@@ -235,10 +238,14 @@ exports.createArticle = (req, res, next) => {
 }
 
 /**
- * UPDATE ARTICLE
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? UPDATE ARTICLE
+ * * Updates an article based on the request.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next middleware function
+ * @return {Object} A message indicating that the article was updated.
+ * @throws {Error} If the article is not updated in the database.
  */
 exports.updateArticle = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -246,8 +253,8 @@ exports.updateArticle = (req, res, next) => {
 
     this.checkArticleData(fields.name, fields.text, fields.alt, fields.cat, res);
 
-    ArticleModel
-      .find()
+    Article
+      .findAll()
       .then((articles) => {
         this.checkArticlesForUnique(req.params.id, articles, fields, res);
 
@@ -257,8 +264,8 @@ exports.updateArticle = (req, res, next) => {
         let likes   = nem.getArrayFromString(fields.likes);
         let article = this.getArticleUpdated(fields.name, fields.text, image, fields.alt, likes, fields.cat, fields.updated);
 
-        ArticleModel
-          .findByIdAndUpdate(req.params.id, { ...article, _id: req.params.id })
+        Article
+          .update(article, { where: { id: req.params.id }})
           .then(() => {
             if (files.image) fs.unlink(ARTICLES_IMG + files.image.newFilename, () => { });
             res.status(200).json({ message: process.env.ARTICLE_UPDATED });
@@ -270,19 +277,23 @@ exports.updateArticle = (req, res, next) => {
 }
 
 /**
- * DELETE ARTICLE
- * @param {object} req 
- * @param {object} res 
+ * ? DELETE ARTICLE
+ * * Deletes an article from the database.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} A message indicating that the article was deleted.
+ * @throws {Error} If the article is not deleted in the database.
  */
 exports.deleteArticle = (req, res) => {
-  ArticleModel
-    .findById(req.params.id)
+  Article
+    .findByPk(req.params.id)
     .then(article => {
       fs.unlink(ARTICLES_THUMB + article.image, () => {
         fs.unlink(ARTICLES_IMG + article.image, () => {
 
-          ArticleModel
-            .findByIdAndDelete(req.params.id)
+          Article
+            .destroy({ where: { id: req.params.id }})
             .then(() => res.status(204).json({ message: process.env.ARTICLE_DELETED }))
             .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_DELETED }))
         });
