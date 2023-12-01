@@ -2,10 +2,12 @@
 
 const formidable  = require("formidable");
 const nem         = require("nemjs");
-const LinkModel   = require("../model/LinkModel");
+const db          = require("../model");
 
 require("dotenv").config();
+
 const form = formidable();
+const Link = db.link;
 
 //! ****************************** CHECKERS ******************************
 
@@ -56,7 +58,7 @@ exports.checkLinkUnique = (name, url, link, res) => {
  */
 exports.checkLinksForUnique = (id, links, fields, res) => {
   for (let link of links) {
-    if (!link._id.equals(id)) {
+    if (!link.id.equals(id)) {
       this.checkLinkUnique(fields.name, fields.url, link, res);
     }
   }
@@ -70,8 +72,8 @@ exports.checkLinksForUnique = (id, links, fields, res) => {
  * @param {object} res 
  */
 exports.listLinks = (req, res) => {
-  LinkModel
-    .find()
+  Link
+    .findAll()
     .then((links) => res.status(200).json(links))
     .catch(() => res.status(404).json({ message: process.env.LINKS_NOT_FOUND }));
 };
@@ -91,17 +93,14 @@ exports.createLink = (req, res, next) => {
 
     this.checkLinkData(fields.name, fields.url, fields.cat, res);
 
-    LinkModel
-      .find()
+    Link
+      .findAll()
       .then((links) => {
         for (let link of links) {
           this.checkLinkUnique(fields.name, fields.url, link, res);
         }
-
-        let link = new LinkModel(fields);
-
-        link
-          .save()
+        Link
+          .create(fields)
           .then(() => res.status(201).json({ message: process.env.LINK_CREATED }))
           .catch(() => res.status(400).json({ message: process.env.LINK_NOT_CREATED }));
       })
@@ -122,13 +121,13 @@ exports.updateLink = (req, res, next) => {
 
     this.checkLinkData(fields.name, fields.url, fields.cat, res);
 
-    LinkModel
-      .find()
+    Link
+      .findAll()
       .then((links) => {
         this.checkLinksForUnique(req.params.id, links, fields, res);
 
-        LinkModel
-          .findByIdAndUpdate(req.params.id, { ...fields, _id: req.params.id })
+        Link
+          .update(fields, { where: { id: req.params.id }})
           .then(() => res.status(200).json({ message: process.env.LINK_UPDATED }))
           .catch(() => res.status(400).json({ message: process.env.LINK_NOT_UPDATED }));
       })
@@ -142,8 +141,8 @@ exports.updateLink = (req, res, next) => {
  * @param {object} res 
  */
 exports.deleteLink = (req, res) => {
-  LinkModel
-    .findByIdAndDelete(req.params.id)
+  Link
+    .destroy({ where: { id: req.params.id }})
     .then(() => res.status(204).json({ message: process.env.LINK_DELETED }))
     .catch(() => res.status(400).json({ message: process.env.LINK_NOT_DELETED }))
 };
