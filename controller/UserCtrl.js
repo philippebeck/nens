@@ -198,7 +198,8 @@ exports.setMessage = (fields, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @param {Function} next - The next middleware function.
- * @return {undefined}
+ * @return {Object} A message indicating that the user was created.
+ * @throws {Error} If the user is not created.
  */
 exports.createUser = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -241,7 +242,6 @@ exports.createUser = (req, res, next) => {
  * @param {Object} req - the request object
  * @param {Object} res - the response object
  * @param {Function} next - the next middleware function
- * @return {undefined} 
  */
 exports.sendMessage = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -261,6 +261,7 @@ exports.sendMessage = (req, res, next) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of users in JSON format.
+ * @throws {Error} If the users are not found in the database.
  */
 exports.listUsers = (req, res) => {
   User
@@ -293,6 +294,7 @@ exports.listUsers = (req, res) => {
  * @param {object} req - The request object.
  * @param {object} res - The response object.
  * @return {object} The user data in JSON format.
+ * @throws {Error} If the user is not found in the database.
  */
 exports.readUser = (req, res) => {
   User
@@ -309,6 +311,7 @@ exports.readUser = (req, res) => {
  * @param {Object} res - The response object.
  * @param {Function} next - The next middleware function.
  * @return {undefined} This function does not return anything.
+ * @throws {Error} If the user is not updated in the database.
  */
 exports.updateUser = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -364,7 +367,8 @@ exports.updateUser = (req, res, next) => {
  *
  * @param {Object} req - The request object containing the user id in the params.
  * @param {Object} res - The response object to send the result.
- * @return {Object} The response object with a status and JSON message indicating success or failure.
+ * @return {Object} The response object with a status & JSON message indicating success or failure.
+ * @throws {Error} If the user is not deleted from the database.
  */
 exports.deleteUser = (req, res) => {
   User
