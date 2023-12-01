@@ -1,18 +1,19 @@
 "use strict";
 
 const bcrypt      = require("bcrypt");
+const db          = require("../model");
 const formidable  = require("formidable");
 const nem         = require("nemjs");
 const Recaptcha   = require("google-recaptcha");
 
-const UserModel = require("../model/UserModel");
-
 require("dotenv").config();
 
-const form = formidable();
+const form      = formidable();
 const recaptcha = new Recaptcha({ secret: process.env.RECAPTCHA_SECRET });
+const User      = db.user;
 
-//! ****************************** CHECKER ******************************
+
+//! ******************** CHECKER ********************
 
 /**
  * CHECK AUTH DATA
@@ -25,7 +26,7 @@ exports.checkAuthData = (email, res) => {
   }
 }
 
-//! ****************************** GETTER ******************************
+//! ******************** GETTER ********************
 
 /**
  * GET USER
@@ -51,7 +52,7 @@ exports.getUser = (name, email, image, pass, role, created, updated) => {
   }
 }
 
-//! ****************************** SETTER ******************************
+//! ******************** SETTER ********************
 
 /**
  * SET MAILER
@@ -87,7 +88,7 @@ exports.setMessage = (fields, pass) => {
   return fields;
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
  * READ AVATAR
@@ -95,8 +96,8 @@ exports.setMessage = (fields, pass) => {
  * @param {object} res 
  */
 exports.readAvatar = (req, res) => {
-  UserModel
-    .findById(req.params.id)
+  User
+    .findByPk(req.params.id)
     .then((user) => { 
       let avatar = {};
 
@@ -143,8 +144,8 @@ exports.loginUser = (req, res, next) => {
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
-    UserModel
-      .findOne({ email: fields.email })
+    User
+      .findOne({ where: { email: fields.email }})
       .then((user) => { nem.setAuth(fields.pass, user, res) })
       .catch(() => res.status(401).json({ message: process.env.AUTH_LOGIN }));
   })
@@ -162,8 +163,8 @@ exports.forgotPass = (req, res, next) => {
 
     this.checkAuthData(fields.email, res);
 
-    UserModel
-      .findOne({ email: fields.email })
+    User
+      .findOne({ where: { email: fields.email }})
       .then((user) => {
         if (user !== null) {
 
@@ -175,8 +176,8 @@ exports.forgotPass = (req, res, next) => {
             .then((hash) => {
               let newUser = this.getUser(user.name, user.email, user.image, hash, user.role, user.created, user.updated);
 
-              UserModel
-                .findByIdAndUpdate(user._id, { ...newUser, _id: user._id })
+              User
+                .update(newUser, { where: { id: user.id }})
                 .then(() => { this.setMailer(fields, res) })
                 .catch(() => res.status(400).json({ message: process.env.USER_NOT_UPDATED }));
             })
