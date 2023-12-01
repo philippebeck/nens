@@ -1,15 +1,15 @@
 "use strict";
 
+const db          = require("../model");
 const formidable  = require("formidable");
 const nem         = require("nemjs");
-const db          = require("../model");
 
 require("dotenv").config();
 
 const form = formidable();
 const Link = db.link;
 
-//! ****************************** CHECKERS ******************************
+//! ******************** CHECKERS ********************
 
 /**
  * CHECK LINK DATA
@@ -64,7 +64,7 @@ exports.checkLinksForUnique = (id, links, fields, res) => {
   }
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
  * LIST LINK
@@ -78,7 +78,7 @@ exports.listLinks = (req, res) => {
     .catch(() => res.status(404).json({ message: process.env.LINKS_NOT_FOUND }));
 };
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
  * CREATE LINK
