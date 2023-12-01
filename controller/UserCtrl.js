@@ -1,11 +1,10 @@
 "use strict";
 
 const bcrypt      = require("bcrypt");
+const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
-
-const UserModel = require("../model/UserModel");
 
 require("dotenv").config();
 
@@ -13,8 +12,9 @@ const USERS_IMG   = process.env.IMG_URL + "users/";
 const USERS_THUMB = process.env.THUMB_URL + "users/";
 
 const form = formidable({ uploadDir: USERS_IMG, keepExtensions: true });
+const User = db.user;
 
-//! ****************************** CHECKERS ******************************
+//! ******************** CHECKERS ********************
 
 /**
  * ? CHECK USER DATA
@@ -85,13 +85,13 @@ exports.checkUserUnique = (name, email, user, res) => {
  */
 exports.checkUsersForUnique = (id, users, fields, res) => {
   for (let user of users) {
-    if (!user._id.equals(id)) {
+    if (!user.id.equals(id)) {
       this.checkUserUnique(fields.name, fields.email, user, res)
     }
   }
 }
 
-//! ****************************** GETTERS ******************************
+//! ******************** GETTERS ********************
 
 /**
  * ? GET USER CREATED
@@ -165,7 +165,7 @@ exports.getUserNoPass = (name, email, image, role, updated) => {
   }
 }
 
-//! ****************************** SETTERS ******************************
+//! ******************** SETTERS ********************
 
 /**
  * ? SET MESSAGE
@@ -189,7 +189,7 @@ exports.setMessage = (fields, res) => {
   })();
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
  * ? CREATE USER
@@ -207,8 +207,8 @@ exports.createUser = (req, res, next) => {
     this.checkUserData(fields.name, fields.email, fields.role, res);
     this.checkUserPass(fields.pass, res);
 
-    UserModel
-      .find()
+    User
+      .findAll()
       .then((users) => {
         for (let user of users) { this.checkUserUnique(fields.name, fields.email, user, res) }
 
@@ -218,10 +218,10 @@ exports.createUser = (req, res, next) => {
         bcrypt
           .hash(fields.pass, 10)
           .then((hash) => {
-            let user = new UserModel(this.getUserCreated(fields.name, fields.email, image, hash, fields.role, fields.created, fields.updated));
+            let user = this.getUserCreated(fields.name, fields.email, image, hash, fields.role, fields.created, fields.updated);
 
-            user
-              .save()
+            User
+              .create(user)
               .then(() => {
                 fs.unlink(USERS_IMG + files.image.newFilename, () => { res.status(201).json({ message: process.env.USER_CREATED }) })
               })
@@ -252,7 +252,7 @@ exports.sendMessage = (req, res, next) => {
   })
 }
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
  * ? LIST ALL USERS WITHOUT PASSWORD
@@ -263,14 +263,14 @@ exports.sendMessage = (req, res, next) => {
  * @return {Object} The list of users in JSON format.
  */
 exports.listUsers = (req, res) => {
-  UserModel
-    .find()
+  User
+    .findAll()
     .then((users) => {
       let usersList = [];
 
       for (let user of users) {
         let userSafe = {
-          _id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
           image: user.image,
@@ -295,8 +295,8 @@ exports.listUsers = (req, res) => {
  * @return {object} The user data in JSON format.
  */
 exports.readUser = (req, res) => {
-  UserModel
-    .findById(req.params.id)
+  User
+    .findByPk(req.params.id)
     .then((user) => res.status(200).json(user))
     .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
 }
@@ -316,8 +316,8 @@ exports.updateUser = (req, res, next) => {
 
     this.checkUserData(fields.name, fields.email, fields.role, res);
 
-    UserModel
-      .find()
+    User
+      .findAll()
       .then((users) => {
         this.checkUsersForUnique(req.params.id, users, fields, res);
 
@@ -332,8 +332,8 @@ exports.updateUser = (req, res, next) => {
             .then((hash) => {
               let user = this.getUserWithPass(fields.name, fields.email, image, hash, fields.role, fields.updated);
 
-              UserModel
-                .findByIdAndUpdate(req.params.id, { ...user, _id: req.params.id })
+              User
+                .update(user, { where: { id: req.params.id }})
                 .then(() => {
                   if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
                   res.status(200).json({ message: process.env.USER_UPDATED });
@@ -345,8 +345,8 @@ exports.updateUser = (req, res, next) => {
         } else {
           let user = this.getUserNoPass(fields.name, fields.email, image, fields.role, fields.updated);
 
-          UserModel
-            .findByIdAndUpdate(req.params.id, { ...user, _id: req.params.id })
+          User
+            .update(user, { where: { id: req.params.id }})
             .then(() => {
               if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
               res.status(200).json({ message: process.env.USER_UPDATED });
@@ -367,13 +367,13 @@ exports.updateUser = (req, res, next) => {
  * @return {Object} The response object with a status and JSON message indicating success or failure.
  */
 exports.deleteUser = (req, res) => {
-  UserModel
-    .findById(req.params.id)
+  User
+    .findByPk(req.params.id)
     .then(user => {
       fs.unlink(USERS_THUMB + user.image, () => {
 
-        UserModel
-          .findByIdAndDelete(req.params.id)
+        User
+          .destroy({ where: { id: req.params.id }})
           .then(() => res.status(204).json({ message: process.env.USER_DELETED }))
           .catch(() => res.status(400).json({ message: process.env.USER_NOT_DELETED }))
       })
