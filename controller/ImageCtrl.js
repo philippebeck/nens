@@ -1,24 +1,28 @@
 "use strict";
 
+const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
 
-const GalleryModel  = require("../model/GalleryModel");
-const ImageModel    = require("../model/ImageModel");
-
 require("dotenv").config();
 
-const GALLERIES_IMG = process.env.IMG_URL + "galleries/";
+const GALLERIES_IMG   = process.env.IMG_URL + "galleries/";
 const GALLERIES_THUMB = process.env.THUMB_URL + "galleries/";
-const form = formidable({ uploadDir: GALLERIES_IMG, keepExtensions: true });
 
-//! ****************************** CHECKER ******************************
+const form    = formidable({ uploadDir: GALLERIES_IMG, keepExtensions: true });
+const Gallery = db.gallery;
+const Image   = db.image;
+
+//! ******************** CHECKER ********************
 
 /**
- * CHECK IMAGE DATA
- * @param {string} description 
- * @param {object} res 
+ * ? CHECK IMAGE DATA
+ * * Checks the image data.
+ *
+ * @param {string} description - The description of the image data.
+ * @param {object} res - The response object.
+ * @return {object} The JSON response.
  */
 exports.checkImageData = (description, res) => {
   if (!nem.checkRange(description, process.env.STRING_MIN, process.env.TEXT_MAX)) {
@@ -26,12 +30,14 @@ exports.checkImageData = (description, res) => {
   }
 }
 
-//! ****************************** SETTER ******************************
+//! ******************** SETTER ********************
 
 /**
- * SET IMAGE
- * @param {string} image 
- * @param {string} newFilename 
+ * ? SET IMAGE
+ * * Sets the image & thumbnail for a gallery.
+ *
+ * @param {string} image - The filename of the image to set.
+ * @param {string} newFilename - The new filename to use for the image.
  */
 exports.setImage = (image, newFilename) => {
   let input   = "galleries/" + newFilename;
@@ -41,73 +47,89 @@ exports.setImage = (image, newFilename) => {
   nem.setThumbnail(input, process.env.THUMB_URL + output);
 }
 
-//! ****************************** GETTER ******************************
+//! ******************** GETTER ********************
 
 /**
- * GET IMAGE
- * @param {string} name 
- * @param {string} description 
- * @param {string} gallery 
- * @returns 
+ * ? GET IMAGE
+ * * Retrieves an image with the given name, description & gallery ID.
+ *
+ * @param {string} name - The name of the image.
+ * @param {string} description - The description of the image.
+ * @param {number} gallery_id - The ID of the gallery the image belongs to.
+ * @return {object} - An object containing the name, description & gallery ID of the image.
  */
-exports.getImage = (name, description, gallery) => {
+exports.getImage = (name, description, gallery_id) => {
 
   return {
     name: name,
     description: description,
-    gallery: gallery
+    gallery_id: gallery_id
   }
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
- * LIST GALLERY IMAGES
- * @param {object} req 
- * @param {object} res 
+ * ? LIST GALLERY IMAGES
+ * * Retrieves a list of gallery images based on the provided gallery ID.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} req.params - The parameters object containing the gallery ID.
+ * @param {string} req.params.id - The ID of the gallery to retrieve images for.
+ * @param {Object} res - The response object.
+ * @return {Promise} A promise that resolves to a response containing the list of gallery images.
+ * @throws {Error} If the images are not found in the database.
  */
 exports.listGalleryImages = (req, res) => {
-  ImageModel
-    .find({ gallery: req.params.id })
+  Image
+    .findAll({ where: { gallery_id: req.params.id }})
     .then((images) => { res.status(200).json(images) })
     .catch(() => res.status(404).json({ message: process.env.IMAGES_NOT_FOUND }));
 };
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
- * LIST IMAGES
- * @param {object} req 
- * @param {object} res 
+ * ? LIST IMAGES
+ * * Retrieves a list of images & modifies the gallery ID of each image by appending the gallery name.
+ *
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @return {Promise} A promise that resolves to a response containing the list of images.
+ * @throws {Error} If the images are not found in the database.
  */
 exports.listImages = (req, res) => {
-  ImageModel
-    .find()
+  Image
+    .findAll()
     .then((images) => { 
 
-      GalleryModel
-        .find()
+      Gallery
+        .findAll()
         .then((galleries) => {
           for (let image of images) {
             for (let gallery of galleries) {
 
-              if (image.gallery === gallery._id.toString()) {
-                image.gallery = image.gallery + "-" + gallery.name;
+              if (image.gallery_id === gallery.id.toNumber()) {
+                image.gallery_id = image.gallery_id + "-" + gallery.name;
               }
             }
           }
           res.status(200).json(images);
         })
+        .catch(() => res.status(404).json({ message: process.env.GALLERIES_NOT_FOUND }));
     })
     .catch(() => res.status(404).json({ message: process.env.IMAGES_NOT_FOUND }));
 };
 
 /**
- * CREATE IMAGE
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
- * @returns
+ * ? CREATE IMAGE
+ * * Creates an image based on the request data.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next middleware function
+ * @return {Object} A message indicating that the image was created.
+ * @throws {Error} If the image is not created in the database.
  */
 exports.createImage = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -115,22 +137,22 @@ exports.createImage = (req, res, next) => {
 
     this.checkImageData(fields.description, res);
 
-    GalleryModel
-      .findById(fields.gallery)
+    Gallery
+      .findOne({ where: { id: fields.gallery_id }})
       .then((gallery) => {
 
-        ImageModel
-        .find({ gallery: fields.gallery })
+        Image
+        .findAll({ where: { gallery_id: fields.gallery_id }})
         .then((images) => { 
           let index = images.length + 1;
           if (index < 10) { index = "0" + index }
 
           let name = nem.getName(gallery.name) + "-" + index + "." + process.env.IMG_EXT;
           this.setImage(name, files.image.newFilename);
-          let image = new ImageModel(this.getImage(name, fields.description, fields.gallery));
+          let image = this.getImage(name, fields.description, fields.gallery_id);
 
-          image
-            .save()
+          Image
+            .create(image)
             .then(() => {
               fs.unlink(GALLERIES_IMG + files.image.newFilename, () => {
                 res.status(201).json({ message: process.env.IMAGE_CREATED });
@@ -145,10 +167,14 @@ exports.createImage = (req, res, next) => {
 };
 
 /**
- * UPDATE IMAGE
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? UPDATE IMAGE
+ * * Updates an image.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {Object} A message indicating that the image was updated.
+ * @throws {Error} If the image is not updated in the database.
  */
 exports.updateImage = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -158,10 +184,10 @@ exports.updateImage = (req, res, next) => {
     let name = fields.name;
 
     if (files.image) this.setImage(name, files.image.newFilename);
-    let image = this.getImage(name, fields.description, fields.gallery);
+    let image = this.getImage(name, fields.description, fields.gallery_id);
 
-    ImageModel
-      .findByIdAndUpdate(req.params.id, { ...image, _id: req.params.id })
+    Image
+      .update(image, { where: { id: req.params.id }})
       .then(() => {
         if (files.image) fs.unlink(GALLERIES_IMG + files.image.newFilename, () => {});
         res.status(200).json({ message: process.env.IMAGE_UPDATED });
@@ -171,19 +197,23 @@ exports.updateImage = (req, res, next) => {
 };
 
 /**
- * DELETE IMAGE
- * @param {object} req 
- * @param {object} res 
+ * ? DELETE IMAGE
+ * * Deletes an image from the server and database.
+ *
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @return {Object} A message indicating that the image was deleted.
+ * @throws {Error} If the image is not deleted in the database.
  */
 exports.deleteImage = (req, res) => {
-  ImageModel
-    .findById(req.params.id)
+  Image
+    .findByPk(req.params.id)
     .then((image) => {
       fs.unlink(GALLERIES_THUMB + image.name, () => {
         fs.unlink(GALLERIES_IMG + image.name, () => {
 
-          ImageModel
-            .findByIdAndDelete(req.params.id)
+          Image
+            .destroy({ where: { id: req.params.id }})
             .then(() => res.status(204).json({ message: process.env.IMAGE_DELETED }))
             .catch(() => res.status(400).json({ message: process.env.IMAGE_NOT_DELETED }));
         })
