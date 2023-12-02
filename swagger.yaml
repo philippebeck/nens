@@ -9,8 +9,10 @@ basePath: /
 schemes:
   - https
 paths:
+
   # ! ARTICLES
   /articles:
+
     # GET /articles => List Articles
     get:
       tags:
@@ -30,6 +32,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # POST /articles => Create Article
     post:
       security:
@@ -38,6 +41,8 @@ paths:
         - Article Module
       summary: Create Article
       description: API to Create an Article
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -56,7 +61,10 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
+  # ! ARTICLES WITH ID
   /articles/{id}:
+
     # GET /articles/{id} => Read Article
     get:
       tags:
@@ -74,6 +82,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # PUT /articles/{id} => Update Article
     put:
       security:
@@ -82,6 +91,8 @@ paths:
         - Article Module
       summary: Update Article
       description: API to Update an Article
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -100,6 +111,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # DELETE /articles/{id} => Delete Article
     delete:
       security:
@@ -122,6 +134,7 @@ paths:
 
   # ! AUTH
   /auth:
+
     # GET /auth/{id} => Read Avatar
     get:
       tags:
@@ -139,12 +152,15 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # POST /auth => Login User
     post:
       tags:
         - Auth Module
       summary: Login User
       description: API to Login the User
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -163,6 +179,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
   # POST /auth/pass => Forgot Pass
   /auth/pass:
     post:
@@ -170,6 +187,8 @@ paths:
         - Auth Module
       summary: Forgot Pass
       description: API to Send a new Password
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -188,6 +207,8 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
+  # TODO create req & res then replace auth req & res
   # POST /auth/recaptcha => Check Recaptcha
   /auth/recaptcha:
     post:
@@ -195,6 +216,8 @@ paths:
         - Auth Module
       summary: Check Recaptcha
       description: API to Check the Recaptcha
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -216,6 +239,7 @@ paths:
 
   # ! GALLERIES
   /galleries:
+
     # GET /galleries => List Galleries
     get:
       tags:
@@ -235,6 +259,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # POST /galleries => Create Article
     post:
       security:
@@ -243,6 +268,8 @@ paths:
         - Gallery Module
       summary: Create Gallery
       description: API to Create a Gallery
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -261,7 +288,10 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
+  # ! GALLERIES WITH ID
   /galleries/{id}:
+
     # GET /galleries/{id} => Read Article
     get:
       tags:
@@ -279,6 +309,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # PUT /galleries/{id} => Update Article
     put:
       security:
@@ -287,6 +318,8 @@ paths:
         - Gallery Module
       summary: Update Gallery
       description: API to Update a Gallery
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -305,6 +338,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # DELETE /galleries/{id} => Delete Article
     delete:
       security:
@@ -327,6 +361,7 @@ paths:
 
   # ! IMAGES
   /images:
+
     # GET /images => List Images
     get:
       tags:
@@ -346,6 +381,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # POST /images => Create Image
     post:
       security:
@@ -354,6 +390,8 @@ paths:
         - Image Module
       summary: Create Image
       description: API to Create an Image
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -372,7 +410,10 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
+  # ! IMAGES WITH ID
   /images/{id}:
+
     # GET /images/{id} => Read Image
     get:
       tags:
@@ -390,6 +431,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # PUT /images/{id} => Update Image
     put:
       security:
@@ -398,6 +440,8 @@ paths:
         - Image Module
       summary: Update Image
       description: API to Update an Image
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -416,6 +460,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # DELETE /images/{id} => Delete Image
     delete:
       security:
@@ -438,6 +483,7 @@ paths:
 
   # ! LINKS
   /links:
+
     # GET /links => List Links
     get:
       tags:
@@ -457,6 +503,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # POST /links => Create Link
     post:
       security:
@@ -465,6 +512,8 @@ paths:
         - Link Module
       summary: Create Link
       description: API to Create a Link
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -483,7 +532,10 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
+  # ! LINKS WITH ID
   /links/{id}:
+
     # PUT /links/{id} => Update Link
     put:
       security:
@@ -492,6 +544,8 @@ paths:
         - Link Module
       summary: Update Link
       description: API to Update a Link
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -510,6 +564,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # DELETE /links/{id} => Delete Link
     delete:
       security:
@@ -530,8 +585,257 @@ paths:
         "500":
           description: Internal Server Error
 
+  # ! ORDERS
+  /orders:
+
+    # GET /orders => List Orders
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Order Module
+      summary: List Orders
+      description: API to List all Orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All Orders have been Successully Listed
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/OrderRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+    # POST /orders => Create Order
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Order Module
+      summary: Create Order
+      description: API to Create an Order
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: body
+          name: body
+          description: createOrder() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/OrderReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Order Created Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+  # ! ORDERS WITH ID
+  /orders/{id}:
+
+    # GET /orders/{id} => List User Orders
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Order Module
+      summary: List User Orders
+      description: API to List User Orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User Orders have been Successully Listed
+          schema:
+            $ref: "#/definitions/OrderRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+    # PUT /orders/{id} => Update Order
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Order Module
+      summary: Update Order
+      description: API to Update an Order
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: body
+          name: body
+          description: updateOrder() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/OrderReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Order Updated Successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+    # DELETE /orders/{id} => Delete Order
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Order Module
+      summary: Delete Gallery
+      description: API to Delete an Order
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Order successully Deleted
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+  # ! PRODUCTS
+  /products:
+
+    # GET /products => List Products
+    get:
+      tags:
+        - Product Module
+      summary: List Products
+      description: API to List all Products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All Products have been Successully Listed
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ArticleRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+    # POST /products => Create Product
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Product Module
+      summary: Create Product
+      description: API to Create an Product
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: body
+          name: body
+          description: createProduct() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ArticleReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Product Created Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+  # ! PRODUCTS WITH ID
+  /products/{id}:
+
+    # GET /products/{id} => Read Product
+    get:
+      tags:
+        - Product Module
+      summary: Read Product
+      description: API to Read an Product
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product Read Successully
+          schema:
+            $ref: "#/definitions/ArticleRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+    # PUT /products/{id} => Update Product
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Product Module
+      summary: Update Product
+      description: API to Update an Product
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: body
+          name: body
+          description: updateProduct() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ArticleReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Product Updated Successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+    # DELETE /products/{id} => Delete Product
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Product Module
+      summary: Delete Product
+      description: API to Delete an Product
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Product Successully Deleted
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
   # ! USERS
   /users:
+
     # GET /users => List Users
     get:
       security:
@@ -553,12 +857,15 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # POST /users => Create User
     post:
       tags:
         - User Module
       summary: Create User
       description: API to Create a User
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -577,7 +884,10 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
+  # ! USERS WITH ID
   /users/{id}:
+
     # GET /users/{id} => Read User
     get:
       security:
@@ -597,6 +907,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # PUT /users/{id} => Update User
     put:
       security:
@@ -605,6 +916,8 @@ paths:
         - User Module
       summary: Update User
       description: API to Update a User
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -623,6 +936,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
     # DELETE /users/{id} => Delete User
     delete:
       security:
@@ -642,6 +956,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
   # POST /users/message => Send Message
   /users/message:
     post:
@@ -649,6 +964,8 @@ paths:
         - User Module
       summary: Send Message
       description: API to Send a User Message
+      consumes:
+        - multipart/form-data
       parameters:
         - in: body
           name: body
@@ -675,8 +992,11 @@ securityDefinitions:
     name: Authorization
     in: header
 
+# TODO review all req & res for missing fields between front & back
 definitions:
   # ! REQUESTS
+
+  # ARTICLES REQUEST
   ArticleReq:
     properties:
       name:
@@ -694,6 +1014,8 @@ definitions:
       cat:
         type: string
         description: article category
+
+  # AUTH REQUEST
   AuthReq:
     properties:
       email:
@@ -702,6 +1024,8 @@ definitions:
       pass:
         type: string
         description: user password
+
+  # GALLERY REQUEST
   GalleryReq:
     properties:
       name:
@@ -710,6 +1034,8 @@ definitions:
       author:
         type: string
         description: gallery author
+
+  # IMAGE REQUEST
   ImageReq:
     properties:
       name:
@@ -718,6 +1044,8 @@ definitions:
       description:
         type: string
         description: image description
+
+  # LINK REQUEST
   LinkReq:
     properties:
       name:
@@ -729,6 +1057,8 @@ definitions:
       cat:
         type: string
         description: link category
+
+  # MESSAGE REQUEST
   MessageReq:
     properties:
       email:
@@ -740,11 +1070,44 @@ definitions:
       text:
         type: string
         description: message content
+
+  # PASS REQUEST
   PassReq:
     properties:
       email:
         type: string
         description: user email
+
+  # ORDER REQUEST
+  OrderReq:
+    properties:
+      products:
+        type: array
+        items:
+          type: number
+        description: order products
+      total:
+        type: number
+        description: order total
+      payment_id:
+        type: string
+        description: payment id
+      status:
+        type: string
+        description: order status
+      user_id:
+        type: number
+        description: user id
+      created:
+        type: string
+        format: date
+        description: order creation
+      updated:
+        type: string
+        format: date
+        description: order update
+
+  # USER REQUEST
   UserReq:
     properties:
       name:
@@ -761,6 +1124,8 @@ definitions:
         description: user password
 
   # ! RESPONSES
+
+  # ARTICLE RESPONSE
   ArticleRes:
     type: object
     properties:
@@ -790,6 +1155,8 @@ definitions:
         type: string
         format: date
         description: article update
+
+  # AUTH RESPONSE
   AuthRes:
     type: object
     properties:
@@ -799,6 +1166,8 @@ definitions:
       userToken:
         type: string
         description: user token
+
+  # AVATAR RESPONSE
   AvatarRes:
     type: object
     properties:
@@ -811,6 +1180,8 @@ definitions:
       role:
         type: string
         description: user role
+
+  # BASIC RESPONSE
   BasicRes:
     properties:
       status:
@@ -819,6 +1190,8 @@ definitions:
       message:
         type: string
         description: confirm message
+
+  # GALLERY RESPONSE
   GalleryRes:
     properties:
       name:
@@ -830,6 +1203,8 @@ definitions:
       cover:
         type: string
         description: gallery cover image
+
+  # IMAGE RESPONSE
   ImageRes:
     properties:
       name:
@@ -841,6 +1216,8 @@ definitions:
       gallery_id:
         type: number
         description: gallery id
+
+  # LINK RESPONSE
   LinkRes:
     properties:
       name:
@@ -852,6 +1229,8 @@ definitions:
       cat:
         type: string
         description: link category
+
+  # MESSAGE RESPONSE
   MessageRes:
     type: object
     properties:
@@ -861,6 +1240,41 @@ definitions:
       message:
         type: string
         description: confirm message
+
+  # ORDER RESPONSE
+  OrderRes:
+    type: object
+    properties:
+      id:
+        type: number
+        description: order id
+      products:
+        type: array
+        items:
+          type: number
+        description: order products
+      total:
+        type: number
+        description: order total
+      payment_id:
+        type: string
+        description: payment id
+      status:
+        type: string
+        description: order status
+      user_id:
+        type: number
+        description: user id
+      created:
+        type: string
+        format: date
+        description: order creation
+      updated:
+        type: string
+        format: date
+        description: order update
+
+  # USER RESPONSE
   UserRes:
     type: object
     properties:
