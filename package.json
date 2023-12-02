@@ -1,5 +1,6 @@
 {
   "name": "sen",
+  "version": "0.1.0-alpha",
   "description": "API with SQL, Express & NemJS",
   "keywords": [
     "api",
@@ -24,6 +25,7 @@
     "formidable": "^2.1.1",
     "google-recaptcha": "^1.1.0",
     "helmet": "^5.0.2",
+    "mysql2": "^3.6.5",
     "nemjs": "^1.6.2",
     "sequelize": "^6.35.1"
   },

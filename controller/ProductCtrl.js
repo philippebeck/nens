@@ -1,28 +1,31 @@
 "use strict";
 
+const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
 
-const ProductModel  = require("../model/ProductModel");
-const ReviewModel   = require("../model/ReviewModel");
-
 require("dotenv").config();
 
-const PRODUCTS_IMG = process.env.IMG_URL + "products/";
-const PRODUCTS_THUMB = process.env.THUMB_URL + "products/";
-const form = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
+const PRODUCTS_IMG    = process.env.IMG_URL + "products/";
+const PRODUCTS_THUMB  = process.env.THUMB_URL + "products/";
 
-//! ****************************** CHECKERS ******************************
+const form    = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
+const Product = db.product;
+
+//! ******************** CHECKERS ********************
 
 /**
- * CHECK PRODUCT DATA
- * @param {string} name 
- * @param {string} description 
- * @param {string} alt 
- * @param {number} price 
- * @param {string} cat 
- * @param {object} res 
+ * ? CHECK PRODUCT DATA
+ * * Validates and checks the product data before processing it.
+ *
+ * @param {string} name - The name of the product.
+ * @param {string} description - The description of the product.
+ * @param {string} alt - The alternative name of the product.
+ * @param {number} price - The price of the product.
+ * @param {string} cat - The category of the product.
+ * @param {object} res - The response object.
+ * @return {object} The response object with a JSON message if there are any validation errors.
  */
 exports.checkProductData = (name, description, alt, price, cat, res) => {
   const PRICE_MAX = process.env.PRICE_MAX;
@@ -36,7 +39,7 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
 
   if (!nem.checkRange(cat, STR_MIN, STR_MAX)) alert = process.env.CHECK_CAT;
   if (!nem.checkRange(price, PRICE_MIN, PRICE_MAX)) alert = process.env.CHECK_PRICE;
-  if (!nem.checkRange(alt, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME; 
+  if (!nem.checkRange(alt, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
   if (!nem.checkRange(description, TXT_MIN, TXT_MAX)) alert = process.env.CHECK_TEXT;
   if (!nem.checkRange(name, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
 
@@ -44,12 +47,14 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
 }
 
 /**
- * CHECK PRODUCT UNIQUE
- * @param {string} name 
- * @param {string} description 
- * @param {object} product 
- * @param {object} res 
- * @returns
+ * ? CHECK PRODUCT UNIQUE
+ * * Checks if the given product name and description are unique.
+ *
+ * @param {string} name - The name of the product.
+ * @param {string} description - The description of the product.
+ * @param {object} product - The product object to compare with.
+ * @param {object} res - The response object.
+ * @return {object} The JSON response object with the appropriate message and status code.
  */
 exports.checkProductUnique = (name, description, product, res) => {
   if (product.name === name) {
@@ -62,36 +67,38 @@ exports.checkProductUnique = (name, description, product, res) => {
 }
 
 /**
- * CHECK PRODUCTS FOR UNIQUE
- * @param {string} id 
- * @param {array} products 
- * @param {object} fields 
- * @param {object} res 
+ * ? CHECK PRODUCTS FOR UNIQUE
+ * * Checks if a product is unique based on its ID & fields.
+ *
+ * @param {string} id - The ID of the product to check uniqueness against.
+ * @param {Array} products - An array of products to check for uniqueness.
+ * @param {Object} fields - An object containing the fields to check for uniqueness.
+ * @param {Object} res - The response object to send the result to.
  */
 exports.checkProductsForUnique = (id, products, fields, res) => {
   for (let product of products) {
-    if (!product._id.equals(id)) { 
-      this.checkProductUnique(fields.name, fields.description, product, res) 
+    if (!product.id.equals(id)) {
+      this.checkProductUnique(fields.name, fields.description, product, res)
     }
   }
 }
 
-//! ****************************** GETTERS ******************************
+//! ******************** GETTERS ********************
 
 /**
- * GET PRODUCT
- * @param {string} name 
- * @param {string} description 
- * @param {string} image 
- * @param {string} alt 
- * @param {number} price 
- * @param {array} options 
- * @param {string} cat 
- * @param {string} created 
- * @param {string} updated 
- * @returns 
+ * ? GET PRODUCT
+ * * Returns a product object with the given properties.
+ *
+ * @param {string} name - The name of the product.
+ * @param {string} description - The description of the product.
+ * @param {string} image - The image URL of the product.
+ * @param {string} alt - The alternative text for the product image.
+ * @param {number} price - The price of the product.
+ * @param {object} options - The options for the product.
+ * @param {string} cat - The category of the product.
+ * @return {object} The product object with the given properties.
  */
-exports.getProduct = (name, description, image, alt, price, options, cat, created, updated) => {
+exports.getProduct = (name, description, image, alt, price, options, cat) => {
 
   return {
     name: name,
@@ -100,18 +107,18 @@ exports.getProduct = (name, description, image, alt, price, options, cat, create
     alt: alt,
     price: price,
     options: options,
-    cat: cat,
-    created: created,
-    updated: updated
+    cat: cat
   }
 }
 
-//! ****************************** SETTER ******************************
+//! ******************** SETTER ********************
 
 /**
- * SET IMAGE
- * @param {string} name 
- * @param {string} newFilename 
+ * ? SET IMAGE
+ * * Sets the image for a product.
+ *
+ * @param {string} name - The name of the product.
+ * @param {string} newFilename - The new filename of the image.
  */
 exports.setImage = (name, newFilename) => {
   let input   = "products/" + newFilename;
@@ -119,46 +126,59 @@ exports.setImage = (name, newFilename) => {
 
   nem.setThumbnail(input, process.env.THUMB_URL + output);
   nem.setThumbnail(
-    input, 
-    process.env.IMG_URL + output, 
-    process.env.IMG_WIDTH, 
+    input,
+    process.env.IMG_URL + output,
+    process.env.IMG_WIDTH,
     process.env.IMG_HEIGHT
   );
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
- * LIST PRODUCTS
- * @param {object} req 
- * @param {object} res 
+ * ? LIST PRODUCTS
+ * * Retrieves a list of all products.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The list of products in JSON format.
+ * @throws {Error} If the products are not found in the database.
  */
 exports.listProducts = (req, res) => {
-  ProductModel
-    .find()
+  Product
+    .findAll()
     .then((products) => res.status(200).json(products))
     .catch(() => res.status(404).json({ message: process.env.PRODUCTS_NOT_FOUND }));
 };
 
 /**
- * READ AN PRODUCT
- * @param {object} req 
- * @param {object} res 
+ * ? READ PRODUCT
+ * * Reads a product by its ID.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {string} req.params.id - The ID of the product.
+ * @return {Object} The product in JSON format.
+ * @throws {Error} If the product is not found in the database.
  */
 exports.readProduct = (req, res) => {
-  ProductModel
-  .findById(req.params.id)
-  .then((product) => res.status(200).json(product))
-  .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
+  Product
+    .findByPk(req.params.id)
+    .then((product) => res.status(200).json(product))
+    .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
 }
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
- * CREATE PRODUCT
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? CREATE PRODUCT
+ * * Creates a new product.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next middleware function
+ * @return {Object} A message indicating that the product was created.
+ * @throws {Error} If the product is not created.
  */
 exports.createProduct = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -166,8 +186,8 @@ exports.createProduct = (req, res, next) => {
 
     this.checkProductData(fields.name, fields.description, fields.alt, fields.price, fields.cat, res);
 
-    ProductModel
-      .find()
+    Product
+      .findAll()
       .then((products) => {
         for (let product of products) { this.checkProductUnique(fields.name, fields.description, product, res) }
 
@@ -175,12 +195,12 @@ exports.createProduct = (req, res, next) => {
         let image   = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         this.setImage(image, files.image.newFilename);
 
-        let product = new ProductModel(this.getProduct(
-          fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat, fields.created, fields.updated
-        ));
+        let product = this.getProduct(
+          fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat
+        );
 
-        product
-          .save()
+        Product
+          .create(product)
           .then(() => {
             fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => {
               res.status(201).json({ message: process.env.PRODUCT_CREATED })
@@ -193,10 +213,14 @@ exports.createProduct = (req, res, next) => {
 };
 
 /**
- * UPDATE PRODUCT
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? UPDATE PRODUCT
+ * * Updates a product.
+ *
+ * @param {Object} req - the request object
+ * @param {Object} res - the response object
+ * @param {Function} next - the next middleware function
+ * @return {Object} A message indicating that the product was updated.
+ * @throws {Error} If the product is not updated.
  */
 exports.updateProduct = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -204,8 +228,8 @@ exports.updateProduct = (req, res, next) => {
 
     this.checkProductData(fields.name, fields.description, fields.alt, fields.price, fields.cat, res);
 
-    ProductModel
-      .find()
+    Product
+      .findAll()
       .then((products) => {
         this.checkProductsForUnique(req.params.id, products, fields, res);
 
@@ -213,12 +237,12 @@ exports.updateProduct = (req, res, next) => {
         if (files.image) this.setImage(image, files.image.newFilename);
 
         let options = nem.getArrayFromString(fields.options);
-        let product = this.getProduct(fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat, fields.created, fields.updated);
+        let product = this.getProduct(fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat);
 
-        ProductModel
-          .findByIdAndUpdate(req.params.id, { ...product, _id: req.params.id })
+        Product
+          .update(product, { where: { id: req.params.id }})
           .then(() => {
-            if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => {});
+            if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => { });
             res.status(200).json({ message: process.env.PRODUCT_UPDATED });
           })
           .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_UPDATED }));
@@ -228,27 +252,25 @@ exports.updateProduct = (req, res, next) => {
 };
 
 /**
- * DELETE PRODUCT
- * @param {object} req 
- * @param {object} res 
+ * ? DELETE PRODUCT
+ * * Deletes a product from the database.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} A message indicating that the product was deleted.
+ * @throws {Error} If the product is not found in the database.
  */
 exports.deleteProduct = (req, res) => {
-  ProductModel
-    .findById(req.params.id)
+  Product
+    .findByPk(req.params.id)
     .then(product => {
       fs.unlink(PRODUCTS_THUMB + product.image, () => {
         fs.unlink(PRODUCTS_IMG + product.image, () => {
 
-          ReviewModel
-            .deleteMany({ product: req.params.id })
-            .then(() => 
-
-              ProductModel
-                .findByIdAndDelete(req.params.id)
-                .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
-                .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_DELETED }))
-            )
-            .catch(() => res.status(400).json({ message: process.env.REVIEWS_NOT_DELETED }))
+          Product
+            .destroy({ where: { id: req.params.id }})
+            .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
+            .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_DELETED }))
         })
       })
     })

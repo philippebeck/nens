@@ -1,20 +1,25 @@
 "use strict";
 
+const db          = require("../model");
 const formidable  = require("formidable");
 const nem         = require("nemjs");
 
-const OrderModel  = require("../model/OrderModel");
-const UserModel   = require("../model/UserModel");
-
 require("dotenv").config();
-const form = formidable();
 
-//! ****************************** SETTERS ******************************
+const form  = formidable();
+const Order = db.order;
+const User  = db.user;
+
+//! ******************** SETTERS ********************
 
 /**
- * SET MAILER
- * @param {string} fields 
- * @param {object} res 
+ * ? SET MAILER
+ * * Sets the mailer and sends an email.
+ *
+ * @param {Object} fields - The fields used to generate the email message.
+ * @param {Object} res - The response object used to send the HTTP response.
+ * @return {Object} A message indicating that the email was sent.
+ * @throws {Error} If an error occurs while sending the email.
  */
 exports.setMailer = (fields, res) => {
   const mailer = nem.getMailer();
@@ -31,13 +36,15 @@ exports.setMailer = (fields, res) => {
 }
 
 /**
- * SET MESSAGE
- * @param {number} total 
- * @param {string} payment 
- * @param {array} products 
- * @returns 
+ * ? SET MESSAGE
+ * * Sets the message content for an order.
+ *
+ * @param {number} total - The total amount of the order.
+ * @param {string} payment_id - The ID of the payment.
+ * @param {Array} products - An array of products in the order.
+ * @return {Object} message - The message object containing the subject, text, and html properties.
  */
-exports.setMessage = (total, payment, products) => {
+exports.setMessage = (total, payment_id, products) => {
   let message = {};
   message.subject = process.env.ORDER_SUBJECT;
 
@@ -47,7 +54,7 @@ exports.setMessage = (total, payment, products) => {
       ${process.env.ORDER_TOTAL} 
       <b>${total} ${process.env.CURRENCY_SYMBOL}</b>,
       ${process.env.ORDER_PAYMENT} 
-      <b>#${payment}</b> !
+      <b>#${payment_id}</b> !
     </p>
     <p>${process.env.ORDER_LIST}</p>`;
 
@@ -68,20 +75,24 @@ exports.setMessage = (total, payment, products) => {
   return message;
 }
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
- * LIST ORDERS
- * @param {object} req 
- * @param {object} res 
+ * ? LIST ORDERS
+ * * Retrieves a list of orders.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The list of orders.
+ * @throws {Error} If the orders are not found in the database.
  */
 exports.listOrders = (req, res) => {
-  OrderModel
-    .find()
+  Order
+    .findAll()
     .then((orders) => {
 
-      UserModel
-        .find()
+      User
+        .findAll()
         .then((users) => {
 
           orders = nem.getArrayWithUsername(orders, users);
@@ -93,37 +104,44 @@ exports.listOrders = (req, res) => {
 };
 
 /**
- * LIST USER ORDERS
- * @param {object} req 
- * @param {object} res 
+ * ? LIST USER ORDERS
+ * * Retrieves a list of orders for a specific user.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The list of user orders.
+ * @throws {Error} If the orders are not found in the database.
  */
 exports.listUserOrders = (req, res) => {
-  OrderModel
-    .find({ user: req.params.id })
+  Order
+    .findAll({ where: { user_id: req.params.id }})
     .then((orders) => res.status(200).json(orders))
     .catch(() => res.status(404).json({ message: process.env.ORDERS_NOT_FOUND }));
 };
 
 /**
- * CREATE ORDER
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? CREATE ORDER
+ * * Creates an order based on the request data.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {Object} A message indicating that the order was created.
+ * @throws {Error} If an error occurs while creating the order.
  */
 exports.createOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
     fields.products = JSON.parse(fields.products);
-    let message     = this.setMessage(fields.total, fields.payment, fields.products);
-    let order       = new OrderModel(fields);
+    let message     = this.setMessage(fields.total, fields.payment_id, fields.products);
 
-    order
-      .save()
+    Order
+      .create(fields)
       .then(() => {
 
-        UserModel
-          .findOne({ _id: fields.user })
+        User
+          .findByPk(fields.user_id)
           .then((user) => {
 
             message.email = user.email;
@@ -137,10 +155,14 @@ exports.createOrder = (req, res, next) => {
 };
 
 /**
- * UPDATE ORDER
- * @param {object} req 
- * @param {object} res 
- * @param {function} next 
+ * ? UPDATE ORDER
+ * * Updates an order.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {function} next - The next middleware function.
+ * @return {Object} A message indicating that the order was updated.
+ * @throws {Error} If the order is not updated.
  */
 exports.updateOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -148,21 +170,25 @@ exports.updateOrder = (req, res, next) => {
     if (err) { next(err); return }
     if (fields.products) { fields.products = JSON.parse(fields.products) }
 
-    OrderModel
-      .findByIdAndUpdate(req.params.id, { ...fields, _id: req.params.id })
+    Order
+      .update(fields, { where: { id: req.params.id }})
       .then(() => res.status(200).json({ message: process.env.ORDER_UPDATED }))
       .catch(() => res.status(400).json({ message: process.env.ORDER_NOT_UPDATED }));
   })
 };
 
 /**
- * DELETE ORDER
- * @param {object} req 
- * @param {object} res 
+ * ? DELETE ORDER
+ * * Deletes an order.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} A message indicating that the order was deleted.
+ * @throws {Error} If the order is not deleted.
  */
 exports.deleteOrder = (req, res) => {
-  OrderModel
-    .findByIdAndDelete(req.params.id)
+  Order
+    .destroy({ where: { id: req.params.id }})
     .then(() => res.status(204).json({ message: process.env.ORDER_DELETED }))
     .catch(() => res.status(400).json({ message: process.env.ORDER_NOT_DELETED }))
 };

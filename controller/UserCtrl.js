@@ -1,21 +1,20 @@
 "use strict";
 
 const bcrypt      = require("bcrypt");
+const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
 const nem         = require("nemjs");
 
-const UserModel     = require("../model/UserModel");
-const CommentModel  = require("../model/CommentModel");
-const ReviewModel   = require("../model/ReviewModel");
-
 require("dotenv").config();
 
-const USERS_IMG = process.env.IMG_URL + "users/";
+const USERS_IMG   = process.env.IMG_URL + "users/";
 const USERS_THUMB = process.env.THUMB_URL + "users/";
-const form = formidable({ uploadDir: USERS_IMG, keepExtensions: true });
 
-//! ****************************** CHECKERS ******************************
+const form = formidable({ uploadDir: USERS_IMG, keepExtensions: true });
+const User = db.user;
+
+//! ******************** CHECKERS ********************
 
 /**
  * ? CHECK USER DATA
@@ -32,7 +31,7 @@ exports.checkUserData = (name, email, role, res) => {
   const MIN = process.env.STRING_MIN;
 
   let alert = "";
-  
+
   if (!nem.checkRange(role, MIN, MAX)) alert = process.env.CHECK_ROLE;
   if (!nem.checkEmail(email)) alert = process.env.CHECK_EMAIL;
   if (!nem.checkRange(name, MIN, MAX)) alert = process.env.CHECK_NAME;
@@ -49,8 +48,8 @@ exports.checkUserData = (name, email, role, res) => {
  * @return {object} - The response object with an error message if the password is invalid.
  */
 exports.checkUserPass = (pass, res) => {
-  if (!nem.checkPass(pass)) { 
-    return res.status(403).json({ message: process.env.CHECK_PASS }) 
+  if (!nem.checkPass(pass)) {
+    return res.status(403).json({ message: process.env.CHECK_PASS })
   }
 }
 
@@ -85,14 +84,14 @@ exports.checkUserUnique = (name, email, user, res) => {
  * @param {Object} res - The response object to send the result of the uniqueness check.
  */
 exports.checkUsersForUnique = (id, users, fields, res) => {
-  for (let user of users) { 
-    if (!user._id.equals(id)) { 
-      this.checkUserUnique(fields.name, fields.email, user, res) 
-    } 
+  for (let user of users) {
+    if (!user.id.equals(id)) {
+      this.checkUserUnique(fields.name, fields.email, user, res)
+    }
   }
 }
 
-//! ****************************** GETTERS ******************************
+//! ******************** GETTERS ********************
 
 /**
  * ? GET USER CREATED
@@ -166,7 +165,7 @@ exports.getUserNoPass = (name, email, image, role, updated) => {
   }
 }
 
-//! ****************************** SETTERS ******************************
+//! ******************** SETTERS ********************
 
 /**
  * ? SET MESSAGE
@@ -179,18 +178,18 @@ exports.getUserNoPass = (name, email, image, role, updated) => {
 exports.setMessage = (fields, res) => {
   const mailer = nem.getMailer();
 
-  (async function(){
+  (async function () {
     try {
       let mail = nem.getMessage(fields);
 
-      await mailer.sendMail(mail, function() {
+      await mailer.sendMail(mail, function () {
         res.status(202).json({ message: process.env.USER_MESSAGE });
       });
-    } catch(e){ console.error(e); }
+    } catch (e) { console.error(e); }
   })();
 }
 
-//! ****************************** PUBLIC ******************************
+//! ******************** PUBLIC ********************
 
 /**
  * ? CREATE USER
@@ -199,7 +198,8 @@ exports.setMessage = (fields, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @param {Function} next - The next middleware function.
- * @return {undefined}
+ * @return {Object} A message indicating that the user was created.
+ * @throws {Error} If the user is not created.
  */
 exports.createUser = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -208,8 +208,8 @@ exports.createUser = (req, res, next) => {
     this.checkUserData(fields.name, fields.email, fields.role, res);
     this.checkUserPass(fields.pass, res);
 
-    UserModel
-      .find()
+    User
+      .findAll()
       .then((users) => {
         for (let user of users) { this.checkUserUnique(fields.name, fields.email, user, res) }
 
@@ -219,10 +219,10 @@ exports.createUser = (req, res, next) => {
         bcrypt
           .hash(fields.pass, 10)
           .then((hash) => {
-            let user = new UserModel(this.getUserCreated(fields.name, fields.email, image, hash, fields.role, fields.created, fields.updated));
+            let user = this.getUserCreated(fields.name, fields.email, image, hash, fields.role, fields.created, fields.updated);
 
-            user
-              .save()
+            User
+              .create(user)
               .then(() => {
                 fs.unlink(USERS_IMG + files.image.newFilename, () => { res.status(201).json({ message: process.env.USER_CREATED }) })
               })
@@ -242,7 +242,6 @@ exports.createUser = (req, res, next) => {
  * @param {Object} req - the request object
  * @param {Object} res - the response object
  * @param {Function} next - the next middleware function
- * @return {undefined} 
  */
 exports.sendMessage = (req, res, next) => {
   form.parse(req, (err, fields) => {
@@ -253,7 +252,7 @@ exports.sendMessage = (req, res, next) => {
   })
 }
 
-//! ****************************** PRIVATE ******************************
+//! ******************** PRIVATE ********************
 
 /**
  * ? LIST ALL USERS WITHOUT PASSWORD
@@ -262,16 +261,17 @@ exports.sendMessage = (req, res, next) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of users in JSON format.
+ * @throws {Error} If the users are not found in the database.
  */
 exports.listUsers = (req, res) => {
-  UserModel
-    .find()
+  User
+    .findAll()
     .then((users) => {
       let usersList = [];
 
       for (let user of users) {
         let userSafe = {
-          _id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
           image: user.image,
@@ -294,12 +294,13 @@ exports.listUsers = (req, res) => {
  * @param {object} req - The request object.
  * @param {object} res - The response object.
  * @return {object} The user data in JSON format.
+ * @throws {Error} If the user is not found in the database.
  */
 exports.readUser = (req, res) => {
-  UserModel
-  .findById(req.params.id)
-  .then((user) => res.status(200).json(user))
-  .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
+  User
+    .findByPk(req.params.id)
+    .then((user) => res.status(200).json(user))
+    .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
 }
 
 /**
@@ -310,6 +311,7 @@ exports.readUser = (req, res) => {
  * @param {Object} res - The response object.
  * @param {Function} next - The next middleware function.
  * @return {undefined} This function does not return anything.
+ * @throws {Error} If the user is not updated in the database.
  */
 exports.updateUser = (req, res, next) => {
   form.parse(req, (err, fields, files) => {
@@ -317,8 +319,8 @@ exports.updateUser = (req, res, next) => {
 
     this.checkUserData(fields.name, fields.email, fields.role, res);
 
-    UserModel
-      .find()
+    User
+      .findAll()
       .then((users) => {
         this.checkUsersForUnique(req.params.id, users, fields, res);
 
@@ -329,27 +331,27 @@ exports.updateUser = (req, res, next) => {
           this.checkUserPass(fields.pass, res);
 
           bcrypt
-          .hash(fields.pass, 10)
-          .then((hash) => { 
-            let user = this.getUserWithPass(fields.name, fields.email, image, hash, fields.role, fields.updated);
+            .hash(fields.pass, 10)
+            .then((hash) => {
+              let user = this.getUserWithPass(fields.name, fields.email, image, hash, fields.role, fields.updated);
 
-            UserModel
-              .findByIdAndUpdate(req.params.id, { ...user, _id: req.params.id })
-              .then(() => {
-                if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => {});
-                res.status(200).json({ message: process.env.USER_UPDATED });
-              })
-              .catch(() => res.status(400).json({ message: process.env.USER_NOT_UPDATED }));
-          })
-          .catch(() => res.status(400).json({ message: process.env.USER_NOT_PASS }));
-      
-        } else { 
+              User
+                .update(user, { where: { id: req.params.id }})
+                .then(() => {
+                  if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
+                  res.status(200).json({ message: process.env.USER_UPDATED });
+                })
+                .catch(() => res.status(400).json({ message: process.env.USER_NOT_UPDATED }));
+            })
+            .catch(() => res.status(400).json({ message: process.env.USER_NOT_PASS }));
+
+        } else {
           let user = this.getUserNoPass(fields.name, fields.email, image, fields.role, fields.updated);
 
-          UserModel
-            .findByIdAndUpdate(req.params.id, { ...user, _id: req.params.id })
+          User
+            .update(user, { where: { id: req.params.id }})
             .then(() => {
-              if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => {});
+              if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
               res.status(200).json({ message: process.env.USER_UPDATED });
             })
             .catch(() => res.status(400).json({ message: process.env.USER_NOT_UPDATED }));
@@ -365,30 +367,19 @@ exports.updateUser = (req, res, next) => {
  *
  * @param {Object} req - The request object containing the user id in the params.
  * @param {Object} res - The response object to send the result.
- * @return {Object} The response object with a status and JSON message indicating success or failure.
+ * @return {Object} The response object with a status & JSON message indicating success or failure.
+ * @throws {Error} If the user is not deleted from the database.
  */
 exports.deleteUser = (req, res) => {
-  UserModel
-    .findById(req.params.id)
+  User
+    .findByPk(req.params.id)
     .then(user => {
       fs.unlink(USERS_THUMB + user.image, () => {
 
-        CommentModel
-          .deleteMany({ user: req.params.id })
-          .then(() =>
-
-            ReviewModel
-              .deleteMany({ user: req.params.id })
-              .then(() => 
-
-                UserModel
-                  .findByIdAndDelete(req.params.id)
-                  .then(() => res.status(204).json({ message: process.env.USER_DELETED }))
-                  .catch(() => res.status(400).json({ message: process.env.USER_NOT_DELETED }))
-              )
-              .catch(() => res.status(400).json({ message: process.env.REVIEWS_NOT_DELETED }))
-          )
-          .catch(() => res.status(400).json({ message: process.env.COMMENTS_NOT_DELETED }))
+        User
+          .destroy({ where: { id: req.params.id }})
+          .then(() => res.status(204).json({ message: process.env.USER_DELETED }))
+          .catch(() => res.status(400).json({ message: process.env.USER_NOT_DELETED }))
       })
     })
     .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
