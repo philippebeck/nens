@@ -1,0 +1,390 @@
+swagger: "2.0"
+info:
+  title: SEN API documentation
+  description: Contains all available API endpoints in this codebase
+  version: "1.0.0"
+  termsOfService: "http://swagger.io/terms/"
+host: localhost:3000
+basePath: /
+schemes:
+  - https
+paths:
+  /articles:
+    # ! GET /articles => List Articles
+    get:
+      tags:
+        - Article Module
+      summary: List Articles
+      description: API to List all Articles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List all Articles Successully
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ArticleRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # ! POST /articles => Create Article
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Article Module
+      summary: Create Article
+      description: API to Create an Article
+      parameters:
+        - in: body
+          name: body
+          description: createArticle() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ArticleReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Created a User Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  /articles/{id}:
+    # ! GET /articles/{id} => Read Article
+    get:
+      tags:
+        - Article Module
+      summary: Read Article
+      description: API to Read an Article
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Read the Article Successully
+          schema:
+            $ref: "#/definitions/ArticleRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # ! PUT /articles/{id} => Update Article
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Article Module
+      summary: Update Article
+      description: API to Update an Article
+      parameters:
+        - in: body
+          name: body
+          description: updateArticle() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ArticleReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Update the Article Successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # ! DELETE /articles/{id} => Delete Article
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Article Module
+      summary: Delete Article
+      description: API to Delete an Article
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Delete the Article successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  /users:
+    # ! GET /users => List Users
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: List Users
+      description: API to List all Users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List all Users Successully
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # ! POST /users => Create User
+    post:
+      tags:
+        - User Module
+      summary: Create User
+      description: API to Create a User
+      parameters:
+        - in: body
+          name: body
+          description: createUser() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/UserReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Created a User Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  /users/{id}:
+    # ! GET /users/{id} => Read User
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: Read User
+      description: API to Read a User
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Read the User Successully
+          schema:
+            $ref: "#/definitions/UserRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # ! PUT /users/{id} => Update User
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: Update User
+      description: API to Update a User
+      parameters:
+        - in: body
+          name: body
+          description: updateUser() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/UserReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Update the User Successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # ! DELETE /users/{id} => Delete User
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - User Module
+      summary: Delete User
+      description: API to Delete a User
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Delete the User successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  # ! POST /users/message => Send Message
+  /users/message:
+    post:
+      tags:
+        - User Module
+      summary: Send Message
+      description: API to Send a Message
+      parameters:
+        - in: body
+          name: body
+          description: sendMessage() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/MessageReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Sending Message Successfully
+          schema:
+            $ref: "#/definitions/MessageRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+# ! TOKEN
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+definitions:
+  # ! REQUESTS
+  ArticleReq:
+    properties:
+      name:
+        type: string
+        description: article name
+      text:
+        type: string
+        description: article content
+      image:
+        type: string
+        description: article image
+      alt:
+        type: string
+        description: alternative text of article image
+      cat:
+        type: string
+        description: article category
+  MessageReq:
+    properties:
+      email:
+        type: string
+        description: user email
+      subject:
+        type: string
+        description: message subject
+      text:
+        type: string
+        description: message content
+  UserReq:
+    properties:
+      name:
+        type: string
+        description: user name
+      email:
+        type: string
+        description: user email
+      image:
+        type: string
+        description: user image
+      password:
+        type: string
+        description: user password
+  # ! RESPONSES
+  ArticleRes:
+    type: object
+    properties:
+      id:
+        type: number
+        description: article id
+      name:
+        type: string
+        description: article name
+      text:
+        type: string
+        description: article content
+      image:
+        type: string
+        description: article image
+      alt:
+        type: string
+        description: alternative text of article image
+      cat:
+        type: string
+        description: article category
+      created:
+        type: string
+        format: date
+        description: article creation
+      upated:
+        type: string
+        format: date
+        description: article update
+  AuthRes:
+    type: object
+    properties:
+      userId:
+        type: string
+        description: user id
+      userToken:
+        type: string
+        description: user token
+  BasicRes:
+    properties:
+      status:
+        type: integer
+        description: status code
+      message:
+        type: string
+        description: confirm message
+  MessageRes:
+    type: object
+    properties:
+      status:
+        type: integer
+        description: status code
+      message:
+        type: string
+        description: confirm message
+  UserRes:
+    type: object
+    properties:
+      id:
+        type: number
+        description: user id
+      name:
+        type: string
+        description: user name
+      email:
+        type: string
+        description: user email
+      image:
+        type: string
+        description: user image
+      role:
+        type: string
+        description: user role
+      created:
+        type: string
+        format: date
+        description: user creation
+      upated:
+        type: string
+        format: date
+        description: user update
