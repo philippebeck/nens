@@ -1,7 +1,7 @@
 {
-  "name": "sen",
+  "name": "nens",
   "version": "0.1.0-alpha",
-  "description": "API with SQL, Express & NemJS",
+  "description": "API with Node, Express, NemJS & SQL",
   "keywords": [
     "api",
     "javascript",
@@ -15,8 +15,8 @@
   },
   "license": "Apache-2.0 License",
   "main": "server.js",
-  "repository": "github:philippebeck/sen",
-  "bugs": "https://github.com/philippebeck/sen/issues",
+  "repository": "github:philippebeck/nens",
+  "bugs": "https://github.com/philippebeck/nens/issues",
   "dependencies": {
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",

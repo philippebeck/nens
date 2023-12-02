@@ -1,26 +1,26 @@
-# Sen 
+# Nens 
 
-API with SQL, Express & NemJS
+API with Node, Express, NemJS & SQL
 
-[![NPM Version](https://badgen.net/npm/v/sen)](https://www.npmjs.com/package/sen)
-[![NPM Downloads](https://badgen.net/npm/dt/sen)](https://www.npmjs.com/package/sen)
+[![NPM Version](https://badgen.net/npm/v/nens)](https://www.npmjs.com/package/nens)
+[![NPM Downloads](https://badgen.net/npm/dt/nens)](https://www.npmjs.com/package/nens)
 
-[![GitHub Last Commit](https://badgen.net/github/last-commit/philippebeck/sen)](https://github.com/philippebeck/sen/commits/master)
+[![GitHub Last Commit](https://badgen.net/github/last-commit/philippebeck/nens)](https://github.com/philippebeck/nens/commits/master)
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/c2938393c028dc63505a/maintainability)](https://codeclimate.com/github/philippebeck/sen/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c2938393c028dc63505a/maintainability)](https://codeclimate.com/github/philippebeck/nens/maintainability)
 
-[![GitHub Top Language](https://img.shields.io/github/languages/top/philippebeck/sen)](https://github.com/philippebeck/sen)
-[![Code Size](https://img.shields.io/github/languages/code-size/philippebeck/sen)](https://github.com/philippebeck/sen/tree/master)
+[![GitHub Top Language](https://img.shields.io/github/languages/top/philippebeck/nens)](https://github.com/philippebeck/nens)
+[![Code Size](https://img.shields.io/github/languages/code-size/philippebeck/nens)](https://github.com/philippebeck/nens/tree/master)
 
 ## Overview
 
 **Warning : This is an alpha version in development, the API is not ready yet.**
 
-Sen is an API made with Node/Express & MySQL, where you can find an "homemade" package complementary, Nemjs, for JWT, Nodemailer, Sharp & back securities, as the backend services  
+Nens is an API made with Node, Express & MySQL, where you can find an "homemade" package complementary, NemJS, for JWT, Nodemailer, Sharp & back securities, as the backend services  
 
 ## Summary
 
-- [Sen](#sen)
+- [Nens](#nens)
   - [Overview](#overview)
   - [Summary](#summary)
   - [Download](#download)
@@ -35,28 +35,28 @@ Sen is an API made with Node/Express & MySQL, where you can find an "homemade" p
 
 ## Download
 
-[Use this Template](https://github.com/philippebeck/sen/generate)  
+[Use this Template](https://github.com/philippebeck/nens/generate)  
 or  
-`git clone https://github.com/philippebeck/sen.git`  
+`git clone https://github.com/philippebeck/nens.git`  
 or  
-[Latest Release](https://github.com/philippebeck/sen/releases)  
+[Latest Release](https://github.com/philippebeck/nens/releases)  
 
 ---
 
 ## Package
 
-NPM : `npm i sen`  
+NPM : `npm i nens`  
 or  
-Yarn : `yarn add sen`  
+Yarn : `yarn add nens`  
 
-**If you choose to get Sen from NPM or Yarn : you need to copy Sen from *node_modules/sen* to the root of your App**
+**If you choose to get Nens from NPM or Yarn : you need to copy Nens from *node_modules/nens* to the root of your App**
 
 ---
 
 ## Installation
 
 Install the backend dependencies :  
-`$ cd sen`  
+`$ cd nens`  
 `$ npm i`  
 
 ---
@@ -91,7 +91,7 @@ Available API Files :
 ## Documentation
 
 Available Documentation :  
--  [**API**](https://github.com/philippebeck/sen/tree/master/swagger.yaml)..
+-  [**API**](https://github.com/philippebeck/nens/tree/master/swagger.yaml)  
 
 Available Readme :  
 -  [**NemJS**](https://github.com/philippebeck/nemjs)  
