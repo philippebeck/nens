@@ -9,8 +9,9 @@ basePath: /
 schemes:
   - https
 paths:
+  # ! ARTICLES
   /articles:
-    # ! GET /articles => List Articles
+    # GET /articles => List Articles
     get:
       tags:
         - Article Module
@@ -20,7 +21,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: List all Articles Successully
+          description: All Articles have been Successully Listed
           schema:
             type: array
             items:
@@ -29,7 +30,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
-    # ! POST /articles => Create Article
+    # POST /articles => Create Article
     post:
       security:
         - Bearer: []
@@ -48,7 +49,7 @@ paths:
         - application/json
       responses:
         "201":
-          description: Created a User Successfully
+          description: Article Created Successfully
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
@@ -56,7 +57,7 @@ paths:
         "500":
           description: Internal Server Error
   /articles/{id}:
-    # ! GET /articles/{id} => Read Article
+    # GET /articles/{id} => Read Article
     get:
       tags:
         - Article Module
@@ -66,14 +67,14 @@ paths:
       - application/json
       responses:
         "200":
-          description: Read the Article Successully
+          description: Article Read Successully
           schema:
             $ref: "#/definitions/ArticleRes"
         "400":
           description: Invalid Fields
         "500":
           description: Internal Server Error
-    # ! PUT /articles/{id} => Update Article
+    # PUT /articles/{id} => Update Article
     put:
       security:
         - Bearer: []
@@ -92,14 +93,14 @@ paths:
         - application/json
       responses:
         "200":
-          description: Update the Article Successully
+          description: Article Updated Successully
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
           description: Invalid Fields
         "500":
           description: Internal Server Error
-    # ! DELETE /articles/{id} => Delete Article
+    # DELETE /articles/{id} => Delete Article
     delete:
       security:
         - Bearer: []
@@ -111,15 +112,222 @@ paths:
       - application/json
       responses:
         "204":
-          description: Delete the Article successully
+          description: Article Successully Deleted
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
           description: Invalid Fields
         "500":
           description: Internal Server Error
+
+  # ! AUTH
+  /auth:
+    # GET /auth/{id} => Read Avatar
+    get:
+      tags:
+        - Auth Module
+      summary: Read Avatar
+      description: API to Read an Avatar
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Avatar Read Successully
+          schema:
+            $ref: "#/definitions/AvatarRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # POST /auth => Login User
+    post:
+      tags:
+        - Auth Module
+      summary: Login User
+      description: API to Login the User
+      parameters:
+        - in: body
+          name: body
+          description: loginUser() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/AuthReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: User Logged In Successfully
+          schema:
+            $ref: "#/definitions/AuthRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  # POST /auth/pass => Forgot Pass
+  /auth/pass:
+    post:
+      tags:
+        - Auth Module
+      summary: Forgot Pass
+      description: API to Send a new Password
+      parameters:
+        - in: body
+          name: body
+          description: forgotPass() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/PassReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: New Password Sended Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  # POST /auth/recaptcha => Check Recaptcha
+  /auth/recaptcha:
+    post:
+      tags:
+        - Auth Module
+      summary: Check Recaptcha
+      description: API to Check the Recaptcha
+      parameters:
+        - in: body
+          name: body
+          description: checkRecaptcha() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/AuthReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Recaptcha Checked Successfully
+          schema:
+            $ref: "#/definitions/AuthRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+  # ! GALLERIES
+  /galleries:
+    # GET /galleries => List Galleries
+    get:
+      tags:
+        - Gallery Module
+      summary: List Galleries
+      description: API to List all Galleries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All Galleries have been Successully Listed
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ArticleRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # POST /galleries => Create Article
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Gallery Module
+      summary: Create Gallery
+      description: API to Create a Gallery
+      parameters:
+        - in: body
+          name: body
+          description: createGallery() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ArticleReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Gallery Created Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  /galleries/{id}:
+    # GET /galleries/{id} => Read Article
+    get:
+      tags:
+        - Gallery Module
+      summary: Read Gallery
+      description: API to Read a Gallery
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gallery Read Successully
+          schema:
+            $ref: "#/definitions/ArticleRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # PUT /galleries/{id} => Update Article
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Gallery Module
+      summary: Update Gallery
+      description: API to Update a Gallery
+      parameters:
+        - in: body
+          name: body
+          description: updateGallery() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ArticleReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Gallery Updated Successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # DELETE /galleries/{id} => Delete Article
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Gallery Module
+      summary: Delete Gallery
+      description: API to Delete a Gallery
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Gallery successully Deleted
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+  # ! USERS
   /users:
-    # ! GET /users => List Users
+    # GET /users => List Users
     get:
       security:
         - Bearer: []
@@ -131,7 +339,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: List all Users Successully
+          description: All Users have been Successully Listed
           schema:
             type: array
             items:
@@ -140,7 +348,7 @@ paths:
           description: Invalid Fields
         "500":
           description: Internal Server Error
-    # ! POST /users => Create User
+    # POST /users => Create User
     post:
       tags:
         - User Module
@@ -157,7 +365,7 @@ paths:
         - application/json
       responses:
         "201":
-          description: Created a User Successfully
+          description: User Created Successfully
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
@@ -165,7 +373,7 @@ paths:
         "500":
           description: Internal Server Error
   /users/{id}:
-    # ! GET /users/{id} => Read User
+    # GET /users/{id} => Read User
     get:
       security:
         - Bearer: []
@@ -177,14 +385,14 @@ paths:
       - application/json
       responses:
         "200":
-          description: Read the User Successully
+          description: User Read Successully
           schema:
             $ref: "#/definitions/UserRes"
         "400":
           description: Invalid Fields
         "500":
           description: Internal Server Error
-    # ! PUT /users/{id} => Update User
+    # PUT /users/{id} => Update User
     put:
       security:
         - Bearer: []
@@ -203,14 +411,14 @@ paths:
         - application/json
       responses:
         "200":
-          description: Update the User Successully
+          description: User Updated Successully
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
           description: Invalid Fields
         "500":
           description: Internal Server Error
-    # ! DELETE /users/{id} => Delete User
+    # DELETE /users/{id} => Delete User
     delete:
       security:
         - Bearer: []
@@ -222,20 +430,20 @@ paths:
       - application/json
       responses:
         "204":
-          description: Delete the User successully
+          description: User Successully Deleted
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
           description: Invalid Fields
         "500":
           description: Internal Server Error
-  # ! POST /users/message => Send Message
+  # POST /users/message => Send Message
   /users/message:
     post:
       tags:
         - User Module
       summary: Send Message
-      description: API to Send a Message
+      description: API to Send a User Message
       parameters:
         - in: body
           name: body
@@ -247,7 +455,7 @@ paths:
         - application/json
       responses:
         "200":
-          description: Sending Message Successfully
+          description: Message Sent Successfully
           schema:
             $ref: "#/definitions/MessageRes"
         "400":
@@ -281,6 +489,14 @@ definitions:
       cat:
         type: string
         description: article category
+  AuthReq:
+    properties:
+      email:
+        type: string
+        description: user email
+      pass:
+        type: string
+        description: user password
   MessageReq:
     properties:
       email:
@@ -292,6 +508,11 @@ definitions:
       text:
         type: string
         description: message content
+  PassReq:
+    properties:
+      email:
+        type: string
+        description: user email
   UserReq:
     properties:
       name:
@@ -306,6 +527,7 @@ definitions:
       password:
         type: string
         description: user password
+
   # ! RESPONSES
   ArticleRes:
     type: object
@@ -345,6 +567,18 @@ definitions:
       userToken:
         type: string
         description: user token
+  AvatarRes:
+    type: object
+    properties:
+      name:
+        type: string
+        description: user name
+      image:
+        type: string
+        description: user image
+      role:
+        type: string
+        description: user role
   BasicRes:
     properties:
       status:
