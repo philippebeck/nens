@@ -230,7 +230,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/ArticleRes"
+              $ref: "#/definitions/GalleryRes"
         "400":
           description: Invalid Fields
         "500":
@@ -249,7 +249,7 @@ paths:
           description: createGallery() Payload
           required: true
           schema:
-            $ref: "#/definitions/ArticleReq"
+            $ref: "#/definitions/GalleryReq"
       produces:
         - application/json
       responses:
@@ -274,7 +274,7 @@ paths:
         "200":
           description: Gallery Read Successully
           schema:
-            $ref: "#/definitions/ArticleRes"
+            $ref: "#/definitions/GalleryRes"
         "400":
           description: Invalid Fields
         "500":
@@ -293,7 +293,7 @@ paths:
           description: updateGallery() Payload
           required: true
           schema:
-            $ref: "#/definitions/ArticleReq"
+            $ref: "#/definitions/GalleryReq"
       produces:
         - application/json
       responses:
@@ -318,6 +318,211 @@ paths:
       responses:
         "204":
           description: Gallery successully Deleted
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+  # ! IMAGES
+  /images:
+    # GET /images => List Images
+    get:
+      tags:
+        - Image Module
+      summary: List Images
+      description: API to List all Images
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All Images have been Successully Listed
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ImageRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # POST /images => Create Image
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Image Module
+      summary: Create Image
+      description: API to Create an Image
+      parameters:
+        - in: body
+          name: body
+          description: createImage() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ImageReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Image Created Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  /images/{id}:
+    # GET /images/{id} => Read Image
+    get:
+      tags:
+        - Image Module
+      summary: Read Image
+      description: API to Read an Image
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gallery Read Successully
+          schema:
+            $ref: "#/definitions/ImageRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # PUT /images/{id} => Update Image
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Image Module
+      summary: Update Image
+      description: API to Update an Image
+      parameters:
+        - in: body
+          name: body
+          description: updateImage() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ImageReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Image Updated Successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # DELETE /images/{id} => Delete Image
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Image Module
+      summary: Delete Image
+      description: API to Delete an Image
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Image successully Deleted
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+
+  # ! LINKS
+  /links:
+    # GET /links => List Links
+    get:
+      tags:
+        - Link Module
+      summary: List Links
+      description: API to List all Links
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All Links have been Successully Listed
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/LinkRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # POST /links => Create Link
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Link Module
+      summary: Create Link
+      description: API to Create a Link
+      parameters:
+        - in: body
+          name: body
+          description: createLink() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/LinkReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Link Created Successfully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+  /links/{id}:
+    # PUT /links/{id} => Update Link
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Link Module
+      summary: Update Link
+      description: API to Update a Link
+      parameters:
+        - in: body
+          name: body
+          description: updateLink() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/LinkReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Link Updated Successully
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Invalid Fields
+        "500":
+          description: Internal Server Error
+    # DELETE /links/{id} => Delete Link
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Link Module
+      summary: Delete Link
+      description: API to Delete a Link
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Link successully Deleted
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
@@ -497,6 +702,33 @@ definitions:
       pass:
         type: string
         description: user password
+  GalleryReq:
+    properties:
+      name:
+        type: string
+        description: gallery name
+      author:
+        type: string
+        description: gallery author
+  ImageReq:
+    properties:
+      name:
+        type: string
+        description: image name
+      description:
+        type: string
+        description: image description
+  LinkReq:
+    properties:
+      name:
+        type: string
+        description: link name
+      url:
+        type: string
+        description: link url
+      cat:
+        type: string
+        description: link category
   MessageReq:
     properties:
       email:
@@ -587,6 +819,39 @@ definitions:
       message:
         type: string
         description: confirm message
+  GalleryRes:
+    properties:
+      name:
+        type: string
+        description: gallery name
+      author:
+        type: string
+        description: gallery author
+      cover:
+        type: string
+        description: gallery cover image
+  ImageRes:
+    properties:
+      name:
+        type: string
+        description: image name
+      description:
+        type: string
+        description: image description
+      gallery_id:
+        type: number
+        description: gallery id
+  LinkRes:
+    properties:
+      name:
+        type: string
+        description: link name
+      url:
+        type: string
+        description: link url
+      cat:
+        type: string
+        description: link category
   MessageRes:
     type: object
     properties:
