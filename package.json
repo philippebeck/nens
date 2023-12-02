@@ -1,5 +1,6 @@
 {
   "name": "sen",
+  "version": "0.1.0-alpha",
   "description": "API with SQL, Express & NemJS",
   "keywords": [
     "api",
