@@ -101,23 +101,7 @@ exports.listGalleryImages = (req, res) => {
 exports.listImages = (req, res) => {
   Image
     .findAll()
-    .then((images) => { 
-
-      Gallery
-        .findAll()
-        .then((galleries) => {
-          for (let image of images) {
-            for (let gallery of galleries) {
-
-              if (image.gallery_id === gallery.id.toNumber()) {
-                image.gallery_id = image.gallery_id + "-" + gallery.name;
-              }
-            }
-          }
-          res.status(200).json(images);
-        })
-        .catch(() => res.status(404).json({ message: process.env.GALLERIES_NOT_FOUND }));
-    })
+    .then((images) => { res.status(200).json(images) })
     .catch(() => res.status(404).json({ message: process.env.IMAGES_NOT_FOUND }));
 };
 

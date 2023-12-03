@@ -1,6 +1,6 @@
 {
   "name": "nens",
-  "version": "0.1.0-alpha",
+  "version": "0.1.1-alpha",
   "description": "API with Node, Express, NemJS & SQL",
   "keywords": [
     "api",
@@ -26,7 +26,7 @@
     "google-recaptcha": "^1.1.0",
     "helmet": "^5.0.2",
     "mysql2": "^3.6.5",
-    "nemjs": "^1.6.2",
+    "nemjs": "^2.0.0",
     "sequelize": "^6.35.1"
   },
   "author": {
