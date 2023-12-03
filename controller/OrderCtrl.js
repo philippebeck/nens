@@ -89,17 +89,7 @@ exports.setMessage = (total, payment_id, products) => {
 exports.listOrders = (req, res) => {
   Order
     .findAll()
-    .then((orders) => {
-
-      User
-        .findAll()
-        .then((users) => {
-
-          orders = nem.getArrayWithUsername(orders, users);
-          res.status(200).json(orders);
-        })
-      .catch(() => res.status(404).json({ message: process.env.USERS_NOT_FOUND }));
-    })
+    .then((orders) => { res.status(200).json(orders) })
     .catch(() => res.status(404).json({ message: process.env.ORDERS_NOT_FOUND }));
 };
 
