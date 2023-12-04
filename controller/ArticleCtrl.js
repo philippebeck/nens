@@ -73,7 +73,7 @@ exports.checkArticleUnique = (name, text, article, res) => {
  */
 exports.checkArticlesForUnique = (id, articles, fields, res) => {
   for (let article of articles) {
-    if (!article.id.equals(id)) {
+    if (article.id !== id) {
       this.checkArticleUnique(fields.name, fields.text, article, res)
     }
   }

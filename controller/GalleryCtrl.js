@@ -65,7 +65,7 @@ exports.checkGalleryUnique = (name, gallery, res) => {
  */
 exports.checkGalleriesForUnique = (id, galleries, name, res) => {
   for (let gallery of galleries) {
-    if (!gallery.id.equals(id)) { 
+    if (gallery.id !== id) { 
       this.checkGalleryUnique(name, gallery, res) 
     }
   }

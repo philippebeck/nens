@@ -85,7 +85,7 @@ exports.checkUserUnique = (name, email, user, res) => {
  */
 exports.checkUsersForUnique = (id, users, fields, res) => {
   for (let user of users) {
-    if (!user.id.equals(id)) {
+    if (user.id !== id) {
       this.checkUserUnique(fields.name, fields.email, user, res)
     }
   }

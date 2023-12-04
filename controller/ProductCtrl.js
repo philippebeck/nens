@@ -77,7 +77,7 @@ exports.checkProductUnique = (name, description, product, res) => {
  */
 exports.checkProductsForUnique = (id, products, fields, res) => {
   for (let product of products) {
-    if (!product.id.equals(id)) {
+    if (product.id !== id) {
       this.checkProductUnique(fields.name, fields.description, product, res)
     }
   }

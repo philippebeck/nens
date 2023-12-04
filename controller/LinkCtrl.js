@@ -65,7 +65,7 @@ exports.checkLinkUnique = (name, url, link, res) => {
  */
 exports.checkLinksForUnique = (id, links, fields, res) => {
   for (let link of links) {
-    if (!link.id.equals(id)) {
+    if (link.id !== id) {
       this.checkLinkUnique(fields.name, fields.url, link, res);
     }
   }
