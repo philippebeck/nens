@@ -99,8 +99,16 @@ exports.listGalleryImages = (req, res) => {
  * @throws {Error} If the images are not found in the database.
  */
 exports.listImages = (req, res) => {
+  Image.belongsTo(Gallery, { foreignKey: 'gallery_id' });
+  
   Image
-    .findAll()
+    .findAll({
+      attributes: ['id', 'name', 'description'],
+      include: {
+        model: Gallery,
+        attributes: ['name'],
+      }
+    })
     .then((images) => { res.status(200).json(images) })
     .catch(() => res.status(404).json({ message: process.env.IMAGES_NOT_FOUND }));
 };
