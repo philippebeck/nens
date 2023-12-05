@@ -1,6 +1,6 @@
 "use strict";
 
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require("sequelize");
 
 /**
  * ? ARTICLE MODEL
@@ -11,7 +11,7 @@ const { Sequelize, DataTypes } = require('sequelize');
  * @return {ArticleModel} the Article Model
  */
 module.exports = (Sequelize, DataTypes) => {
-  const ArticleModel = Sequelize.define('Articles', {
+  const ArticleModel = Sequelize.define("Articles", {
 
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
@@ -26,7 +26,7 @@ module.exports = (Sequelize, DataTypes) => {
     },
 
     text: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
       unique: true
     },
@@ -63,6 +63,7 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: false
     }
   }, {
+    tableName: "Articles",
     timestamps: false
   });
 

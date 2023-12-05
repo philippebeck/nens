@@ -1,6 +1,6 @@
 "use strict";
 
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require("sequelize");
 
 /**
  * ? GALLERY MODEL
@@ -11,7 +11,7 @@ const { Sequelize, DataTypes } = require('sequelize');
  * @return {GalleryModel} the Gallery Model
  */
 module.exports = (Sequelize, DataTypes) => {
-  const GalleryModel = Sequelize.define('Galleries', {
+  const GalleryModel = Sequelize.define("Galleries", {
 
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
@@ -36,6 +36,7 @@ module.exports = (Sequelize, DataTypes) => {
       unique: true
     }
   }, {
+    tableName: "Galleries",
     timestamps: false
   });
 

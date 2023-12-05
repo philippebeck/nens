@@ -100,7 +100,7 @@ exports.listGalleries = (req, res) => {
  */
 exports.readGallery = (req, res) => {
   Gallery
-  .findByPk(req.params.id)
+  .findByPk(parseInt(req.params.id))
   .then((gallery) => { res.status(200).json(gallery) })
   .catch(() => res.status(404).json({ message: process.env.GALLERY_NOT_FOUND }));
 }
@@ -157,6 +157,8 @@ exports.createGallery = (req, res, next) => {
  * @throws {Error} If the gallery is not updated.
  */
 exports.updateGallery = (req, res, next) => {
+  const id = parseInt(req.params.id);
+
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
@@ -165,7 +167,7 @@ exports.updateGallery = (req, res, next) => {
     Gallery
       .findAll()
       .then((galleries) => {
-        this.checkGalleriesForUnique(req.params.id, galleries, fields.name, res);
+        this.checkGalleriesForUnique(id, galleries, fields.name, res);
 
         let gallery = {
           name: fields.name,
@@ -173,7 +175,7 @@ exports.updateGallery = (req, res, next) => {
         };
 
         Gallery
-          .update(gallery, { where: { id: req.params.id }})
+          .update(gallery, { where: { id: id }})
           .then(() => res.status(200).json({ message: process.env.GALLERY_UPDATED }))
           .catch(() => res.status(400).json({ message: process.env.GALLERY_NOT_UPDATED }));
       })
@@ -191,8 +193,10 @@ exports.updateGallery = (req, res, next) => {
  * @throws {Error} If the gallery is not deleted.
  */
 exports.deleteGallery = (req, res) => {
+  const id = parseInt(req.params.id);
+
   Image
-    .findAll({ where: { gallery_id: req.params.id }})
+    .findAll({ where: { gallery_id: id }})
     .then(images => {
       for (let image of images) {
         fs.unlink(GALLERIES_THUMB + image.name, () => {
@@ -200,11 +204,11 @@ exports.deleteGallery = (req, res) => {
         });
       }
       Image
-        .destroy({ where: { gallery_id: req.params.id }})
+        .destroy({ where: { gallery_id: id }})
         .then(() =>
 
           Gallery
-            .destroy({ where: { id: req.params.id }})
+            .destroy({ where: { id: id }})
             .then(() => res.status(204).json({ message: process.env.GALLERY_DELETED }))
             .catch(() => res.status(400).json({ message: process.env.GALLERY_NOT_DELETED }))
         )

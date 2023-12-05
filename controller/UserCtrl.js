@@ -298,7 +298,7 @@ exports.listUsers = (req, res) => {
  */
 exports.readUser = (req, res) => {
   User
-    .findByPk(req.params.id)
+    .findByPk(parseInt(req.params.id))
     .then((user) => res.status(200).json(user))
     .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
 }
@@ -314,6 +314,8 @@ exports.readUser = (req, res) => {
  * @throws {Error} If the user is not updated in the database.
  */
 exports.updateUser = (req, res, next) => {
+  const id = parseInt(req.params.id);
+
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
 
@@ -322,7 +324,7 @@ exports.updateUser = (req, res, next) => {
     User
       .findAll()
       .then((users) => {
-        this.checkUsersForUnique(req.params.id, users, fields, res);
+        this.checkUsersForUnique(id, users, fields, res);
 
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         if (files.image) nem.setThumbnail("users/" + files.image.newFilename, USERS_THUMB + image);
@@ -336,7 +338,7 @@ exports.updateUser = (req, res, next) => {
               let user = this.getUserWithPass(fields.name, fields.email, image, hash, fields.role, fields.updated);
 
               User
-                .update(user, { where: { id: req.params.id }})
+                .update(user, { where: { id: id }})
                 .then(() => {
                   if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
                   res.status(200).json({ message: process.env.USER_UPDATED });
@@ -349,7 +351,7 @@ exports.updateUser = (req, res, next) => {
           let user = this.getUserNoPass(fields.name, fields.email, image, fields.role, fields.updated);
 
           User
-            .update(user, { where: { id: req.params.id }})
+            .update(user, { where: { id: id }})
             .then(() => {
               if (files.image) fs.unlink(USERS_IMG + files.image.newFilename, () => { });
               res.status(200).json({ message: process.env.USER_UPDATED });
@@ -371,13 +373,15 @@ exports.updateUser = (req, res, next) => {
  * @throws {Error} If the user is not deleted from the database.
  */
 exports.deleteUser = (req, res) => {
+  const id = parseInt(req.params.id);
+
   User
-    .findByPk(req.params.id)
+    .findByPk(id)
     .then(user => {
       fs.unlink(USERS_THUMB + user.image, () => {
 
         User
-          .destroy({ where: { id: req.params.id }})
+          .destroy({ where: { id: id }})
           .then(() => res.status(204).json({ message: process.env.USER_DELETED }))
           .catch(() => res.status(400).json({ message: process.env.USER_NOT_DELETED }))
       })

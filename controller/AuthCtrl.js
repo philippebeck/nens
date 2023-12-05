@@ -112,7 +112,7 @@ exports.setMessage = (fields, pass) => {
  */
 exports.readAvatar = (req, res) => {
   User
-    .findByPk(req.params.id)
+    .findByPk(parseInt(req.params.id))
     .then((user) => { 
       let avatar = {};
 

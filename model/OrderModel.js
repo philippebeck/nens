@@ -1,6 +1,9 @@
 "use strict";
 
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require("sequelize");
+
+const db = require("../model");
+const User = db.user;
 
 /**
  * ? ORDER MODEL
@@ -11,7 +14,7 @@ const { Sequelize, DataTypes } = require('sequelize');
  * @return {OrderModel} the Order Model
  */
 module.exports = (Sequelize, DataTypes) => {
-  const OrderModel = Sequelize.define('Orders', {
+  const OrderModel = Sequelize.define("Orders", {
 
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
@@ -42,7 +45,11 @@ module.exports = (Sequelize, DataTypes) => {
 
     user_id: {
       type: DataTypes.SMALLINT.UNSIGNED,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
     },
 
     created: {
@@ -55,7 +62,9 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: false
     }
   }, {
-    timestamps: false
+    tableName: "Orders",
+    timestamps: false,
+    underscored: true
   });
 
   return OrderModel;

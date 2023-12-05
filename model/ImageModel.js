@@ -1,6 +1,6 @@
 "use strict";
 
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require("sequelize");
 
 const db = require("../model");
 const Gallery = db.gallery;
@@ -14,7 +14,7 @@ const Gallery = db.gallery;
  * @return {ImageModel} the Image Model
  */
 module.exports = (Sequelize, DataTypes) => {
-  const ImageModel = Sequelize.define('Images', {
+  const ImageModel = Sequelize.define("Images", {
 
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
@@ -38,11 +38,13 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: Gallery,
-        key: 'id',
+        key: "id",
       }
     }
   }, {
-    timestamps: false
+    tableName: "Images",
+    timestamps: false,
+    underscored: true
   });
 
   return ImageModel;
