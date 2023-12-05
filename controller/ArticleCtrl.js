@@ -186,7 +186,7 @@ exports.listArticles = (req, res) => {
  */
 exports.readArticle = (req, res) => {
   Article
-    .findByPk(req.params.id)
+    .findByPk(parseInt(req.params.id))
     .then((article) => { res.status(200).json(article) })
     .catch(() => res.status(404).json({ message: process.env.ARTICLE_NOT_FOUND }));
 }
@@ -246,6 +246,8 @@ exports.createArticle = (req, res, next) => {
  * @throws {Error} If the article is not updated in the database.
  */
 exports.updateArticle = (req, res, next) => {
+  const id = parseInt(req.params.id);
+
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
 
@@ -254,7 +256,7 @@ exports.updateArticle = (req, res, next) => {
     Article
       .findAll()
       .then((articles) => {
-        this.checkArticlesForUnique(req.params.id, articles, fields, res);
+        this.checkArticlesForUnique(id, articles, fields, res);
 
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         if (files.image) this.setImage(image, files.image.newFilename);
@@ -263,7 +265,7 @@ exports.updateArticle = (req, res, next) => {
         let article = this.getArticleUpdated(fields.name, fields.text, image, fields.alt, likes, fields.cat, fields.updated);
 
         Article
-          .update(article, { where: { id: req.params.id }})
+          .update(article, { where: { id: id }})
           .then(() => {
             if (files.image) fs.unlink(ARTICLES_IMG + files.image.newFilename, () => { });
             res.status(200).json({ message: process.env.ARTICLE_UPDATED });
@@ -284,14 +286,16 @@ exports.updateArticle = (req, res, next) => {
  * @throws {Error} If the article is not deleted in the database.
  */
 exports.deleteArticle = (req, res) => {
+  const id = parseInt(req.params.id);
+
   Article
-    .findByPk(req.params.id)
+    .findByPk(id)
     .then(article => {
       fs.unlink(ARTICLES_THUMB + article.image, () => {
         fs.unlink(ARTICLES_IMG + article.image, () => {
 
           Article
-            .destroy({ where: { id: req.params.id }})
+            .destroy({ where: { id: id }})
             .then(() => res.status(204).json({ message: process.env.ARTICLE_DELETED }))
             .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_DELETED }))
         });

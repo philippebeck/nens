@@ -133,6 +133,8 @@ exports.createLink = (req, res, next) => {
  * @throws {Error} If the link is not updated.
  */
 exports.updateLink = (req, res, next) => {
+  const id = parseInt(req.params.id);
+
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
@@ -141,10 +143,10 @@ exports.updateLink = (req, res, next) => {
     Link
       .findAll()
       .then((links) => {
-        this.checkLinksForUnique(req.params.id, links, fields, res);
+        this.checkLinksForUnique(id, links, fields, res);
 
         Link
-          .update(fields, { where: { id: req.params.id }})
+          .update(fields, { where: { id: id }})
           .then(() => res.status(200).json({ message: process.env.LINK_UPDATED }))
           .catch(() => res.status(400).json({ message: process.env.LINK_NOT_UPDATED }));
       })
@@ -163,7 +165,7 @@ exports.updateLink = (req, res, next) => {
  */
 exports.deleteLink = (req, res) => {
   Link
-    .destroy({ where: { id: req.params.id }})
+    .destroy({ where: { id: parseInt(req.params.id) }})
     .then(() => res.status(204).json({ message: process.env.LINK_DELETED }))
     .catch(() => res.status(400).json({ message: process.env.LINK_NOT_DELETED }))
 };

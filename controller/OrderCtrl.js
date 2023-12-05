@@ -69,7 +69,7 @@ exports.setMessage = (total, payment_id, products) => {
       </ul>`;
   }
 
-  message.products  = message.products.split('undefined')[1];
+  message.products  = message.products.split("undefined")[1];
   message.html      = message.text + message.products;
 
   return message;
@@ -104,7 +104,7 @@ exports.listOrders = (req, res) => {
  */
 exports.listUserOrders = (req, res) => {
   Order
-    .findAll({ where: { user_id: req.params.id }})
+    .findAll({ where: { user_id: parseInt(req.params.id) }})
     .then((orders) => res.status(200).json(orders))
     .catch(() => res.status(404).json({ message: process.env.ORDERS_NOT_FOUND }));
 };
@@ -161,7 +161,7 @@ exports.updateOrder = (req, res, next) => {
     if (fields.products) { fields.products = JSON.parse(fields.products) }
 
     Order
-      .update(fields, { where: { id: req.params.id }})
+      .update(fields, { where: { id: parseInt(req.params.id) }})
       .then(() => res.status(200).json({ message: process.env.ORDER_UPDATED }))
       .catch(() => res.status(400).json({ message: process.env.ORDER_NOT_UPDATED }));
   })
@@ -178,7 +178,7 @@ exports.updateOrder = (req, res, next) => {
  */
 exports.deleteOrder = (req, res) => {
   Order
-    .destroy({ where: { id: req.params.id }})
+    .destroy({ where: { id: parseInt(req.params.id) }})
     .then(() => res.status(204).json({ message: process.env.ORDER_DELETED }))
     .catch(() => res.status(400).json({ message: process.env.ORDER_NOT_DELETED }))
 };

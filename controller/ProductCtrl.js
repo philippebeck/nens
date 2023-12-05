@@ -157,13 +157,12 @@ exports.listProducts = (req, res) => {
  *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
- * @param {string} req.params.id - The ID of the product.
  * @return {Object} The product in JSON format.
  * @throws {Error} If the product is not found in the database.
  */
 exports.readProduct = (req, res) => {
   Product
-    .findByPk(req.params.id)
+    .findByPk(parseInt(req.params.id))
     .then((product) => res.status(200).json(product))
     .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
 }
@@ -223,6 +222,8 @@ exports.createProduct = (req, res, next) => {
  * @throws {Error} If the product is not updated.
  */
 exports.updateProduct = (req, res, next) => {
+  const id = parseInt(req.params.id);
+
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
 
@@ -231,7 +232,7 @@ exports.updateProduct = (req, res, next) => {
     Product
       .findAll()
       .then((products) => {
-        this.checkProductsForUnique(req.params.id, products, fields, res);
+        this.checkProductsForUnique(id, products, fields, res);
 
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         if (files.image) this.setImage(image, files.image.newFilename);
@@ -240,7 +241,7 @@ exports.updateProduct = (req, res, next) => {
         let product = this.getProduct(fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat);
 
         Product
-          .update(product, { where: { id: req.params.id }})
+          .update(product, { where: { id: id }})
           .then(() => {
             if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => { });
             res.status(200).json({ message: process.env.PRODUCT_UPDATED });
@@ -261,14 +262,16 @@ exports.updateProduct = (req, res, next) => {
  * @throws {Error} If the product is not found in the database.
  */
 exports.deleteProduct = (req, res) => {
+  const id = parseInt(req.params.id);
+
   Product
-    .findByPk(req.params.id)
+    .findByPk(id)
     .then(product => {
       fs.unlink(PRODUCTS_THUMB + product.image, () => {
         fs.unlink(PRODUCTS_IMG + product.image, () => {
 
           Product
-            .destroy({ where: { id: req.params.id }})
+            .destroy({ where: { id: id }})
             .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
             .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_DELETED }))
         })

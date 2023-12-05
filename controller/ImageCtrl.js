@@ -99,14 +99,14 @@ exports.listGalleryImages = (req, res) => {
  * @throws {Error} If the images are not found in the database.
  */
 exports.listImages = (req, res) => {
-  Image.belongsTo(Gallery, { foreignKey: 'gallery_id' });
+  Image.belongsTo(Gallery, { foreignKey: "gallery_id" });
 
   Image
     .findAll({
-      attributes: ['id', 'name', 'description'],
+      attributes: ["id", "name", "description"],
       include: {
         model: Gallery,
-        attributes: ['name'],
+        attributes: ["name"],
       }
     })
     .then((images) => { res.status(200).json(images) })
@@ -179,7 +179,7 @@ exports.updateImage = (req, res, next) => {
     let image = this.getImage(name, fields.description, fields.gallery_id);
 
     Image
-      .update(image, { where: { id: req.params.id }})
+      .update(image, { where: { id: parseInt(req.params.id) }})
       .then(() => {
         if (files.image) fs.unlink(GALLERIES_IMG + files.image.newFilename, () => {});
         res.status(200).json({ message: process.env.IMAGE_UPDATED });
@@ -198,14 +198,16 @@ exports.updateImage = (req, res, next) => {
  * @throws {Error} If the image is not deleted in the database.
  */
 exports.deleteImage = (req, res) => {
+  const id = parseInt(req.params.id);
+
   Image
-    .findByPk(req.params.id)
+    .findByPk(id)
     .then((image) => {
       fs.unlink(GALLERIES_THUMB + image.name, () => {
         fs.unlink(GALLERIES_IMG + image.name, () => {
 
           Image
-            .destroy({ where: { id: req.params.id }})
+            .destroy({ where: { id: id }})
             .then(() => res.status(204).json({ message: process.env.IMAGE_DELETED }))
             .catch(() => res.status(400).json({ message: process.env.IMAGE_NOT_DELETED }));
         })
