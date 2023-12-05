@@ -14,7 +14,7 @@ module.exports = (Sequelize, DataTypes) => {
   const OrderModel = Sequelize.define('Orders', {
 
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
@@ -30,18 +30,18 @@ module.exports = (Sequelize, DataTypes) => {
     },
 
     payment_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
       unique: true
     },
 
     status: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(10),
       allowNull: false
     },
 
     user_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false
     },
 

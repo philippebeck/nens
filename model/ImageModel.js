@@ -2,6 +2,9 @@
 
 const { Sequelize, DataTypes } = require('sequelize');
 
+const db = require("../model");
+const Gallery = db.gallery;
+
 /**
  * ? IMAGE MODEL
  * * Define the Image Model
@@ -14,25 +17,29 @@ module.exports = (Sequelize, DataTypes) => {
   const ImageModel = Sequelize.define('Images', {
 
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
 
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
 
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(200),
       allowNull: false
     },
 
     gallery_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false
+      type: DataTypes.SMALLINT.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: Gallery,
+        key: 'id',
+      }
     }
   }, {
     timestamps: false

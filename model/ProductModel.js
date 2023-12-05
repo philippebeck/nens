@@ -14,13 +14,13 @@ module.exports = (Sequelize, DataTypes) => {
   const ProductModel = Sequelize.define('Products', {
 
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
 
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
@@ -32,13 +32,13 @@ module.exports = (Sequelize, DataTypes) => {
     },
 
     image: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
 
     alt: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
@@ -54,7 +54,7 @@ module.exports = (Sequelize, DataTypes) => {
     },
 
     cat: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
       allowNull: false
     }
   }, {
