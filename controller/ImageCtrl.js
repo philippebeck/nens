@@ -75,7 +75,7 @@ exports.getImage = (name, description, gallery_id) => {
  *
  * @param {Object} req - The request object.
  * @param {Object} req.params - The parameters object containing the gallery ID.
- * @param {string} req.params.id - The ID of the gallery to retrieve images for.
+ * @param {number} req.params.id - The ID of the gallery to retrieve images for.
  * @param {Object} res - The response object.
  * @return {Promise} A promise that resolves to a response containing the list of gallery images.
  * @throws {Error} If the images are not found in the database.
@@ -100,7 +100,7 @@ exports.listGalleryImages = (req, res) => {
  */
 exports.listImages = (req, res) => {
   Image.belongsTo(Gallery, { foreignKey: 'gallery_id' });
-  
+
   Image
     .findAll({
       attributes: ['id', 'name', 'description'],
