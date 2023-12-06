@@ -2,9 +2,6 @@
 
 const { Sequelize, DataTypes } = require("sequelize");
 
-const db = require("../model");
-const User = db.user;
-
 /**
  * ? ORDER MODEL
  * * Define the Order Model
@@ -47,7 +44,7 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false,
       references: {
-        model: User,
+        model: "User",
         key: "id",
       },
     },
