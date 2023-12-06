@@ -168,7 +168,10 @@ exports.listProducts = (req, res) => {
 exports.readProduct = (req, res) => {
   Product
     .findByPk(parseInt(req.params.id))
-    .then((product) => res.status(200).json(product))
+    .then((product) => { 
+      product.options = JSON.parse(product.options).join(",");
+      res.status(200).json(product);
+    })
     .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
 }
 
