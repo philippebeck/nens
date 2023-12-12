@@ -103,7 +103,7 @@ exports.listImages = (req, res) => {
 
   Image
     .findAll({
-      attributes: ["id", "name", "description"],
+      attributes: ["id", "name", "description", "gallery_id"],
       include: {
         model: Gallery,
         attributes: ["name"],

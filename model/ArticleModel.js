@@ -44,27 +44,16 @@ module.exports = (Sequelize, DataTypes) => {
     },
 
     likes: {
-      type: DataTypes.JSON,
-      allowNull: false
+      type: DataTypes.TEXT,
+      defaultValue: "[]"
     },
 
     cat: {
       type: DataTypes.STRING(20),
       allowNull: false
     },
-
-    created: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-
-    updated: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
   }, {
-    tableName: "Articles",
-    timestamps: false
+    tableName: "Articles"
   });
 
   return ArticleModel;

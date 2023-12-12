@@ -89,23 +89,17 @@ exports.checkArticlesForUnique = (id, articles, fields, res) => {
  * @param {string} text - The text of the article.
  * @param {string} image - The image of the article.
  * @param {string} alt - The alt text for the image.
- * @param {number} likes - The number of likes the article has.
  * @param {string} cat - The category of the article.
- * @param {Date} created - The date and time the article was created.
- * @param {Date} updated - The date and time the article was last updated.
  * @return {object} An object containing the details of the article.
  */
-exports.getArticleCreated = (name, text, image, alt, likes, cat, created, updated) => {
+exports.getArticleCreated = (name, text, image, alt, cat) => {
 
   return {
     name: name,
     text: text,
     image: image,
     alt: alt,
-    likes: likes,
-    cat: cat,
-    created: created,
-    updated: updated
+    cat: cat
   }
 }
 
@@ -117,12 +111,11 @@ exports.getArticleCreated = (name, text, image, alt, likes, cat, created, update
  * @param {string} text - The text content of the article.
  * @param {string} image - The URL of the article image.
  * @param {string} alt - The alternative text for the article image.
- * @param {number} likes - The number of likes that the article has.
+ * @param {string} likes - The list of user Ids as article likes.
  * @param {string} cat - The category that the article belongs to.
- * @param {Date} updated - The updated date of the article.
  * @return {object} - An object containing the updated article information.
  */
-exports.getArticleUpdated = (name, text, image, alt, likes, cat, updated) => {
+exports.getArticleUpdated = (name, text, image, alt, likes, cat) => {
 
   return {
     name: name,
@@ -130,8 +123,7 @@ exports.getArticleUpdated = (name, text, image, alt, likes, cat, updated) => {
     image: image,
     alt: alt,
     likes: likes,
-    cat: cat,
-    updated: updated
+    cat: cat
   }
 }
 
@@ -212,14 +204,15 @@ exports.createArticle = (req, res, next) => {
     Article
       .findAll()
       .then((articles) => {
-        for (let article of articles) { this.checkArticleUnique(fields.name, fields.text, article, res) }
+        for (let article of articles) {
+          this.checkArticleUnique(fields.name, fields.text, article, res)
+        }
 
-        let likes = nem.getArrayFromString(fields.likes);
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         this.setImage(image, files.image.newFilename);
 
         let article = this.getArticleCreated(
-          fields.name, fields.text, image, fields.alt, likes, fields.cat, fields.created, fields.updated
+          fields.name, fields.text, image, fields.alt, fields.cat
         );
 
         Article
@@ -261,8 +254,7 @@ exports.updateArticle = (req, res, next) => {
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         if (files.image) this.setImage(image, files.image.newFilename);
 
-        let likes   = nem.getArrayFromString(fields.likes);
-        let article = this.getArticleUpdated(fields.name, fields.text, image, fields.alt, likes, fields.cat, fields.updated);
+        let article = this.getArticleUpdated(fields.name, fields.text, image, fields.alt, fields.likes, fields.cat);
 
         Article
           .update(article, { where: { id: id }})
