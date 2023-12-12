@@ -5,15 +5,15 @@ USE sen;
 
 CREATE TABLE Articles
 (
-  id      SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
-  name    VARCHAR(100)  NOT NULL  UNIQUE,
-  text    TEXT          NOT NULL  UNIQUE,
-  image   VARCHAR(100)  NOT NULL  UNIQUE,
-  alt     VARCHAR(100)  NOT NULL  UNIQUE,
-  likes   JSON          NOT NULL,
-  cat     VARCHAR(20)   NOT NULL,
-  created DATETIME      NOT NULL,
-  updated DATETIME      NOT NULL
+  id        SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
+  name      VARCHAR(100)  NOT NULL  UNIQUE,
+  text      TEXT          NOT NULL  UNIQUE,
+  image     VARCHAR(100)  NOT NULL  UNIQUE,
+  alt       VARCHAR(100)  NOT NULL  UNIQUE,
+  likes     TEXT          NOT NULL,
+  cat       VARCHAR(20)   NOT NULL,
+  createdAt DATETIME      NOT NULL,
+  updatedAt DATETIME      NOT NULL
 )
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
