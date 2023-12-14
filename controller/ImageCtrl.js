@@ -70,32 +70,12 @@ exports.getImage = (name, description, gallery_id) => {
 //! ******************** PUBLIC ********************
 
 /**
- * ? LIST GALLERY IMAGES
+ * ? LIST IMAGES
  * * Retrieves a list of gallery images based on the provided gallery ID.
  *
  * @param {Object} req - The request object.
- * @param {Object} req.params - The parameters object containing the gallery ID.
- * @param {number} req.params.id - The ID of the gallery to retrieve images for.
  * @param {Object} res - The response object.
  * @return {Promise} A promise that resolves to a response containing the list of gallery images.
- * @throws {Error} If the images are not found in the database.
- */
-exports.listGalleryImages = (req, res) => {
-  Image
-    .findAll({ where: { gallery_id: req.params.id }})
-    .then((images) => { res.status(200).json(images) })
-    .catch(() => res.status(404).json({ message: process.env.IMAGES_NOT_FOUND }));
-};
-
-//! ******************** PRIVATE ********************
-
-/**
- * ? LIST IMAGES
- * * Retrieves a list of images & modifies the gallery ID of each image by appending the gallery name.
- *
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @return {Promise} A promise that resolves to a response containing the list of images.
  * @throws {Error} If the images are not found in the database.
  */
 exports.listImages = (req, res) => {
@@ -103,6 +83,7 @@ exports.listImages = (req, res) => {
 
   Image
     .findAll({
+      where: { gallery_id: req.params.id },
       attributes: ["id", "name", "description", "gallery_id"],
       include: {
         model: Gallery,
@@ -112,6 +93,8 @@ exports.listImages = (req, res) => {
     .then((images) => { res.status(200).json(images) })
     .catch(() => res.status(404).json({ message: process.env.IMAGES_NOT_FOUND }));
 };
+
+//! ******************** PRIVATE ********************
 
 /**
  * ? CREATE IMAGE
