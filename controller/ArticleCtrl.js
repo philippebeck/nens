@@ -13,7 +13,7 @@ const ARTICLES_THUMB  = process.env.THUMB_URL + "articles/";
 const Article = db.article;
 const form    = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
 
-//! ******************** CHECKERS ********************
+//! ******************** UTILS ********************
 
 /**
  * ? CHECK ARTICLE DATA
@@ -61,73 +61,6 @@ exports.checkArticleUnique = (name, text, article, res) => {
     return res.status(403).json({ message: process.env.DISPO_TEXT });
   }
 }
-
-/**
- * ? CHECK ARTICLES FOR UNIQUE
- * * Checks the articles for uniqueness based on the given id.
- *
- * @param {string} id - The id to compare against.
- * @param {Array} articles - The array of articles to check.
- * @param {Object} fields - The object containing the fields to check against.
- * @param {Object} res - The response object.
- */
-exports.checkArticlesForUnique = (id, articles, fields, res) => {
-  for (let article of articles) {
-    if (article.id !== id) {
-      this.checkArticleUnique(fields.name, fields.text, article, res)
-    }
-  }
-}
-
-//! ******************** GETTERS ********************
-
-/**
- * ? GET ARTICLE CREATED
- * * Returns an object containing the details of an article.
- *
- * @param {string} name - The name of the article.
- * @param {string} text - The text of the article.
- * @param {string} image - The image of the article.
- * @param {string} alt - The alt text for the image.
- * @param {string} cat - The category of the article.
- * @return {object} An object containing the details of the article.
- */
-exports.getArticleCreated = (name, text, image, alt, cat) => {
-
-  return {
-    name: name,
-    text: text,
-    image: image,
-    alt: alt,
-    cat: cat
-  }
-}
-
-/**
- * ? GET ARTICLE UPDATED
- * * Returns an object containing updated article information.
- *
- * @param {string} name - The name of the article.
- * @param {string} text - The text content of the article.
- * @param {string} image - The URL of the article image.
- * @param {string} alt - The alternative text for the article image.
- * @param {string} likes - The list of user Ids as article likes.
- * @param {string} cat - The category that the article belongs to.
- * @return {object} - An object containing the updated article information.
- */
-exports.getArticleUpdated = (name, text, image, alt, likes, cat) => {
-
-  return {
-    name: name,
-    text: text,
-    image: image,
-    alt: alt,
-    likes: likes,
-    cat: cat
-  }
-}
-
-//! ******************** SETTER ********************
 
 /**
  * ? SET IMAGE
@@ -185,6 +118,8 @@ exports.readArticle = (req, res) => {
 
 //! ******************** PRIVATE ********************
 
+// TODO : create a method to like an article
+
 /**
  * ? CREATE ARTICLE
  * * Creates an article based on the request data.
@@ -211,9 +146,13 @@ exports.createArticle = (req, res, next) => {
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         this.setImage(image, files.image.newFilename);
 
-        let article = this.getArticleCreated(
-          fields.name, fields.text, image, fields.alt, fields.cat
-        );
+        let article = {
+          name: fields.name,
+          text: fields.text,
+          image: image,
+          alt: fields.alt,
+          cat: fields.cat
+        }
 
         Article
           .create(article)
@@ -249,12 +188,21 @@ exports.updateArticle = (req, res, next) => {
     Article
       .findAll()
       .then((articles) => {
-        this.checkArticlesForUnique(id, articles, fields, res);
+        for (let article of articles) {
+          if (article.id !== id) this.checkArticleUnique(fields.name, fields.text, article, res);
+        }
 
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         if (files.image) this.setImage(image, files.image.newFilename);
 
-        let article = this.getArticleUpdated(fields.name, fields.text, image, fields.alt, fields.likes, fields.cat);
+        let article = {
+          name: fields.name,
+          text: fields.text,
+          image: image,
+          alt: fields.alt,
+          likes: fields.likes,
+          cat: fields.cat
+        }
 
         Article
           .update(article, { where: { id: id }})
