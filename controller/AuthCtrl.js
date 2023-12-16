@@ -100,12 +100,10 @@ exports.forgotPass = (req, res, next) => {
 
     if (!nem.checkEmail(fields.email)) return res.status(403).json({ message: process.env.CHECK_EMAIL });
 
-
     User
       .findOne({ where: { email: fields.email }})
       .then((user) => {
         if (user !== null) {
-
           let pass    = nem.getPassword();
           fields.html = `<p>${fields.html}</p><b>${pass}</b>`;
 
@@ -124,11 +122,9 @@ exports.forgotPass = (req, res, next) => {
                 .update(newUser, { where: { id: user.id }})
                 .then(() => { 
                   const mailer = nem.getMailer();
-
                   (async function(){
                     try {
                       let mail = nem.getMessage(fields);
-
                       await mailer.sendMail(mail, function() {
                         res.status(202).json({ message: process.env.AUTH_MESSAGE });
                       });
