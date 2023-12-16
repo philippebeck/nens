@@ -1213,7 +1213,7 @@ definitions:
       description:
         type: string
         description: image description
-      gallery_id:
+      galleryId:
         type: number
         description: gallery id
 

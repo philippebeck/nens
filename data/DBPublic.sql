@@ -287,7 +287,7 @@ INSERT INTO Links (name, url, cat) VALUES
 ('How to become a 10x dev','dev.to/idboussadel/how-to-become-a-10x-dev-ake','JS'),
 ('Sequelize with Vue & Node', 'www.bezkoder.com/vue-js-node-js-express-mysql-crud-example', 'JS');
 
-INSERT INTO Images (name, description, gallery_id) VALUES
+INSERT INTO Images (name, description, galleryId) VALUES
 ('964-kitab-suwar-al-kawakib-01.webp','Ursa Minor',1),
 ('964-kitab-suwar-al-kawakib-02.webp','Ursa Major',1),
 ('964-kitab-suwar-al-kawakib-03.webp','Draco',1),

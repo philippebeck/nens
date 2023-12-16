@@ -23,11 +23,11 @@ CREATE TABLE Galleries(
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Images(
-  id          SMALLINT      UNSIGNED    PRIMARY KEY   AUTO_INCREMENT,
+  id          SMALLINT      UNSIGNED    PRIMARY KEY  AUTO_INCREMENT,
   name        VARCHAR(100)  NOT NULL    UNIQUE,
   description VARCHAR(200)  NOT NULL,
-  gallery_id  SMALLINT      UNSIGNED    NOT NULL,
-  CONSTRAINT  fk_gallery_id FOREIGN KEY (gallery_id)  REFERENCES Galleries(id))
+  galleryId   SMALLINT      UNSIGNED    NOT NULL,
+  CONSTRAINT  fk_galleryId  FOREIGN KEY (galleryId)  REFERENCES Galleries(id))
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Links(

@@ -55,15 +55,15 @@ exports.setImage = (image, newFilename) => {
  *
  * @param {string} name - The name of the image.
  * @param {string} description - The description of the image.
- * @param {number} gallery_id - The ID of the gallery the image belongs to.
+ * @param {number} galleryId - The ID of the gallery the image belongs to.
  * @return {object} - An object containing the name, description & gallery ID of the image.
  */
-exports.getImage = (name, description, gallery_id) => {
+exports.getImage = (name, description, galleryId) => {
 
   return {
     name: name,
     description: description,
-    gallery_id: gallery_id
+    galleryId: galleryId
   }
 }
 
@@ -79,12 +79,12 @@ exports.getImage = (name, description, gallery_id) => {
  * @throws {Error} If the images are not found in the database.
  */
 exports.listImages = (req, res) => {
-  Image.belongsTo(Gallery, { foreignKey: "gallery_id" });
+  Image.belongsTo(Gallery, { foreignKey: "galleryId" });
 
   Image
     .findAll({
-      where: { gallery_id: req.params.id },
-      attributes: ["id", "name", "description", "gallery_id"],
+      where: { galleryId: req.params.id },
+      attributes: ["id", "name", "description", "galleryId"],
       include: {
         model: Gallery,
         attributes: ["name"],
@@ -113,18 +113,18 @@ exports.createImage = (req, res, next) => {
     this.checkImageData(fields.description, res);
 
     Gallery
-      .findOne({ where: { id: fields.gallery_id }})
+      .findOne({ where: { id: fields.galleryId }})
       .then((gallery) => {
 
         Image
-        .findAll({ where: { gallery_id: fields.gallery_id }})
+        .findAll({ where: { galleryId: fields.galleryId }})
         .then((images) => { 
           let index = images.length + 1;
           if (index < 10) { index = "0" + index }
 
           let name = nem.getName(gallery.name) + "-" + index + "." + process.env.IMG_EXT;
           this.setImage(name, files.image.newFilename);
-          let image = this.getImage(name, fields.description, fields.gallery_id);
+          let image = this.getImage(name, fields.description, fields.galleryId);
 
           Image
             .create(image)
@@ -159,7 +159,7 @@ exports.updateImage = (req, res, next) => {
     let name = fields.name;
 
     if (files.image) this.setImage(name, files.image.newFilename);
-    let image = this.getImage(name, fields.description, fields.gallery_id);
+    let image = this.getImage(name, fields.description, fields.galleryId);
 
     Image
       .update(image, { where: { id: parseInt(req.params.id) }})

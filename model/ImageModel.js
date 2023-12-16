@@ -26,7 +26,7 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.STRING(200),
       allowNull: false
     },
-    gallery_id: {
+    galleryId: {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false,
       references: {
