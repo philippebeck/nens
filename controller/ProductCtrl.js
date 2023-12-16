@@ -13,7 +13,7 @@ const PRODUCTS_THUMB  = process.env.THUMB_URL + "products/";
 const form    = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
 const Product = db.product;
 
-//! ******************** CHECKERS ********************
+//! ******************** UTILS ********************
 
 /**
  * ? CHECK PRODUCT DATA
@@ -57,33 +57,9 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
  * @return {object} The JSON response object with the appropriate message and status code.
  */
 exports.checkProductUnique = (name, description, product, res) => {
-  if (product.name === name) {
-    return res.status(403).json({ message: process.env.DISPO_NAME });
-  }
-
-  if (product.description === description) {
-    return res.status(403).json({ message: process.env.DISPO_DESCRIPTION });
-  }
+  if (product.name === name) return res.status(403).json({ message: process.env.DISPO_NAME });
+  if (product.description === description) return res.status(403).json({ message: process.env.DISPO_DESCRIPTION });
 }
-
-/**
- * ? CHECK PRODUCTS FOR UNIQUE
- * * Checks if a product is unique based on its ID & fields.
- *
- * @param {string} id - The ID of the product to check uniqueness against.
- * @param {Array} products - An array of products to check for uniqueness.
- * @param {Object} fields - An object containing the fields to check for uniqueness.
- * @param {Object} res - The response object to send the result to.
- */
-exports.checkProductsForUnique = (id, products, fields, res) => {
-  for (let product of products) {
-    if (product.id !== id) {
-      this.checkProductUnique(fields.name, fields.description, product, res)
-    }
-  }
-}
-
-//! ******************** GETTERS ********************
 
 /**
  * ? GET PRODUCT
@@ -99,7 +75,6 @@ exports.checkProductsForUnique = (id, products, fields, res) => {
  * @return {object} The product object with the given properties.
  */
 exports.getProduct = (name, description, image, alt, price, options, cat) => {
-
   return {
     name: name,
     description: description,
@@ -110,8 +85,6 @@ exports.getProduct = (name, description, image, alt, price, options, cat) => {
     cat: cat
   }
 }
-
-//! ******************** SETTER ********************
 
 /**
  * ? SET IMAGE
@@ -125,12 +98,7 @@ exports.setImage = (name, newFilename) => {
   let output  = "products/" + name;
 
   nem.setThumbnail(input, process.env.THUMB_URL + output);
-  nem.setThumbnail(
-    input,
-    process.env.IMG_URL + output,
-    process.env.IMG_WIDTH,
-    process.env.IMG_HEIGHT
-  );
+  nem.setThumbnail(input, process.env.IMG_URL + output, process.env.IMG_WIDTH, process.env.IMG_HEIGHT);
 }
 
 //! ******************** PUBLIC ********************
@@ -226,13 +194,14 @@ exports.updateProduct = (req, res, next) => {
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
-
     this.checkProductData(fields.name, fields.description, fields.alt, fields.price, fields.cat, res);
 
     Product
       .findAll()
       .then((products) => {
-        this.checkProductsForUnique(id, products, fields, res);
+        for (let product of products) {
+          if (product.id !== id) this.checkProductUnique(fields.name, fields.description, product, res);
+        }
 
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         if (files.image) this.setImage(image, files.image.newFilename);
@@ -243,7 +212,7 @@ exports.updateProduct = (req, res, next) => {
         Product
           .update(product, { where: { id: id }})
           .then(() => {
-            if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => { });
+            if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => {});
             res.status(200).json({ message: process.env.PRODUCT_UPDATED });
           })
           .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_UPDATED }));
@@ -269,7 +238,6 @@ exports.deleteProduct = (req, res) => {
     .then(product => {
       fs.unlink(PRODUCTS_THUMB + product.image, () => {
         fs.unlink(PRODUCTS_IMG + product.image, () => {
-
           Product
             .destroy({ where: { id: id }})
             .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
