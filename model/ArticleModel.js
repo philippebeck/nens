@@ -12,42 +12,35 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 module.exports = (Sequelize, DataTypes) => {
   const ArticleModel = Sequelize.define("Articles", {
-
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
-
     name: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     text: {
       type: DataTypes.TEXT,
       allowNull: false,
       unique: true
     },
-
     image: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     alt: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     likes: {
       type: DataTypes.TEXT,
       defaultValue: "[]"
     },
-
     cat: {
       type: DataTypes.STRING(20),
       allowNull: false

@@ -1089,13 +1089,13 @@ definitions:
       total:
         type: number
         description: order total
-      payment_id:
+      paymentId:
         type: string
         description: payment id
       status:
         type: string
         description: order status
-      user_id:
+      userId:
         type: number
         description: user id
       created:
@@ -1213,7 +1213,7 @@ definitions:
       description:
         type: string
         description: image description
-      gallery_id:
+      galleryId:
         type: number
         description: gallery id
 
@@ -1256,13 +1256,13 @@ definitions:
       total:
         type: number
         description: order total
-      payment_id:
+      paymentId:
         type: string
         description: payment id
       status:
         type: string
         description: order status
-      user_id:
+      userId:
         type: number
         description: user id
       created:

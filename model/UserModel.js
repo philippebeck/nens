@@ -12,50 +12,34 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 module.exports = (Sequelize, DataTypes) => {
   const UserModel = Sequelize.define("Users", {
-
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
-
     name: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     email: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     image: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     pass: {
       type: DataTypes.STRING(100),
       allowNull: false
     },
-
     role: {
       type: DataTypes.STRING(10),
       allowNull: false
     },
-
-    created: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-
-    updated: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
   }, {
     tableName: "Users",
     timestamps: false

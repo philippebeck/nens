@@ -12,35 +12,29 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 module.exports = (Sequelize, DataTypes) => {
   const OrderModel = Sequelize.define("Orders", {
-
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
-
     products: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: false
     },
-
     total: {
       type: DataTypes.DECIMAL,
       allowNull: false
     },
-
-    payment_id: {
+    paymentId: {
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: true
     },
-
     status: {
       type: DataTypes.STRING(10),
       allowNull: false
     },
-
-    user_id: {
+    userId: {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false,
       references: {
@@ -48,19 +42,8 @@ module.exports = (Sequelize, DataTypes) => {
         key: "id",
       },
     },
-
-    created: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-
-    updated: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
   }, {
     tableName: "Orders",
-    timestamps: false,
     underscored: true
   });
 

@@ -12,25 +12,21 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 module.exports = (Sequelize, DataTypes) => {
   const ImageModel = Sequelize.define("Images", {
-
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
-
     name: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     description: {
       type: DataTypes.STRING(200),
       allowNull: false
     },
-
-    gallery_id: {
+    galleryId: {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false,
       references: {

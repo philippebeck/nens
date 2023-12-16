@@ -196,7 +196,7 @@ exports.deleteGallery = (req, res) => {
   const id = parseInt(req.params.id);
 
   Image
-    .findAll({ where: { gallery_id: id }})
+    .findAll({ where: { galleryId: id }})
     .then(images => {
       for (let image of images) {
         fs.unlink(GALLERIES_THUMB + image.name, () => {
@@ -204,7 +204,7 @@ exports.deleteGallery = (req, res) => {
         });
       }
       Image
-        .destroy({ where: { gallery_id: id }})
+        .destroy({ where: { galleryId: id }})
         .then(() =>
 
           Gallery
