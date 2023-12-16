@@ -18,7 +18,7 @@ module.exports = (Sequelize, DataTypes) => {
       autoIncrement: true
     },
     products: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: false
     },
     total: {

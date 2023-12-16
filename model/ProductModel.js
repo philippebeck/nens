@@ -42,8 +42,8 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: false
     },
     options: {
-      type: DataTypes.JSON,
-      allowNull: false
+      type: DataTypes.TEXT,
+      defaultValue: "[]"
     },
     cat: {
       type: DataTypes.STRING(20),
