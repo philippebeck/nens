@@ -12,34 +12,28 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 module.exports = (Sequelize, DataTypes) => {
   const OrderModel = Sequelize.define("Orders", {
-
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
-
     products: {
       type: DataTypes.JSON,
       allowNull: false
     },
-
     total: {
       type: DataTypes.DECIMAL,
       allowNull: false
     },
-
     payment_id: {
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: true
     },
-
     status: {
       type: DataTypes.STRING(10),
       allowNull: false
     },
-
     user_id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false,

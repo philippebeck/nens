@@ -12,24 +12,20 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 module.exports = (Sequelize, DataTypes) => {
   const GalleryModel = Sequelize.define("Galleries", {
-
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
-
     name: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     author: {
       type: DataTypes.STRING(100),
       allowNull: false
     },
-
     cover: {
       type: DataTypes.STRING(100),
       allowNull: false,

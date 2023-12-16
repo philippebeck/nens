@@ -12,25 +12,21 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 module.exports = (Sequelize, DataTypes) => {
   const LinkModel = Sequelize.define("Links", {
-
     id: {
       type: DataTypes.SMALLINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true
     },
-
     name: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     url: {
       type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
-
     cat: {
       type: DataTypes.STRING(20),
       allowNull: false
