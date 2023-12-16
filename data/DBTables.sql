@@ -60,13 +60,13 @@ CREATE TABLE Users(
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Orders(
-  id          SMALLINT     UNSIGNED     PRIMARY KEY AUTO_INCREMENT,
-  products    TEXT         NOT NULL,
-  total       DECIMAL      NOT NULL,
-  payment_id  VARCHAR(50)  NOT NULL     UNIQUE,
-  status      VARCHAR(10)  NOT NULL,
-  user_id     SMALLINT     UNSIGNED     NOT NULL,
-  createdAt   DATETIME     NOT NULL,
-  updatedAt   DATETIME     NOT NULL,
-  CONSTRAINT  fk_user_id   FOREIGN KEY  (user_id)   REFERENCES Users(id))
+  id          SMALLINT    UNSIGNED    PRIMARY KEY AUTO_INCREMENT,
+  products    TEXT        NOT NULL,
+  total       DECIMAL     NOT NULL,
+  paymentId   VARCHAR(50) NOT NULL    UNIQUE,
+  status      VARCHAR(10) NOT NULL,
+  userId      SMALLINT    UNSIGNED    NOT NULL,
+  createdAt   DATETIME    NOT NULL,
+  updatedAt   DATETIME    NOT NULL,
+  CONSTRAINT  fk_userId   FOREIGN KEY (userId)    REFERENCES Users(id))
 ENGINE=INNODB DEFAULT CHARSET=utf8;

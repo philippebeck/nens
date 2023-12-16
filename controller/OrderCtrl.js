@@ -40,11 +40,11 @@ exports.setMailer = (fields, res) => {
  * * Sets the message content for an order.
  *
  * @param {number} total - The total amount of the order.
- * @param {string} payment_id - The ID of the payment.
+ * @param {string} paymentId - The ID of the payment.
  * @param {Array} products - An array of products in the order.
  * @return {Object} message - The message object containing the subject, text, and html properties.
  */
-exports.setMessage = (total, payment_id, products) => {
+exports.setMessage = (total, paymentId, products) => {
   let message = {};
   message.subject = process.env.ORDER_SUBJECT;
 
@@ -54,7 +54,7 @@ exports.setMessage = (total, payment_id, products) => {
       ${process.env.ORDER_TOTAL} 
       <b>${total} ${process.env.CURRENCY_SYMBOL}</b>,
       ${process.env.ORDER_PAYMENT} 
-      <b>#${payment_id}</b> !
+      <b>#${paymentId}</b> !
     </p>
     <p>${process.env.ORDER_LIST}</p>`;
 
@@ -104,7 +104,7 @@ exports.listOrders = (req, res) => {
  */
 exports.listUserOrders = (req, res) => {
   Order
-    .findAll({ where: { user_id: parseInt(req.params.id) }})
+    .findAll({ where: { userId: parseInt(req.params.id) }})
     .then((orders) => res.status(200).json(orders))
     .catch(() => res.status(404).json({ message: process.env.ORDERS_NOT_FOUND }));
 };
@@ -123,13 +123,13 @@ exports.createOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
-    let message = this.setMessage(fields.total, fields.payment_id, fields.products);
+    let message = this.setMessage(fields.total, fields.paymentId, fields.products);
 
     Order
       .create(fields)
       .then(() => {
         User
-          .findByPk(fields.user_id)
+          .findByPk(fields.userId)
           .then((user) => {
             message.email = user.email;
             this.setMailer(message, res);

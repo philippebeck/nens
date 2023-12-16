@@ -25,7 +25,7 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.DECIMAL,
       allowNull: false
     },
-    payment_id: {
+    paymentId: {
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: true
@@ -34,7 +34,7 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.STRING(10),
       allowNull: false
     },
-    user_id: {
+    userId: {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false,
       references: {
