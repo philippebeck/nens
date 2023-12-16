@@ -73,8 +73,7 @@ exports.loginUser = (req, res, next) => {
     if (err) { next(err); return }
     const { email, pass } = fields;
 
-    User
-      .findOne({ where: { email: email }})
+    User.findOne({ where: { email: email }})
       .then((user) => { nem.setAuth(pass, user, res) })
       .catch(() => res.status(401).json({ message: AUTH_LOGIN }));
   })
@@ -104,8 +103,7 @@ exports.forgotPass = (req, res, next) => {
     const mailer  = nem.getMailer();
     const mail    = nem.getMessage(fields);
 
-    User
-      .findOne({ where: { email: email }})
+    User.findOne({ where: { email: email }})
       .then((user) => {
         if (user !== null) {
           bcrypt
@@ -113,8 +111,7 @@ exports.forgotPass = (req, res, next) => {
             .then((hash) => {
               const newUser = { ...user, pass: hash };
 
-              User
-                .update(newUser, { where: { id: user.id }})
+              User.update(newUser, { where: { id: user.id }})
                 .then(() => { 
                   (async function(){
                     try {
