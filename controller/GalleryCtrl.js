@@ -14,7 +14,7 @@ const form    = formidable();
 const Gallery = db.gallery;
 const Image   = db.image;
 
-//! ******************** CHECKERS ********************
+//! ******************** UTILS ********************
 
 /**
  * ? CHECK GALLERY DATA
@@ -29,13 +29,8 @@ exports.checkGalleryData = (name, author, res) => {
   const MAX = process.env.STRING_MAX;
   const MIN = process.env.STRING_MIN;
 
-  if (!nem.checkRange(author, MIN, MAX)) {
-    return res.status(403).json({ message: process.env.CHECK_NAME });
-  }
-
-  if (!nem.checkRange(name, MIN, MAX)) { 
-    return res.status(403).json({ message: process.env.CHECK_NAME });
-  }
+  if (!nem.checkRange(author, MIN, MAX)) return res.status(403).json({ message: process.env.CHECK_NAME });
+  if (!nem.checkRange(name, MIN, MAX)) return res.status(403).json({ message: process.env.CHECK_NAME });
 }
 
 /**
@@ -49,26 +44,7 @@ exports.checkGalleryData = (name, author, res) => {
  * @throws {Error} If the name is not unique.
  */
 exports.checkGalleryUnique = (name, gallery, res) => {
-  if (gallery.name === name) {
-    return res.status(403).json({ message: process.env.DISPO_NAME });
-  }
-}
-
-/**
- * ? CHECK GALLERIES FOR UNIQUE
- * * Checks if the given name is unique in the array of galleries.
- * 
- * @param {type} id - The ID to compare with the galleries' IDs.
- * @param {type} galleries - The array of galleries to check.
- * @param {type} name - The name parameter to pass to the "checkGalleryUnique" function.
- * @param {type} res - The res parameter to pass to the "checkGalleryUnique" function.
- */
-exports.checkGalleriesForUnique = (id, galleries, name, res) => {
-  for (let gallery of galleries) {
-    if (gallery.id !== id) { 
-      this.checkGalleryUnique(name, gallery, res) 
-    }
-  }
+  if (gallery.name === name) return res.status(403).json({ message: process.env.DISPO_NAME });
 }
 
 //! ******************** PUBLIC ********************
@@ -167,7 +143,9 @@ exports.updateGallery = (req, res, next) => {
     Gallery
       .findAll()
       .then((galleries) => {
-        this.checkGalleriesForUnique(id, galleries, fields.name, res);
+        for (let gallery of galleries) {
+          if (gallery.id !== id) this.checkGalleryUnique(fields.name, gallery, res);
+        }
 
         let gallery = {
           name: fields.name,
