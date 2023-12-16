@@ -9,7 +9,7 @@ require("dotenv").config();
 const form = formidable();
 const Link = db.link;
 
-//! ******************** CHECKERS ********************
+//! ******************** UTILS ********************
 
 /**
  * ? CHECK LINK DATA
@@ -24,13 +24,11 @@ const Link = db.link;
 exports.checkLinkData = (name, url, cat, res) => {
   const MAX = process.env.STRING_MAX;
   const MIN = process.env.STRING_MIN;
-
   let alert = "";
 
   if (!nem.checkRange(cat, MIN, MAX)) alert = process.env.CHECK_CAT;
   if (!nem.checkUrl("https://" + url)) alert = process.env.CHECK_URL;
   if (!nem.checkRange(name, MIN, MAX)) alert = process.env.CHECK_NAME;
-
   if (alert !== "") return res.status(403).json({ message: alert });
 }
 
@@ -45,30 +43,8 @@ exports.checkLinkData = (name, url, cat, res) => {
  * @return {object} - The response object with the appropriate status & message.
  */
 exports.checkLinkUnique = (name, url, link, res) => {
-  if (link.name === name) {
-    return res.status(403).json({ message: process.env.DISPO_NAME });
-  }
-
-  if (link.url === url) {
-    return res.status(403).json({ message: process.env.DISPO_URL });
-  }
-}
-
-/**
- * ? CHECK LINKS FOR UNIQUE
- * * Checks the links for uniqueness based on the given ID.
- *
- * @param {string} id - The ID to compare against the links.
- * @param {Array} links - An array of links to check.
- * @param {Object} fields - An object containing the fields to check against the links.
- * @param {Object} res - The response object to handle the result.
- */
-exports.checkLinksForUnique = (id, links, fields, res) => {
-  for (let link of links) {
-    if (link.id !== id) {
-      this.checkLinkUnique(fields.name, fields.url, link, res);
-    }
-  }
+  if (link.name === name) return res.status(403).json({ message: process.env.DISPO_NAME });
+  if (link.url === url) return res.status(403).json({ message: process.env.DISPO_URL });
 }
 
 //! ******************** PUBLIC ********************
@@ -104,15 +80,12 @@ exports.listLinks = (req, res) => {
 exports.createLink = (req, res, next) => {
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
-
     this.checkLinkData(fields.name, fields.url, fields.cat, res);
 
     Link
       .findAll()
       .then((links) => {
-        for (let link of links) {
-          this.checkLinkUnique(fields.name, fields.url, link, res);
-        }
+        for (let link of links) this.checkLinkUnique(fields.name, fields.url, link, res);
         Link
           .create(fields)
           .then(() => res.status(201).json({ message: process.env.LINK_CREATED }))
@@ -134,17 +107,16 @@ exports.createLink = (req, res, next) => {
  */
 exports.updateLink = (req, res, next) => {
   const id = parseInt(req.params.id);
-
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
-
     this.checkLinkData(fields.name, fields.url, fields.cat, res);
 
     Link
       .findAll()
       .then((links) => {
-        this.checkLinksForUnique(id, links, fields, res);
-
+        for (let link of links) {
+          if (link.id !== id) this.checkLinkUnique(fields.name, fields.url, link, res);
+        }
         Link
           .update(fields, { where: { id: id }})
           .then(() => res.status(200).json({ message: process.env.LINK_UPDATED }))
