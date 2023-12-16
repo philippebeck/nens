@@ -14,7 +14,7 @@ const USERS_THUMB = process.env.THUMB_URL + "users/";
 const form = formidable({ uploadDir: USERS_IMG, keepExtensions: true });
 const User = db.user;
 
-//! ******************** CHECKERS ********************
+//! ******************** UTILS ********************
 
 /**
  * ? CHECK USER DATA
@@ -48,9 +48,7 @@ exports.checkUserData = (name, email, role, res) => {
  * @return {object} - The response object with an error message if the password is invalid.
  */
 exports.checkUserPass = (pass, res) => {
-  if (!nem.checkPass(pass)) {
-    return res.status(403).json({ message: process.env.CHECK_PASS })
-  }
+  if (!nem.checkPass(pass)) return res.status(403).json({ message: process.env.CHECK_PASS });
 }
 
 /**
@@ -64,129 +62,8 @@ exports.checkUserPass = (pass, res) => {
  * @return {object} The JSON response containing the error message if the name or email is not unique.
  */
 exports.checkUserUnique = (name, email, user, res) => {
-  if (user.name === name) {
-    return res.status(403).json({ message: process.env.DISPO_NAME });
-  }
-
-  if (user.email === email) {
-    return res.status(403).json({ message: process.env.DISPO_EMAIL });
-  }
-}
-
-/**
- * ? CHECK USERS FOR UNIQUE
- * * Checks if users in the given array have unique fields except for the user with the given id,
- * * & calls the checkUserUnique function for each non-matching user.
- *
- * @param {string} id - The id of the user to exclude from the uniqueness check.
- * @param {Array} users - The array of user objects to check.
- * @param {Object} fields - The fields object containing the name & email fields to check for uniqueness.
- * @param {Object} res - The response object to send the result of the uniqueness check.
- */
-exports.checkUsersForUnique = (id, users, fields, res) => {
-  for (let user of users) {
-    if (user.id !== id) {
-      this.checkUserUnique(fields.name, fields.email, user, res)
-    }
-  }
-}
-
-//! ******************** GETTERS ********************
-
-/**
- * ? GET USER CREATED
- * * Returns an object with the user's information.
- *
- * @param {string} name - The name of the user.
- * @param {string} email - The email of the user.
- * @param {string} image - The image of the user.
- * @param {string} pass - The password of the user.
- * @param {string} role - The role of the user.
- * @param {string} created - The creation date of the user.
- * @param {string} updated - The update date of the user.
- * @return {Object} - An object containing the user's information.
- */
-exports.getUserCreated = (name, email, image, pass, role, created, updated) => {
-
-  return {
-    name: name,
-    email: email,
-    image: image,
-    pass: pass,
-    role: role,
-    created: created,
-    updated: updated
-  }
-}
-
-/**
- * ? GET USER WITH PASSWORD
- * * Returns a user object with the password field.
- *
- * @param {string} name - The name of the user.
- * @param {string} email - The email address of the user.
- * @param {string} image - The image URL of the user.
- * @param {string} pass - The password of the user.
- * @param {string} role - The role of the user.
- * @param {string} updated - The date of the last update.
- * @return {object} - The user object with the provided properties.
- */
-exports.getUserWithPass = (name, email, image, pass, role, updated) => {
-
-  return {
-    name: name,
-    email: email,
-    image: image,
-    pass: pass,
-    role: role,
-    updated: updated
-  }
-}
-
-/**
- * ? GET USER NO PASSWORD
- * * Returns a user object without the password field.
- *
- * @param {string} name - The name of the user.
- * @param {string} email - The email address of the user.
- * @param {string} image - The URL of the user's profile image.
- * @param {string} role - The role of the user.
- * @param {string} updated - The date when the user was last updated.
- * @return {Object} - The user object without the password field.
- */
-exports.getUserNoPass = (name, email, image, role, updated) => {
-
-  return {
-    name: name,
-    email: email,
-    image: image,
-    role: role,
-    updated: updated
-  }
-}
-
-//! ******************** SETTERS ********************
-
-/**
- * ? SET MESSAGE
- * * Sets the message using the provided fields & sends it via email.
- *
- * @param {object} fields - The fields containing the necessary information to construct the message.
- * @param {object} res - The response object used to send the HTTP response.
- * @return {undefined} This function does not return anything.
- */
-exports.setMessage = (fields, res) => {
-  const mailer = nem.getMailer();
-
-  (async function () {
-    try {
-      let mail = nem.getMessage(fields);
-
-      await mailer.sendMail(mail, function () {
-        res.status(202).json({ message: process.env.USER_MESSAGE });
-      });
-    } catch (e) { console.error(e); }
-  })();
+  if (user.name === name) return res.status(403).json({ message: process.env.DISPO_NAME });
+  if (user.email === email) return res.status(403).json({ message: process.env.DISPO_EMAIL });
 }
 
 //! ******************** PUBLIC ********************
@@ -219,7 +96,13 @@ exports.createUser = (req, res, next) => {
         bcrypt
           .hash(fields.pass, 10)
           .then((hash) => {
-            let user = this.getUserCreated(fields.name, fields.email, image, hash, fields.role, fields.created, fields.updated);
+            let user = {
+              name: fields.name,
+              email: fields.email,
+              image: image,
+              pass: hash,
+              role: fields.role
+            }
 
             User
               .create(user)
@@ -247,8 +130,18 @@ exports.sendMessage = (req, res, next) => {
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
-    fields.html = `<p>${fields.html}</p>`;
-    this.setMessage(fields, res);
+    const mailer  = nem.getMailer();
+    fields.html   = `<p>${fields.html}</p>`;
+
+    (async function () {
+      try {
+        let mail = nem.getMessage(fields);
+
+        await mailer.sendMail(mail, function () {
+          res.status(202).json({ message: process.env.USER_MESSAGE });
+        });
+      } catch (e) { console.error(e); }
+    })();
   })
 }
 
@@ -324,7 +217,9 @@ exports.updateUser = (req, res, next) => {
     User
       .findAll()
       .then((users) => {
-        this.checkUsersForUnique(id, users, fields, res);
+        for (let user of users) {
+          if (user.id !== id) this.checkUserUnique(fields.name, fields.email, user, res);
+        }
 
         let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
         if (files.image) nem.setThumbnail("users/" + files.image.newFilename, USERS_THUMB + image);
@@ -335,7 +230,13 @@ exports.updateUser = (req, res, next) => {
           bcrypt
             .hash(fields.pass, 10)
             .then((hash) => {
-              let user = this.getUserWithPass(fields.name, fields.email, image, hash, fields.role, fields.updated);
+              let user = {
+                name: fields.name,
+                email: fields.email,
+                image: image,
+                pass: hash,
+                role: fields.role
+              }
 
               User
                 .update(user, { where: { id: id }})
@@ -348,7 +249,12 @@ exports.updateUser = (req, res, next) => {
             .catch(() => res.status(400).json({ message: process.env.USER_NOT_PASS }));
 
         } else {
-          let user = this.getUserNoPass(fields.name, fields.email, image, fields.role, fields.updated);
+          let user = {
+            name: fields.name,
+            email: fields.email,
+            image: image,
+            role: fields.role
+          }
 
           User
             .update(user, { where: { id: id }})
