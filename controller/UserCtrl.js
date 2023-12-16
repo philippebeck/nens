@@ -168,9 +168,7 @@ exports.listUsers = (req, res) => {
           name: user.name,
           email: user.email,
           image: user.image,
-          role: user.role,
-          created: user.created,
-          updated: user.updated,
+          role: user.role
         };
 
         usersList.push(userSafe);
