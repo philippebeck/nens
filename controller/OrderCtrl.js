@@ -123,17 +123,14 @@ exports.createOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
-    fields.products = JSON.parse(fields.products);
-    let message     = this.setMessage(fields.total, fields.payment_id, fields.products);
+    let message = this.setMessage(fields.total, fields.payment_id, fields.products);
 
     Order
       .create(fields)
       .then(() => {
-
         User
           .findByPk(fields.user_id)
           .then((user) => {
-
             message.email = user.email;
             this.setMailer(message, res);
           })
@@ -156,9 +153,7 @@ exports.createOrder = (req, res, next) => {
  */
 exports.updateOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
-
     if (err) { next(err); return }
-    if (fields.products) { fields.products = JSON.parse(fields.products) }
 
     Order
       .update(fields, { where: { id: parseInt(req.params.id) }})
