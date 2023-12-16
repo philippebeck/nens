@@ -42,19 +42,8 @@ module.exports = (Sequelize, DataTypes) => {
         key: "id",
       },
     },
-
-    created: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-
-    updated: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
   }, {
     tableName: "Orders",
-    timestamps: false,
     underscored: true
   });
 

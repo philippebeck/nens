@@ -40,16 +40,6 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.STRING(10),
       allowNull: false
     },
-
-    created: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-
-    updated: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
   }, {
     tableName: "Users",
     timestamps: false
