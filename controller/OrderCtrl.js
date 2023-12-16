@@ -10,30 +10,7 @@ const form  = formidable();
 const Order = db.order;
 const User  = db.user;
 
-//! ******************** SETTERS ********************
-
-/**
- * ? SET MAILER
- * * Sets the mailer and sends an email.
- *
- * @param {Object} fields - The fields used to generate the email message.
- * @param {Object} res - The response object used to send the HTTP response.
- * @return {Object} A message indicating that the email was sent.
- * @throws {Error} If an error occurs while sending the email.
- */
-exports.setMailer = (fields, res) => {
-  const mailer = nem.getMailer();
-
-  (async function(){
-    try {
-      let mail = nem.getMessage(fields);
-
-      await mailer.sendMail(mail, function() {
-        res.status(202).json({ message: process.env.ORDER_MESSAGE });
-      });
-    } catch(e){ console.error(e); }
-  })();
-}
+//! ******************** UTILS ********************
 
 /**
  * ? SET MESSAGE
@@ -122,7 +99,6 @@ exports.listUserOrders = (req, res) => {
 exports.createOrder = (req, res, next) => {
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
-
     let message = this.setMessage(fields.total, fields.paymentId, fields.products);
 
     Order
@@ -132,7 +108,16 @@ exports.createOrder = (req, res, next) => {
           .findByPk(fields.userId)
           .then((user) => {
             message.email = user.email;
-            this.setMailer(message, res);
+            const mailer  = nem.getMailer();
+
+            (async function(){
+              try {
+                let mail = nem.getMessage(fields);
+                await mailer.sendMail(mail, function() {
+                  res.status(202).json({ message: process.env.ORDER_MESSAGE });
+                });
+              } catch(e){ console.error(e); }
+            })();
           })
           .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
       })
