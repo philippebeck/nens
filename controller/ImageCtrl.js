@@ -14,7 +14,7 @@ const form    = formidable({ uploadDir: GALLERIES_IMG, keepExtensions: true });
 const Gallery = db.gallery;
 const Image   = db.image;
 
-//! ******************** CHECKER ********************
+//! ******************** UTILS ********************
 
 /**
  * ? CHECK IMAGE DATA
@@ -29,8 +29,6 @@ exports.checkImageData = (description, res) => {
     return res.status(403).json({ message: process.env.CHECK_NAME });
   }
 }
-
-//! ******************** SETTER ********************
 
 /**
  * ? SET IMAGE
@@ -47,8 +45,6 @@ exports.setImage = (image, newFilename) => {
   nem.setThumbnail(input, process.env.THUMB_URL + output);
 }
 
-//! ******************** GETTER ********************
-
 /**
  * ? GET IMAGE
  * * Retrieves an image with the given name, description & gallery ID.
@@ -59,7 +55,6 @@ exports.setImage = (image, newFilename) => {
  * @return {object} - An object containing the name, description & gallery ID of the image.
  */
 exports.getImage = (name, description, galleryId) => {
-
   return {
     name: name,
     description: description,
@@ -80,7 +75,6 @@ exports.getImage = (name, description, galleryId) => {
  */
 exports.listImages = (req, res) => {
   Image.belongsTo(Gallery, { foreignKey: "galleryId" });
-
   Image
     .findAll({
       where: { galleryId: req.params.id },
