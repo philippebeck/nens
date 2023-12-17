@@ -20,7 +20,7 @@ const User = db.user;
 
 /**
  * ? CHECK USER DATA
- * * Validates user data & returns a JSON response with an error message if any validation fails.
+ * * Validates user data & returns a JSON response with an error message if it fails.
  * @param {string} name - The user's name.
  * @param {string} email - The user's email.
  * @param {string} role - The user's role.
@@ -64,8 +64,9 @@ exports.checkUserPass = (pass, res) => {
 exports.checkUserUnique = (name, email, user, res) => {
   const { DISPO_EMAIL, DISPO_NAME } = process.env;
 
-  if (user.name === name) return res.status(403).json({ message: DISPO_NAME });
-  if (user.email === email) return res.status(403).json({ message: DISPO_EMAIL });
+  if (user.name === name || user.email === email) {
+    return res.status(403).json({ message: DISPO_NAME || DISPO_EMAIL })
+  }
 }
 
 //! ******************** PUBLIC ********************
@@ -96,7 +97,9 @@ exports.createUser = (req, res, next) => {
     User.findAll()
       .then((users) => {
         for (const user of users) this.checkUserUnique(name, email, user, res);
-        if (image && image.newFilename) nem.setThumbnail("users/" + image.newFilename, USERS_THUMB + IMG);
+        if (image && image.newFilename) {
+          nem.setThumbnail("users/" + image.newFilename, USERS_THUMB + IMG);
+        }
 
         bcrypt.hash(pass, 10)
           .then((hash) => {
@@ -105,7 +108,9 @@ exports.createUser = (req, res, next) => {
             User.create(user)
               .then(() => {
                 if (image && image.newFilename) {
-                  fs.unlink(USERS_IMG + image.newFilename, () => { res.status(201).json({ message: USER_CREATED })});
+                  fs.unlink(USERS_IMG + image.newFilename, () => { 
+                    res.status(201).json({ message: USER_CREATED })
+                  })
                 }
               })
               .catch(() => res.status(400).json({ message: USER_NOT_CREATED }));
@@ -135,7 +140,9 @@ exports.sendMessage = (req, res, next) => {
 
     (async function () {
       try {
-        await mailer.sendMail(mail, function () { res.status(202).json({ message: USER_MESSAGE })});
+        await mailer.sendMail(mail, function () { 
+          res.status(202).json({ message: USER_MESSAGE })
+        });
       } catch (e) { console.error(e) }
     })();
   })
@@ -211,8 +218,12 @@ exports.updateUser = (req, res, next) => {
 
     User.findAll()
       .then((users) => {
-        users.filter(user => user.id !== ID).forEach(user => this.checkUserUnique(name, email, user, res));
-        if (image && image.newFilename) nem.setThumbnail("users/" + image.newFilename, USERS_THUMB + IMG);
+        users.filter(user => user.id !== ID).forEach(user => 
+          this.checkUserUnique(name, email, user, res));
+
+        if (image && image.newFilename) {
+          nem.setThumbnail("users/" + image.newFilename, USERS_THUMB + IMG)
+        }
 
         if (pass) {
           this.checkUserPass(pass, res);
@@ -227,7 +238,9 @@ exports.updateUser = (req, res, next) => {
 
         User.update(user, { where: { id: ID }})
           .then(() => {
-            if (image && image.newFilename) fs.unlink(USERS_IMG + image.newFilename, () => {});
+            if (image && image.newFilename) {
+              fs.unlink(USERS_IMG + image.newFilename, () => {})
+            }
             res.status(200).json({ message: USER_UPDATED });
           })
           .catch(() => res.status(400).json({ message: USER_NOT_UPDATED }));
@@ -241,7 +254,7 @@ exports.updateUser = (req, res, next) => {
  * * Deletes a user, associated comments & reviews from the database.
  * @param {Object} req - The request object containing the user id in the params.
  * @param {Object} res - The response object to send the result.
- * @return {Object} The response object with a status & JSON message indicating success or failure.
+ * @return {Object} The response object with a status & JSON message.
  * @throws {Error} If the user is not deleted from the database.
  */
 exports.deleteUser = (req, res) => {

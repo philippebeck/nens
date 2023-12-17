@@ -23,14 +23,13 @@ const User      = db.user;
  * @throws {Error} If the user is not found in the database.
  */
 exports.readAvatar = (req, res) => {
-  User.findByPk(parseInt(req.params.id))
-    .then((user) => { 
-      const avatar = {
-        name: user.name,
-        image: user.image,
-        role: user.role
-      };
-      res.status(200).json(avatar) 
+  const ID = parseInt(req.params.id);
+
+  User.findByPk(ID)
+    .then((user) => {
+      const { name, image, role } = user;
+      const avatar = { name: name, image: image, role: role };
+      res.status(200).json(avatar);
     })
     .catch(() => res.status(404).json({ message: USER_NOT_FOUND }));
 }
@@ -115,7 +114,9 @@ exports.forgotPass = (req, res, next) => {
                 .then(() => { 
                   (async function(){
                     try {
-                      await mailer.sendMail(mail, function() {res.status(202).json({ message: AUTH_MESSAGE })});
+                      await mailer.sendMail(mail, function() {
+                        res.status(202).json({ message: AUTH_MESSAGE })
+                      });
                     } catch(e){ console.error(e) }
                   })();
                 })

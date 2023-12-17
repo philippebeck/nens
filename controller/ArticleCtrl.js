@@ -36,7 +36,9 @@ exports.checkArticleData = (name, text, alt, cat, res) => {
     !nem.checkRange(text, TEXT_MIN, TEXT_MAX) ||
     !nem.checkRange(name, STRING_MIN, STRING_MAX)
   ) {
-    return res.status(403).json({ message: CHECK_CAT || CHECK_NAME || CHECK_TEXT || CHECK_NAME });
+    return res.status(403).json({ 
+      message: CHECK_CAT || CHECK_NAME || CHECK_TEXT || CHECK_NAME
+    });
   }
 }
 
@@ -52,8 +54,9 @@ exports.checkArticleData = (name, text, alt, cat, res) => {
 exports.checkArticleUnique = (name, text, article, res) => {
   const { DISPO_NAME, DISPO_TEXT } = process.env;
 
-  if (article.name === name) return res.status(403).json({ message: DISPO_NAME });
-  if (article.text === text) return res.status(403).json({ message: DISPO_TEXT });
+  if (article.name === name || article.text === text) {
+    return res.status(403).json({ message: DISPO_NAME || DISPO_TEXT })
+  }
 }
 
 /**
@@ -99,7 +102,9 @@ exports.listArticles = (req, res) => {
  * @throws {Error} If the article is not found in the database.
  */
 exports.readArticle = (req, res) => {
-  Article.findByPk(parseInt(req.params.id))
+  const ID = parseInt(req.params.id);
+
+  Article.findByPk(ID)
     .then((article) => { res.status(200).json(article) })
     .catch(() => res.status(404).json({ message: ARTICLE_NOT_FOUND }));
 }
@@ -139,7 +144,9 @@ exports.createArticle = (req, res, next) => {
         Article.create(article)
           .then(() => {
             if (image && image.newFilename) {
-              fs.unlink(ARTICLES_IMG + image.newFilename, () => { res.status(201).json({ message: ARTICLE_CREATED })})
+              fs.unlink(ARTICLES_IMG + image.newFilename, () => {
+                res.status(201).json({ message: ARTICLE_CREATED })
+              })
             }
           })
           .catch(() => res.status(400).json({ message: ARTICLE_NOT_CREATED }));
@@ -174,14 +181,17 @@ exports.updateArticle = (req, res, next) => {
 
     Article.findAll()
       .then((articles) => {
-        articles.filter(article => article.id !== ID).forEach(article => this.checkArticleUnique(name, text, article, res));
+        articles.filter(article => article.id !== ID)
+          .forEach(article => this.checkArticleUnique(name, text, article, res));
 
         if (image && image.newFilename) this.setImage(IMG, image.newFilename);
         const article = { ...fields, image: IMG };
 
         Article.update(article, { where: { id: ID }})
           .then(() => {
-            if (image && image.newFilename) fs.unlink(ARTICLES_IMG + image.newFilename, () => {});
+            if (image && image.newFilename) {
+              fs.unlink(ARTICLES_IMG + image.newFilename, () => {})
+            }
             res.status(200).json({ message: ARTICLE_UPDATED });
           })
           .catch(() => res.status(400).json({ message: ARTICLE_NOT_UPDATED }));

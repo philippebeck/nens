@@ -46,8 +46,9 @@ exports.checkLinkData = (name, url, cat, res) => {
 exports.checkLinkUnique = (name, url, link, res) => {
   const { DISPO_NAME, DISPO_URL } = process.env;
 
-  if (link.name === name) return res.status(403).json({ message: DISPO_NAME });
-  if (link.url === url) return res.status(403).json({ message: DISPO_URL });
+  if (link.name === name || link.url === url) {
+    return res.status(403).json({ message: DISPO_NAME || DISPO_URL });
+  }
 }
 
 //! ******************** PUBLIC ********************
@@ -119,7 +120,8 @@ exports.updateLink = (req, res, next) => {
 
     Link.findAll()
       .then((links) => {
-        links.filter(link => link.id !== ID).forEach(link => this.checkLinkUnique(name, url, link, res));
+        links.filter(link => link.id !== ID).forEach(link => 
+          this.checkLinkUnique(name, url, link, res));
 
         Link.update(fields, { where: { id: ID }})
           .then(() => res.status(200).json({ message: LINK_UPDATED }))
