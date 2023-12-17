@@ -7,18 +7,19 @@ const nem         = require("nemjs");
 
 require("dotenv").config();
 
-const ARTICLES_IMG    = process.env.IMG_URL + "articles/";
-const ARTICLES_THUMB  = process.env.THUMB_URL + "articles/";
+const { ARTICLE_NOT_FOUND, ARTICLES_NOT_FOUND, IMG_EXT, IMG_URL, THUMB_URL } = process.env;
+
+const ARTICLES_IMG    = IMG_URL + "articles/";
+const ARTICLES_THUMB  = THUMB_URL + "articles/";
 
 const Article = db.article;
 const form    = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
 
-//! ******************** CHECKERS ********************
+//! ******************** UTILS ********************
 
 /**
  * ? CHECK ARTICLE DATA
  * * Checks the validity of article data.
- *
  * @param {string} name - The name of the article.
  * @param {string} text - The text of the article.
  * @param {string} alt - The alternative text for the article.
@@ -27,25 +28,23 @@ const form    = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
  * @return {object} The response object with an error message if the article is not correct.
  */
 exports.checkArticleData = (name, text, alt, cat, res) => {
-  const STR_MAX = process.env.STRING_MAX;
-  const STR_MIN = process.env.STRING_MIN;
-  const TXT_MAX = process.env.TEXT_MAX;
-  const TXT_MIN = process.env.TEXT_MIN;
+  const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
-  let alert = "";
-
-  if (!nem.checkRange(cat, STR_MIN, STR_MAX)) alert = process.env.CHECK_CAT;
-  if (!nem.checkRange(alt, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
-  if (!nem.checkRange(text, TXT_MIN, TXT_MAX)) alert = process.env.CHECK_TEXT;
-  if (!nem.checkRange(name, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
-
-  if (alert !== "") return res.status(403).json({ message: alert });
+  if (
+    !nem.checkRange(cat, STRING_MIN, STRING_MAX) ||
+    !nem.checkRange(alt, STRING_MIN, STRING_MAX) ||
+    !nem.checkRange(text, TEXT_MIN, TEXT_MAX) ||
+    !nem.checkRange(name, STRING_MIN, STRING_MAX)
+  ) {
+    return res.status(403).json({ 
+      message: CHECK_CAT || CHECK_NAME || CHECK_TEXT || CHECK_NAME
+    });
+  }
 }
 
 /**
  * ? CHECK ARTICLE UNIQUE
  * * Checks if an article is unique based on its name & text.
- *
  * @param {string} name - The name of the article.
  * @param {string} text - The text of the article.
  * @param {object} article - The existing article to compare with.
@@ -53,100 +52,27 @@ exports.checkArticleData = (name, text, alt, cat, res) => {
  * @return {object} The response object with an error message if the article is not unique.
  */
 exports.checkArticleUnique = (name, text, article, res) => {
-  if (article.name === name) {
-    return res.status(403).json({ message: process.env.DISPO_NAME });
-  }
+  const { DISPO_NAME, DISPO_TEXT } = process.env;
 
-  if (article.text === text) {
-    return res.status(403).json({ message: process.env.DISPO_TEXT });
+  if (article.name === name || article.text === text) {
+    return res.status(403).json({ message: DISPO_NAME || DISPO_TEXT })
   }
 }
-
-/**
- * ? CHECK ARTICLES FOR UNIQUE
- * * Checks the articles for uniqueness based on the given id.
- *
- * @param {string} id - The id to compare against.
- * @param {Array} articles - The array of articles to check.
- * @param {Object} fields - The object containing the fields to check against.
- * @param {Object} res - The response object.
- */
-exports.checkArticlesForUnique = (id, articles, fields, res) => {
-  for (let article of articles) {
-    if (article.id !== id) {
-      this.checkArticleUnique(fields.name, fields.text, article, res)
-    }
-  }
-}
-
-//! ******************** GETTERS ********************
-
-/**
- * ? GET ARTICLE CREATED
- * * Returns an object containing the details of an article.
- *
- * @param {string} name - The name of the article.
- * @param {string} text - The text of the article.
- * @param {string} image - The image of the article.
- * @param {string} alt - The alt text for the image.
- * @param {string} cat - The category of the article.
- * @return {object} An object containing the details of the article.
- */
-exports.getArticleCreated = (name, text, image, alt, cat) => {
-
-  return {
-    name: name,
-    text: text,
-    image: image,
-    alt: alt,
-    cat: cat
-  }
-}
-
-/**
- * ? GET ARTICLE UPDATED
- * * Returns an object containing updated article information.
- *
- * @param {string} name - The name of the article.
- * @param {string} text - The text content of the article.
- * @param {string} image - The URL of the article image.
- * @param {string} alt - The alternative text for the article image.
- * @param {string} likes - The list of user Ids as article likes.
- * @param {string} cat - The category that the article belongs to.
- * @return {object} - An object containing the updated article information.
- */
-exports.getArticleUpdated = (name, text, image, alt, likes, cat) => {
-
-  return {
-    name: name,
-    text: text,
-    image: image,
-    alt: alt,
-    likes: likes,
-    cat: cat
-  }
-}
-
-//! ******************** SETTER ********************
 
 /**
  * ? SET IMAGE
  * * Sets the image for an article.
- *
  * @param {string} name - The name of the article.
  * @param {string} newFilename - The new filename of the image.
  */
 exports.setImage = (name, newFilename) => {
-  let input   = "articles/" + newFilename;
-  let output  = "articles/" + name;
+  const { IMG_HEIGHT, IMG_WIDTH } = process.env;
 
-  nem.setThumbnail(input, process.env.THUMB_URL + output);
-  nem.setThumbnail(
-    input,
-    process.env.IMG_URL + output,
-    process.env.IMG_WIDTH,
-    process.env.IMG_HEIGHT
-  );
+  const INPUT   = "articles/" + newFilename;
+  const OUTPUT  = "articles/" + name;
+
+  nem.setThumbnail(INPUT, THUMB_URL + OUTPUT);
+  nem.setThumbnail(INPUT, IMG_URL + OUTPUT, IMG_WIDTH, IMG_HEIGHT);
 }
 
 //! ******************** PUBLIC ********************
@@ -161,10 +87,9 @@ exports.setImage = (name, newFilename) => {
  * @throws {Error} If the articles are not found in the database.
  */
 exports.listArticles = (req, res) => {
-  Article
-    .findAll()
+  Article.findAll()
     .then((articles) => { res.status(200).json(articles) })
-    .catch(() => res.status(404).json({ message: process.env.ARTICLES_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: ARTICLES_NOT_FOUND }));
 }
 
 /**
@@ -177,10 +102,11 @@ exports.listArticles = (req, res) => {
  * @throws {Error} If the article is not found in the database.
  */
 exports.readArticle = (req, res) => {
-  Article
-    .findByPk(parseInt(req.params.id))
+  const ID = parseInt(req.params.id);
+
+  Article.findByPk(ID)
     .then((article) => { res.status(200).json(article) })
-    .catch(() => res.status(404).json({ message: process.env.ARTICLE_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: ARTICLE_NOT_FOUND }));
 }
 
 //! ******************** PRIVATE ********************
@@ -196,35 +122,36 @@ exports.readArticle = (req, res) => {
  * @throws {Error} If the article is not created in the database.
  */
 exports.createArticle = (req, res, next) => {
+  const { ARTICLE_CREATED, ARTICLE_NOT_CREATED } = process.env;
+
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
 
-    this.checkArticleData(fields.name, fields.text, fields.alt, fields.cat, res);
+    const { name, text, alt, cat } = fields;
+    const { image } = files;
 
-    Article
-      .findAll()
+    const IMG = nem.getName(name) + "." + IMG_EXT;
+
+    this.checkArticleData(name, text, alt, cat, res);
+
+    Article.findAll()
       .then((articles) => {
-        for (let article of articles) {
-          this.checkArticleUnique(fields.name, fields.text, article, res)
-        }
+        for (const article of articles) this.checkArticleUnique(name, text, article, res);
+        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
 
-        let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
-        this.setImage(image, files.image.newFilename);
+        const article = { ...fields, image: IMG };
 
-        let article = this.getArticleCreated(
-          fields.name, fields.text, image, fields.alt, fields.cat
-        );
-
-        Article
-          .create(article)
+        Article.create(article)
           .then(() => {
-            fs.unlink(ARTICLES_IMG + files.image.newFilename, () => {
-              res.status(201).json({ message: process.env.ARTICLE_CREATED })
-            })
+            if (image && image.newFilename) {
+              fs.unlink(ARTICLES_IMG + image.newFilename, () => {
+                res.status(201).json({ message: ARTICLE_CREATED })
+              })
+            }
           })
-          .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_CREATED }));
+          .catch(() => res.status(400).json({ message: ARTICLE_NOT_CREATED }));
       })
-      .catch(() => res.status(404).json({ message: process.env.ARTICLES_NOT_FOUND }));
+      .catch(() => res.status(404).json({ message: ARTICLES_NOT_FOUND }));
   })
 }
 
@@ -239,32 +166,37 @@ exports.createArticle = (req, res, next) => {
  * @throws {Error} If the article is not updated in the database.
  */
 exports.updateArticle = (req, res, next) => {
-  const id = parseInt(req.params.id);
+  const { ARTICLE_UPDATED, ARTICLE_NOT_UPDATED } = process.env;
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
 
-    this.checkArticleData(fields.name, fields.text, fields.alt, fields.cat, res);
+    const { name, text, alt, cat } = fields;
+    const { image } = files;
 
-    Article
-      .findAll()
+    const ID  = parseInt(req.params.id);
+    const IMG = nem.getName(name) + "." + IMG_EXT;
+
+    this.checkArticleData(name, text, alt, cat, res);
+
+    Article.findAll()
       .then((articles) => {
-        this.checkArticlesForUnique(id, articles, fields, res);
+        articles.filter(article => article.id !== ID)
+          .forEach(article => this.checkArticleUnique(name, text, article, res));
 
-        let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
-        if (files.image) this.setImage(image, files.image.newFilename);
+        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
+        const article = { ...fields, image: IMG };
 
-        let article = this.getArticleUpdated(fields.name, fields.text, image, fields.alt, fields.likes, fields.cat);
-
-        Article
-          .update(article, { where: { id: id }})
+        Article.update(article, { where: { id: ID }})
           .then(() => {
-            if (files.image) fs.unlink(ARTICLES_IMG + files.image.newFilename, () => { });
-            res.status(200).json({ message: process.env.ARTICLE_UPDATED });
+            if (image && image.newFilename) {
+              fs.unlink(ARTICLES_IMG + image.newFilename, () => {})
+            }
+            res.status(200).json({ message: ARTICLE_UPDATED });
           })
-          .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_UPDATED }));
+          .catch(() => res.status(400).json({ message: ARTICLE_NOT_UPDATED }));
       })
-      .catch(() => res.status(404).json({ message: process.env.ARTICLES_NOT_FOUND }));
+      .catch(() => res.status(404).json({ message: ARTICLES_NOT_FOUND }));
   })
 }
 
@@ -278,20 +210,19 @@ exports.updateArticle = (req, res, next) => {
  * @throws {Error} If the article is not deleted in the database.
  */
 exports.deleteArticle = (req, res) => {
-  const id = parseInt(req.params.id);
+  const { ARTICLE_DELETED, ARTICLE_NOT_DELETED } = process.env;
+  const ID = parseInt(req.params.id);
 
-  Article
-    .findByPk(id)
+  Article.findByPk(ID)
     .then(article => {
       fs.unlink(ARTICLES_THUMB + article.image, () => {
         fs.unlink(ARTICLES_IMG + article.image, () => {
 
-          Article
-            .destroy({ where: { id: id }})
-            .then(() => res.status(204).json({ message: process.env.ARTICLE_DELETED }))
-            .catch(() => res.status(400).json({ message: process.env.ARTICLE_NOT_DELETED }))
-        });
+          Article.destroy({ where: { id: ID }})
+            .then(() => res.status(204).json({ message: ARTICLE_DELETED }))
+            .catch(() => res.status(400).json({ message: ARTICLE_NOT_DELETED }));
+        })
       })
     })
-    .catch(() => res.status(404).json({ message: process.env.ARTICLE_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: ARTICLE_NOT_FOUND }));
 }

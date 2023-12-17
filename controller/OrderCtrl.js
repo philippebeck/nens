@@ -6,66 +6,48 @@ const nem         = require("nemjs");
 
 require("dotenv").config();
 
+const { ORDERS_NOT_FOUND } = process.env;
+
 const form  = formidable();
 const Order = db.order;
 const User  = db.user;
 
-//! ******************** SETTERS ********************
-
-/**
- * ? SET MAILER
- * * Sets the mailer and sends an email.
- *
- * @param {Object} fields - The fields used to generate the email message.
- * @param {Object} res - The response object used to send the HTTP response.
- * @return {Object} A message indicating that the email was sent.
- * @throws {Error} If an error occurs while sending the email.
- */
-exports.setMailer = (fields, res) => {
-  const mailer = nem.getMailer();
-
-  (async function(){
-    try {
-      let mail = nem.getMessage(fields);
-
-      await mailer.sendMail(mail, function() {
-        res.status(202).json({ message: process.env.ORDER_MESSAGE });
-      });
-    } catch(e){ console.error(e); }
-  })();
-}
+//! ******************** UTILS ********************
 
 /**
  * ? SET MESSAGE
  * * Sets the message content for an order.
- *
  * @param {number} total - The total amount of the order.
  * @param {string} paymentId - The ID of the payment.
  * @param {Array} products - An array of products in the order.
- * @return {Object} message - The message object containing the subject, text, and html properties.
+ * @return {Object} message - The message object containing subject, text & html.
  */
 exports.setMessage = (total, paymentId, products) => {
+  const { CURRENCY_SYMBOL, ORDER_LIST, ORDER_NAME, ORDER_PAYMENT, ORDER_PRICE, ORDER_QUANTITY, ORDER_SUBJECT, ORDER_TITLE, ORDER_TOTAL } = process.env;
+
   let message = {};
-  message.subject = process.env.ORDER_SUBJECT;
+  message.subject = ORDER_SUBJECT;
 
   message.text = `
-    <h1>${process.env.ORDER_TITLE}</h1>
+    <h1>${ORDER_TITLE}</h1>
     <p>
-      ${process.env.ORDER_TOTAL} 
-      <b>${total} ${process.env.CURRENCY_SYMBOL}</b>,
-      ${process.env.ORDER_PAYMENT} 
+      ${ORDER_TOTAL} 
+      <b>${total} ${CURRENCY_SYMBOL}</b>,
+      ${ORDER_PAYMENT} 
       <b>#${paymentId}</b> !
     </p>
-    <p>${process.env.ORDER_LIST}</p>`;
+    <p>${ORDER_LIST}</p>`;
 
   for (let product of products) {
+    const { id, name, option, quantity, price } = product;
+
     message.products += `
       <ul>
-        <li><i>id</i> : ${product.id}</li>
-        <li><i>${process.env.ORDER_NAME}</i> : <b>${product.name}</b></li>
-        <li><i>option</i> : <b>${product.option}</b></li>
-        <li><i>${process.env.ORDER_QUANTITY}</i> : ${product.quantity}</li>
-        <li><i>${process.env.ORDER_PRICE}</i> : ${product.price} ${process.env.CURRENCY_SYMBOL}</li>
+        <li><i>id</i> : ${id}</li>
+        <li><i>${ORDER_NAME}</i> : <b>${name}</b></li>
+        <li><i>option</i> : <b>${option}</b></li>
+        <li><i>${ORDER_QUANTITY}</i> : ${quantity}</li>
+        <li><i>${ORDER_PRICE}</i> : ${price} ${CURRENCY_SYMBOL}</li>
       </ul>`;
   }
 
@@ -80,39 +62,36 @@ exports.setMessage = (total, paymentId, products) => {
 /**
  * ? LIST ORDERS
  * * Retrieves a list of orders.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of orders.
  * @throws {Error} If the orders are not found in the database.
  */
 exports.listOrders = (req, res) => {
-  Order
-    .findAll()
+  Order.findAll()
     .then((orders) => { res.status(200).json(orders) })
-    .catch(() => res.status(404).json({ message: process.env.ORDERS_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: ORDERS_NOT_FOUND }));
 };
 
 /**
  * ? LIST USER ORDERS
  * * Retrieves a list of orders for a specific user.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of user orders.
  * @throws {Error} If the orders are not found in the database.
  */
 exports.listUserOrders = (req, res) => {
-  Order
-    .findAll({ where: { userId: parseInt(req.params.id) }})
+  const ID = parseInt(req.params.id);
+
+  Order.findAll({ where: { userId: ID }})
     .then((orders) => res.status(200).json(orders))
-    .catch(() => res.status(404).json({ message: process.env.ORDERS_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: ORDERS_NOT_FOUND }));
 };
 
 /**
  * ? CREATE ORDER
  * * Creates an order based on the request data.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @param {Function} next - The next middleware function.
@@ -120,31 +99,41 @@ exports.listUserOrders = (req, res) => {
  * @throws {Error} If an error occurs while creating the order.
  */
 exports.createOrder = (req, res, next) => {
+  const { ORDER_CREATED, ORDER_MESSAGE, ORDER_NOT_CREATED, USER_NOT_FOUND } = process.env;
+
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
-    let message = this.setMessage(fields.total, fields.paymentId, fields.products);
+    const { paymentId, products, total } = fields;
+    let message = this.setMessage(total, paymentId, products);
 
-    Order
-      .create(fields)
+    Order.create(fields)
       .then(() => {
-        User
-          .findByPk(fields.userId)
+
+        User.findByPk(fields.userId)
           .then((user) => {
             message.email = user.email;
-            this.setMailer(message, res);
+            const mailer  = nem.getMailer();
+            const mail    = nem.getMessage(message);
+
+            (async function(){
+              try {
+                await mailer.sendMail(mail, function() { 
+                  res.status(202).json({ message: ORDER_MESSAGE })
+                });
+              } catch(e){ console.error(e); }
+            })();
           })
-          .catch(() => res.status(404).json({ message: process.env.USER_NOT_FOUND }));
+          .catch(() => res.status(404).json({ message: USER_NOT_FOUND }));
       })
-      .then(() => res.status(201).json({ message: process.env.ORDER_CREATED }))
-      .catch(() => res.status(400).json({ message: process.env.ORDER_NOT_CREATED }));
+      .then(() => res.status(201).json({ message: ORDER_CREATED }))
+      .catch(() => res.status(400).json({ message: ORDER_NOT_CREATED }));
   })
 };
 
 /**
  * ? UPDATE ORDER
  * * Updates an order.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @param {function} next - The next middleware function.
@@ -152,28 +141,31 @@ exports.createOrder = (req, res, next) => {
  * @throws {Error} If the order is not updated.
  */
 exports.updateOrder = (req, res, next) => {
+  const { ORDER_NOT_UPDATED, ORDER_UPDATED } = process.env;
+  const ID = parseInt(req.params.id);
+
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
-    Order
-      .update(fields, { where: { id: parseInt(req.params.id) }})
-      .then(() => res.status(200).json({ message: process.env.ORDER_UPDATED }))
-      .catch(() => res.status(400).json({ message: process.env.ORDER_NOT_UPDATED }));
+    Order.update(fields, { where: { id: ID }})
+      .then(() => res.status(200).json({ message: ORDER_UPDATED }))
+      .catch(() => res.status(400).json({ message: ORDER_NOT_UPDATED }));
   })
 };
 
 /**
  * ? DELETE ORDER
  * * Deletes an order.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} A message indicating that the order was deleted.
  * @throws {Error} If the order is not deleted.
  */
 exports.deleteOrder = (req, res) => {
-  Order
-    .destroy({ where: { id: parseInt(req.params.id) }})
-    .then(() => res.status(204).json({ message: process.env.ORDER_DELETED }))
-    .catch(() => res.status(400).json({ message: process.env.ORDER_NOT_DELETED }))
+  const { ORDER_DELETED, ORDER_NOT_DELETED } = process.env;
+  const ID = parseInt(req.params.id);
+
+  Order.destroy({ where: { id: ID }})
+    .then(() => res.status(204).json({ message: ORDER_DELETED }))
+    .catch(() => res.status(400).json({ message: ORDER_NOT_DELETED }))
 };
