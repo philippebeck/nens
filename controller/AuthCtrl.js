@@ -104,28 +104,26 @@ exports.forgotPass = (req, res, next) => {
 
     User.findOne({ where: { email: email }})
       .then((user) => {
-        if (user !== null) {
-          bcrypt
-            .hash(pass, 10)
-            .then((hash) => {
-              const newUser = { ...user, pass: hash };
+        if (!user) return res.status(403).json({ message: DISPO_EMAIL_REF });
 
-              User.update(newUser, { where: { id: user.id }})
-                .then(() => { 
-                  (async function(){
-                    try {
-                      await mailer.sendMail(mail, function() {
-                        res.status(202).json({ message: AUTH_MESSAGE })
-                      });
-                    } catch(e){ console.error(e) }
-                  })();
-                })
-                .catch(() => res.status(400).json({ message: USER_NOT_UPDATED }));
-            })
-            .catch(() => res.status(400).json({ message: USER_NOT_PASS }));
-        } else {
-          return res.status(403).json({ message: DISPO_EMAIL_REF });
-        }
+        bcrypt
+          .hash(pass, 10)
+          .then((hash) => {
+            const newUser = { ...user, pass: hash };
+
+            User.update(newUser, { where: { id: user.id }})
+              .then(() => { 
+                (async function(){
+                  try {
+                    await mailer.sendMail(mail, function() {
+                      res.status(202).json({ message: AUTH_MESSAGE })
+                    });
+                  } catch(e){ console.error(e) }
+                })();
+              })
+              .catch(() => res.status(400).json({ message: USER_NOT_UPDATED }));
+          })
+          .catch(() => res.status(400).json({ message: USER_NOT_PASS }));
       })
       .catch(() => res.status(404).json({ message: USER_NOT_FOUND }));
   })
