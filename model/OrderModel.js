@@ -26,12 +26,12 @@ module.exports = (Sequelize, DataTypes) => {
       allowNull: false
     },
     paymentId: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
     status: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       allowNull: false
     },
     userId: {

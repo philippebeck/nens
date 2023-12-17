@@ -18,26 +18,26 @@ module.exports = (Sequelize, DataTypes) => {
       autoIncrement: true
     },
     name: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
     email: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
     image: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
     pass: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(200),
       allowNull: false
     },
     role: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       allowNull: false
     },
   }, {
