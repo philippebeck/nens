@@ -7,8 +7,10 @@ const nem         = require("nemjs");
 
 require("dotenv").config();
 
-const PRODUCTS_IMG    = process.env.IMG_URL + "products/";
-const PRODUCTS_THUMB  = process.env.THUMB_URL + "products/";
+const {IMG_EXT, IMG_URL, PRODUCT_NOT_FOUND, PRODUCTS_NOT_FOUND, THUMB_URL } = process.env;
+
+const PRODUCTS_IMG    = IMG_URL + "products/";
+const PRODUCTS_THUMB  = THUMB_URL + "products/";
 
 const form    = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
 const Product = db.product;
@@ -18,38 +20,33 @@ const Product = db.product;
 /**
  * ? CHECK PRODUCT DATA
  * * Validates and checks the product data before processing it.
- *
  * @param {string} name - The name of the product.
  * @param {string} description - The description of the product.
  * @param {string} alt - The alternative name of the product.
  * @param {number} price - The price of the product.
  * @param {string} cat - The category of the product.
  * @param {object} res - The response object.
- * @return {object} The response object with a JSON message if there are any validation errors.
+ * @return {object} The response object with a JSON message if there are errors.
  */
 exports.checkProductData = (name, description, alt, price, cat, res) => {
-  const PRICE_MAX = process.env.PRICE_MAX;
-  const PRICE_MIN = process.env.PRICE_MIN;
-  const STR_MAX   = process.env.STRING_MAX;
-  const STR_MIN   = process.env.STRING_MIN;
-  const TXT_MAX   = process.env.TEXT_MAX;
-  const TXT_MIN   = process.env.TEXT_MIN;
+  const { CHECK_CAT, CHECK_NAME, CHECK_PRICE, CHECK_TEXT, PRICE_MAX, PRICE_MIN, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
-  let alert = "";
-
-  if (!nem.checkRange(cat, STR_MIN, STR_MAX)) alert = process.env.CHECK_CAT;
-  if (!nem.checkRange(price, PRICE_MIN, PRICE_MAX)) alert = process.env.CHECK_PRICE;
-  if (!nem.checkRange(alt, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
-  if (!nem.checkRange(description, TXT_MIN, TXT_MAX)) alert = process.env.CHECK_TEXT;
-  if (!nem.checkRange(name, STR_MIN, STR_MAX)) alert = process.env.CHECK_NAME;
-
-  if (alert !== "") return res.status(403).json({ message: alert });
+  if (
+    !nem.checkRange(cat, STRING_MIN, STRING_MAX) ||
+    !nem.checkRange(price, PRICE_MIN, PRICE_MAX) ||
+    !nem.checkRange(alt, STRING_MIN, STRING_MAX) ||
+    !nem.checkRange(description, TEXT_MIN, TEXT_MAX) ||
+    !nem.checkRange(name, STRING_MIN, STRING_MAX)
+  ) {
+    return res.status(403).json({ 
+      message: CHECK_CAT || CHECK_PRICE || CHECK_NAME || CHECK_TEXT || CHECK_NAME 
+    });
+  }
 }
 
 /**
  * ? CHECK PRODUCT UNIQUE
  * * Checks if the given product name and description are unique.
- *
  * @param {string} name - The name of the product.
  * @param {string} description - The description of the product.
  * @param {object} product - The product object to compare with.
@@ -57,48 +54,27 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
  * @return {object} The JSON response object with the appropriate message and status code.
  */
 exports.checkProductUnique = (name, description, product, res) => {
-  if (product.name === name) return res.status(403).json({ message: process.env.DISPO_NAME });
-  if (product.description === description) return res.status(403).json({ message: process.env.DISPO_DESCRIPTION });
-}
+  const { DISPO_DESCRIPTION, DISPO_NAME } = process.env;
 
-/**
- * ? GET PRODUCT
- * * Returns a product object with the given properties.
- *
- * @param {string} name - The name of the product.
- * @param {string} description - The description of the product.
- * @param {string} image - The image URL of the product.
- * @param {string} alt - The alternative text for the product image.
- * @param {number} price - The price of the product.
- * @param {object} options - The options for the product.
- * @param {string} cat - The category of the product.
- * @return {object} The product object with the given properties.
- */
-exports.getProduct = (name, description, image, alt, price, options, cat) => {
-  return {
-    name: name,
-    description: description,
-    image: image,
-    alt: alt,
-    price: price,
-    options: options,
-    cat: cat
+  if (product.name === name || product.description === description) {
+    return res.status(403).json({ message: DISPO_NAME || DISPO_DESCRIPTION });
   }
 }
 
 /**
  * ? SET IMAGE
  * * Sets the image for a product.
- *
  * @param {string} name - The name of the product.
  * @param {string} newFilename - The new filename of the image.
  */
 exports.setImage = (name, newFilename) => {
-  let input   = "products/" + newFilename;
-  let output  = "products/" + name;
+  const { IMG_HEIGHT, IMG_WIDTH } = process.env;
 
-  nem.setThumbnail(input, process.env.THUMB_URL + output);
-  nem.setThumbnail(input, process.env.IMG_URL + output, process.env.IMG_WIDTH, process.env.IMG_HEIGHT);
+  const INPUT   = "products/" + newFilename;
+  const OUTPUT  = "products/" + name;
+
+  nem.setThumbnail(INPUT, THUMB_URL + OUTPUT);
+  nem.setThumbnail(INPUT, IMG_URL + OUTPUT, IMG_WIDTH, IMG_HEIGHT);
 }
 
 //! ******************** PUBLIC ********************
@@ -106,33 +82,31 @@ exports.setImage = (name, newFilename) => {
 /**
  * ? LIST PRODUCTS
  * * Retrieves a list of all products.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of products in JSON format.
  * @throws {Error} If the products are not found in the database.
  */
 exports.listProducts = (req, res) => {
-  Product
-    .findAll()
+  Product.findAll()
     .then((products) => { res.status(200).json(products) })
-    .catch(() => res.status(404).json({ message: process.env.PRODUCTS_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: PRODUCTS_NOT_FOUND }));
 };
 
 /**
  * ? READ PRODUCT
  * * Reads a product by its ID.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The product in JSON format.
  * @throws {Error} If the product is not found in the database.
  */
 exports.readProduct = (req, res) => {
-  Product
-    .findByPk(parseInt(req.params.id))
+  const ID = parseInt(req.params.id);
+
+  Product.findByPk(ID)
     .then((product) => { res.status(200).json(product) })
-    .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: PRODUCT_NOT_FOUND }));
 }
 
 //! ******************** PRIVATE ********************
@@ -140,7 +114,6 @@ exports.readProduct = (req, res) => {
 /**
  * ? CREATE PRODUCT
  * * Creates a new product.
- *
  * @param {Object} req - the request object
  * @param {Object} res - the response object
  * @param {Function} next - the next middleware function
@@ -148,41 +121,44 @@ exports.readProduct = (req, res) => {
  * @throws {Error} If the product is not created.
  */
 exports.createProduct = (req, res, next) => {
+  const { PRODUCT_CREATED, PRODUCT_NOT_CREATED } = process.env;
+
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
 
-    this.checkProductData(fields.name, fields.description, fields.alt, fields.price, fields.cat, res);
+    const { alt, cat, description, name, price } = fields;
+    const { image } = files;
 
-    Product
-      .findAll()
+    this.checkProductData(name, description, alt, price, cat, res);
+
+    Product.findAll()
       .then((products) => {
-        for (let product of products) { this.checkProductUnique(fields.name, fields.description, product, res) }
+        for (let product of products) {
+          this.checkProductUnique(name, description, product, res)
+        }
 
-        let options = nem.getArrayFromString(fields.options);
-        let image   = nem.getName(fields.name) + "." + process.env.IMG_EXT;
-        this.setImage(image, files.image.newFilename);
+        const IMG     = nem.getName(fields.name) + "." + IMG_EXT;
+        const product = { ...fields, image: IMG };
 
-        let product = this.getProduct(
-          fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat
-        );
+        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
 
-        Product
-          .create(product)
+        Product.create(product)
           .then(() => {
-            fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => {
-              res.status(201).json({ message: process.env.PRODUCT_CREATED })
-            })
+            if (image && image.newFilename) {
+              fs.unlink(PRODUCTS_IMG + image.newFilename, () => { 
+                res.status(201).json({ message: PRODUCT_CREATED })
+              })
+            }
           })
-          .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_CREATED }));
+          .catch(() => res.status(400).json({ message: PRODUCT_NOT_CREATED }));
       })
-      .catch(() => res.status(404).json({ message: process.env.PRODUCTS_NOT_FOUND }));
+      .catch(() => res.status(404).json({ message: PRODUCTS_NOT_FOUND }));
   })
 };
 
 /**
  * ? UPDATE PRODUCT
  * * Updates a product.
- *
  * @param {Object} req - the request object
  * @param {Object} res - the response object
  * @param {Function} next - the next middleware function
@@ -190,60 +166,62 @@ exports.createProduct = (req, res, next) => {
  * @throws {Error} If the product is not updated.
  */
 exports.updateProduct = (req, res, next) => {
-  const id = parseInt(req.params.id);
+  const { PRODUCT_NOT_UPDATED, PRODUCT_UPDATED } = process.env;
+  const ID = parseInt(req.params.id);
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
-    this.checkProductData(fields.name, fields.description, fields.alt, fields.price, fields.cat, res);
 
-    Product
-      .findAll()
+    const { name, description, alt, price, cat } = fields;
+    const { image } = files;
+
+    this.checkProductData(name, description, alt, price, cat, res);
+
+    Product.findAll()
       .then((products) => {
-        for (let product of products) {
-          if (product.id !== id) this.checkProductUnique(fields.name, fields.description, product, res);
-        }
+        products.filter(product => product.id !== ID).forEach(product => 
+          this.checkProductUnique(name, description, product, res));
 
-        let image = nem.getName(fields.name) + "." + process.env.IMG_EXT;
-        if (files.image) this.setImage(image, files.image.newFilename);
+        const IMG     = nem.getName(name) + "." + IMG_EXT;
+        const product = { ...fields, image: IMG };
 
-        let options = nem.getArrayFromString(fields.options);
-        let product = this.getProduct(fields.name, fields.description, image, fields.alt, fields.price, options, fields.cat);
+        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
 
-        Product
-          .update(product, { where: { id: id }})
+        Product.update(product, { where: { id: ID }})
           .then(() => {
-            if (files.image) fs.unlink(PRODUCTS_IMG + files.image.newFilename, () => {});
-            res.status(200).json({ message: process.env.PRODUCT_UPDATED });
+            if (image && image.newFilename) {
+              fs.unlink(PRODUCTS_IMG + image.newFilename, () => {})
+            }
+            res.status(200).json({ message: PRODUCT_UPDATED });
           })
-          .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_UPDATED }));
+          .catch(() => res.status(400).json({ message: PRODUCT_NOT_UPDATED }));
       })
-      .catch(() => res.status(404).json({ message: process.env.PRODUCTS_NOT_FOUND }));
+      .catch(() => res.status(404).json({ message: PRODUCTS_NOT_FOUND }));
   })
 };
 
 /**
  * ? DELETE PRODUCT
  * * Deletes a product from the database.
- *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} A message indicating that the product was deleted.
  * @throws {Error} If the product is not found in the database.
  */
 exports.deleteProduct = (req, res) => {
-  const id = parseInt(req.params.id);
+  const { PRODUCT_DELETED, PRODUCT_NOT_DELETED } = process.env;
+  const ID = parseInt(req.params.id);
 
-  Product
-    .findByPk(id)
+  Product.findByPk(ID)
     .then(product => {
       fs.unlink(PRODUCTS_THUMB + product.image, () => {
         fs.unlink(PRODUCTS_IMG + product.image, () => {
-          Product
-            .destroy({ where: { id: id }})
-            .then(() => res.status(204).json({ message: process.env.PRODUCT_DELETED }))
-            .catch(() => res.status(400).json({ message: process.env.PRODUCT_NOT_DELETED }))
+
+          Product.destroy({ where: { id: ID }})
+            .then(() => res.status(204).json({ message: PRODUCT_DELETED }))
+            .catch(() => res.status(400).json({ message: PRODUCT_NOT_DELETED }))
         })
       })
     })
-    .catch(() => res.status(404).json({ message: process.env.PRODUCT_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: PRODUCT_NOT_FOUND }));
 }
