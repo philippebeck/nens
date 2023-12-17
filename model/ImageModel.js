@@ -36,8 +36,7 @@ module.exports = (Sequelize, DataTypes) => {
     }
   }, {
     tableName: "Images",
-    timestamps: false,
-    underscored: true
+    timestamps: false
   });
 
   return ImageModel;
