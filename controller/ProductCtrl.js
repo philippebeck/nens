@@ -64,17 +64,15 @@ exports.checkProductUnique = (name, description, product, res) => {
 /**
  * ? SET IMAGE
  * * Sets the image for a product.
- * @param {string} name - The name of the product.
- * @param {string} newFilename - The new filename of the image.
+ * @param {string} input - The name of the input image.
+ * @param {string} output - The name of the output image.
  */
-exports.setImage = (name, newFilename) => {
-  const { IMG_HEIGHT, IMG_WIDTH } = process.env;
+exports.setImage = (input, output) => {
+  const INPUT   = `products/${input}`;
+  const OUTPUT  = `products/${output}`;
 
-  const INPUT   = "products/" + newFilename;
-  const OUTPUT  = "products/" + name;
-
-  nem.setThumbnail(INPUT, THUMB_URL + OUTPUT);
-  nem.setThumbnail(INPUT, IMG_URL + OUTPUT, IMG_WIDTH, IMG_HEIGHT);
+  nem.setImage(INPUT, OUTPUT);
+  nem.setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -140,7 +138,7 @@ exports.createProduct = (req, res, next) => {
         const IMG     = nem.getName(fields.name) + "." + IMG_EXT;
         const product = { ...fields, image: IMG };
 
-        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         Product.create(product)
           .then(() => {
@@ -185,7 +183,7 @@ exports.updateProduct = (req, res, next) => {
         const IMG     = nem.getName(name) + "." + IMG_EXT;
         const product = { ...fields, image: IMG };
 
-        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         Product.update(product, { where: { id: ID }})
           .then(() => {

@@ -62,17 +62,15 @@ exports.checkArticleUnique = (name, text, article, res) => {
 /**
  * ? SET IMAGE
  * * Sets the image for an article.
- * @param {string} name - The name of the article.
- * @param {string} newFilename - The new filename of the image.
+ * @param {string} input - The name of the input image.
+ * @param {string} output - The name of the output image.
  */
-exports.setImage = (name, newFilename) => {
-  const { IMG_HEIGHT, IMG_WIDTH } = process.env;
+exports.setImage = (input, output) => {
+  const INPUT   = `articles/${input}`;
+  const OUTPUT  = `articles/${output}`;
 
-  const INPUT   = "articles/" + newFilename;
-  const OUTPUT  = "articles/" + name;
-
-  nem.setThumbnail(INPUT, THUMB_URL + OUTPUT);
-  nem.setThumbnail(INPUT, IMG_URL + OUTPUT, IMG_WIDTH, IMG_HEIGHT);
+  nem.setImage(INPUT, OUTPUT);
+  nem.setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -137,7 +135,7 @@ exports.createArticle = (req, res, next) => {
     Article.findAll()
       .then((articles) => {
         for (const article of articles) this.checkArticleUnique(name, text, article, res);
-        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         const article = { ...fields, image: IMG };
 
@@ -181,10 +179,10 @@ exports.updateArticle = (req, res, next) => {
 
     Article.findAll()
       .then((articles) => {
-        articles.filter(article => article.id !== ID)
-          .forEach(article => this.checkArticleUnique(name, text, article, res));
+        articles.filter(article => article.id !== ID).forEach(article => 
+          this.checkArticleUnique(name, text, article, res));
 
-        if (image && image.newFilename) this.setImage(IMG, image.newFilename);
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
         const article = { ...fields, image: IMG };
 
         Article.update(article, { where: { id: ID }})

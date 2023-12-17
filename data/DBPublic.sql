@@ -1,4 +1,4 @@
-USE sen;
+USE nens;
 
 INSERT INTO Galleries (name, author, cover) VALUES
 ('964 Kitab Suwar al Kawakib','Abd al-Rahman al-Sufi','964-kitab-suwar-al-kawakib-01.webp'),
@@ -285,7 +285,8 @@ INSERT INTO Links (name, url, cat) VALUES
 ('Vue Sfc Vite','www.freecodecamp.org/news/how-to-create-and-publish-a-vue-component-library-update','JS'),
 ('Sequelize Doc','sequelize.org/docs/v6','Dev'),
 ('How to become a 10x dev','dev.to/idboussadel/how-to-become-a-10x-dev-ake','JS'),
-('Sequelize with Vue & Node', 'www.bezkoder.com/vue-js-node-js-express-mysql-crud-example', 'JS');
+('Sequelize with Vue & Node', 'www.bezkoder.com/vue-js-node-js-express-mysql-crud-example', 'JS'),
+('Before & After animations', 'blog.logrocket.com/css-before-after-custom-animations-transitions', 'CSS3');
 
 INSERT INTO Images (name, description, galleryId) VALUES
 ('964-kitab-suwar-al-kawakib-01.webp','Ursa Minor',1),

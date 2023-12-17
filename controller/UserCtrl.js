@@ -69,6 +69,19 @@ exports.checkUserUnique = (name, email, user, res) => {
   }
 }
 
+/**
+ * ? SET IMAGE
+ * * Sets the image for a user.
+ * @param {string} input - The name of the input image.
+ * @param {string} output - The name of the output image.
+ */
+exports.setImage = (input, output) => {
+  const INPUT   = `users/${input}`;
+  const OUTPUT  = `users/${output}`;
+
+  nem.setThumbnail(INPUT, OUTPUT);
+}
+
 //! ******************** PUBLIC ********************
 
 /**
@@ -97,9 +110,7 @@ exports.createUser = (req, res, next) => {
     User.findAll()
       .then((users) => {
         for (const user of users) this.checkUserUnique(name, email, user, res);
-        if (image && image.newFilename) {
-          nem.setThumbnail("users/" + image.newFilename, USERS_THUMB + IMG);
-        }
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         bcrypt.hash(pass, 10)
           .then((hash) => {
@@ -223,9 +234,7 @@ exports.updateUser = (req, res, next) => {
         users.filter(user => user.id !== ID).forEach(user => 
           this.checkUserUnique(name, email, user, res));
 
-        if (image && image.newFilename) {
-          nem.setThumbnail("users/" + image.newFilename, USERS_THUMB + IMG)
-        }
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         if (pass) {
           this.checkUserPass(pass, res);

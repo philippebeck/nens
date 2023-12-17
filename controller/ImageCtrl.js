@@ -36,15 +36,15 @@ exports.checkImageData = (description, res) => {
 /**
  * ? SET IMAGE
  * * Sets the image & thumbnail for a gallery.
- * @param {string} image - The filename of the image to set.
- * @param {string} newFilename - The new filename to use for the image.
+ * @param {string} input - The name of the input image.
+ * @param {string} output - The name of the output image.
  */
-exports.setImage = (image, newFilename) => {
-  const INPUT   = "galleries/" + newFilename;
-  const OUTPUT  = "galleries/" + image;
+exports.setImage = (input, output) => {
+  const INPUT   = `galleries/${input}`;
+  const OUTPUT  = `galleries/${output}`;
 
-  nem.setImage(INPUT, IMG_URL + OUTPUT);
-  nem.setThumbnail(INPUT, THUMB_URL + OUTPUT);
+  nem.setImage(INPUT, OUTPUT);
+  nem.setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -97,12 +97,12 @@ exports.createImage = (req, res, next) => {
         Image.findAll({ where: { galleryId: galleryId }})
         .then((images) => { 
           let index = images.length + 1;
-          if (index < 10) index = "0" + index;
+          if (index < 10) index = `0${index}`;
 
-          const name  = nem.getName(gallery.name) + "-" + index + "." + IMG_EXT;
-          const img   = { ...fields, name: name };
+          const NAME  = `${nem.getName(gallery.name)}-${index}.${IMG_EXT}`;
+          const img   = { ...fields, name: NAME };
 
-          if (image && image.newFilename) this.setImage(name, image.newFilename);
+          if (image && image.newFilename) this.setImage(image.newFilename, NAME);
 
           Image.create(img)
             .then(() => {
@@ -141,7 +141,7 @@ exports.updateImage = (req, res, next) => {
     const img = { ...fields };
 
     this.checkImageData(description, res);
-    if (image && image.newFilename) this.setImage(name, image.newFilename);
+    if (image && image.newFilename) this.setImage(image.newFilename, name);
 
     Image.update(img, { where: { id: ID }})
       .then(() => {
