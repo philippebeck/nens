@@ -18,7 +18,7 @@ module.exports = (Sequelize, DataTypes) => {
       autoIncrement: true
     },
     name: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
@@ -28,12 +28,12 @@ module.exports = (Sequelize, DataTypes) => {
       unique: true
     },
     image: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
     alt: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(200),
       allowNull: false,
       unique: true
     },
