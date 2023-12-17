@@ -7,6 +7,9 @@ API with Node, Express, NemJS & SQL
 
 [![GitHub Last Commit](https://badgen.net/github/last-commit/philippebeck/nens)](https://github.com/philippebeck/nens/commits/master)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7e8b050c9e1a4350a1cbc93a1cbf85c0)](https://app.codacy.com/gh/philippebeck/nens/dashboard)
+[![Maintainability](https://api.codeclimate.com/v1/badges/b7f0e56412a0b8c38be2/maintainability)](https://codeclimate.com/github/philippebeck/nens/maintainability)
+
 [![GitHub Top Language](https://img.shields.io/github/languages/top/philippebeck/nens)](https://github.com/philippebeck/nens)
 [![Code Size](https://img.shields.io/github/languages/code-size/philippebeck/nens)](https://github.com/philippebeck/nens/tree/master)
 
