@@ -131,7 +131,7 @@ exports.createImage = (req, res, next) => {
  */
 exports.updateImage = (req, res, next) => {
   const { IMAGE_NOT_UPDATED, IMAGE_UPDATED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
@@ -164,7 +164,7 @@ exports.updateImage = (req, res, next) => {
  */
 exports.deleteImage = (req, res) => {
   const { IMAGE_DELETED, IMAGE_NOT_DELETED, IMAGE_NOT_FOUND } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Image.findByPk(ID)
     .then((image) => {

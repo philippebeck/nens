@@ -187,7 +187,9 @@ exports.listUsers = (req, res) => {
  * @throws {Error} If the user is not found in the database.
  */
 exports.readUser = (req, res) => {
-  User.findByPk(parseInt(req.params.id))
+  const ID = parseInt(req.params.id, 10);
+
+  User.findByPk(ID)
     .then((user) => res.status(200).json(user))
     .catch(() => res.status(404).json({ message: USER_NOT_FOUND }));
 }
@@ -210,7 +212,7 @@ exports.updateUser = (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
-    const ID  = parseInt(req.params.id);
+    const ID  = parseInt(req.params.id, 10);
     const IMG = nem.getName(name) + "." + IMG_EXT;
 
     let user;
@@ -259,7 +261,7 @@ exports.updateUser = (req, res, next) => {
  */
 exports.deleteUser = (req, res) => {
   const { USER_DELETED, USER_NOT_DELETED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   User.findByPk(ID)
     .then(user => {
