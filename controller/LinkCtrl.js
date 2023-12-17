@@ -110,7 +110,7 @@ exports.createLink = (req, res, next) => {
  */
 exports.updateLink = (req, res, next) => {
   const { LINK_NOT_UPDATED, LINK_UPDATED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
@@ -141,7 +141,7 @@ exports.updateLink = (req, res, next) => {
  */
 exports.deleteLink = (req, res) => {
   const { LINK_DELETED, LINK_NOT_DELETED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Link.destroy({ where: { id: ID }})
     .then(() => res.status(204).json({ message: LINK_DELETED }))

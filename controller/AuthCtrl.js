@@ -23,7 +23,7 @@ const User      = db.user;
  * @throws {Error} If the user is not found in the database.
  */
 exports.readAvatar = (req, res) => {
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   User.findByPk(ID)
     .then((user) => {

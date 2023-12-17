@@ -102,7 +102,7 @@ exports.listArticles = (req, res) => {
  * @throws {Error} If the article is not found in the database.
  */
 exports.readArticle = (req, res) => {
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Article.findByPk(ID)
     .then((article) => { res.status(200).json(article) })
@@ -174,7 +174,7 @@ exports.updateArticle = (req, res, next) => {
     const { name, text, alt, cat } = fields;
     const { image } = files;
 
-    const ID  = parseInt(req.params.id);
+    const ID  = parseInt(req.params.id, 10);
     const IMG = nem.getName(name) + "." + IMG_EXT;
 
     this.checkArticleData(name, text, alt, cat, res);
@@ -211,7 +211,7 @@ exports.updateArticle = (req, res, next) => {
  */
 exports.deleteArticle = (req, res) => {
   const { ARTICLE_DELETED, ARTICLE_NOT_DELETED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Article.findByPk(ID)
     .then(article => {

@@ -102,7 +102,7 @@ exports.listProducts = (req, res) => {
  * @throws {Error} If the product is not found in the database.
  */
 exports.readProduct = (req, res) => {
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Product.findByPk(ID)
     .then((product) => { res.status(200).json(product) })
@@ -167,7 +167,7 @@ exports.createProduct = (req, res, next) => {
  */
 exports.updateProduct = (req, res, next) => {
   const { PRODUCT_NOT_UPDATED, PRODUCT_UPDATED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
@@ -210,7 +210,7 @@ exports.updateProduct = (req, res, next) => {
  */
 exports.deleteProduct = (req, res) => {
   const { PRODUCT_DELETED, PRODUCT_NOT_DELETED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Product.findByPk(ID)
     .then(product => {

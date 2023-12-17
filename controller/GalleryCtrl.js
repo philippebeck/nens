@@ -78,7 +78,7 @@ exports.listGalleries = (req, res) => {
  */
 exports.readGallery = (req, res) => {
   const { GALLERY_NOT_FOUND } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Gallery.findByPk(ID)
     .then((gallery) => { res.status(200).json(gallery) })
@@ -131,7 +131,7 @@ exports.createGallery = (req, res, next) => {
  */
 exports.updateGallery = (req, res, next) => {
   const { GALLERY_NOT_UPDATED, GALLERY_UPDATED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
@@ -164,7 +164,7 @@ exports.updateGallery = (req, res, next) => {
  */
 exports.deleteGallery = (req, res) => {
   const { GALLERY_DELETED, GALLERY_NOT_DELETED, IMAGE_DELETE_MANY, IMAGES_NOT_FOUND } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Image.findAll({ where: { galleryId: ID }})
     .then(images => {

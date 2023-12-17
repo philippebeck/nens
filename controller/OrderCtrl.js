@@ -82,7 +82,7 @@ exports.listOrders = (req, res) => {
  * @throws {Error} If the orders are not found in the database.
  */
 exports.listUserOrders = (req, res) => {
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Order.findAll({ where: { userId: ID }})
     .then((orders) => res.status(200).json(orders))
@@ -142,7 +142,7 @@ exports.createOrder = (req, res, next) => {
  */
 exports.updateOrder = (req, res, next) => {
   const { ORDER_NOT_UPDATED, ORDER_UPDATED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
@@ -163,7 +163,7 @@ exports.updateOrder = (req, res, next) => {
  */
 exports.deleteOrder = (req, res) => {
   const { ORDER_DELETED, ORDER_NOT_DELETED } = process.env;
-  const ID = parseInt(req.params.id);
+  const ID = parseInt(req.params.id, 10);
 
   Order.destroy({ where: { id: ID }})
     .then(() => res.status(204).json({ message: ORDER_DELETED }))
