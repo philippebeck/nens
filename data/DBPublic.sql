@@ -1,4 +1,4 @@
-USE sen;
+USE nens;
 
 INSERT INTO Galleries (name, author, cover) VALUES
 ('964 Kitab Suwar al Kawakib','Abd al-Rahman al-Sufi','964-kitab-suwar-al-kawakib-01.webp'),
