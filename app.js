@@ -7,11 +7,7 @@ const helmet  = require("helmet");
 require("dotenv").config();
 
 const app = express();
-
-app
-  .use(express.json())
-  .use(cors())
-  .use(helmet());
+app.use(express.json()).use(cors()).use(helmet());
 
 app
   .use(process.env.ROUTE_ARTICLE, require("./route/ArticleRoute"))

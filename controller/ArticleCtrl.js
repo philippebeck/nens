@@ -181,8 +181,8 @@ exports.updateArticle = (req, res, next) => {
 
     Article.findAll()
       .then((articles) => {
-        articles.filter(article => article.id !== ID)
-          .forEach(article => this.checkArticleUnique(name, text, article, res));
+        articles.filter(article => article.id !== ID).forEach(article => 
+          this.checkArticleUnique(name, text, article, res));
 
         if (image && image.newFilename) this.setImage(IMG, image.newFilename);
         const article = { ...fields, image: IMG };
