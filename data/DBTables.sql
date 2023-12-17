@@ -5,10 +5,10 @@ USE nens;
 
 CREATE TABLE Articles(
   id        SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
-  name      VARCHAR(100)  NOT NULL  UNIQUE,
+  name      VARCHAR(200)  NOT NULL  UNIQUE,
   text      TEXT          NOT NULL  UNIQUE,
-  image     VARCHAR(100)  NOT NULL  UNIQUE,
-  alt       VARCHAR(100)  NOT NULL  UNIQUE,
+  image     VARCHAR(200)  NOT NULL  UNIQUE,
+  alt       VARCHAR(200)  NOT NULL  UNIQUE,
   likes     TEXT          NOT NULL,
   cat       VARCHAR(20)   NOT NULL,
   createdAt DATETIME      NOT NULL,
@@ -17,14 +17,14 @@ ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Galleries(
   id      SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
-  name    VARCHAR(100)  NOT NULL  UNIQUE,
-  author  VARCHAR(100)  NOT NULL,
-  cover   VARCHAR(100)  NOT NULL  UNIQUE)
+  name    VARCHAR(200)  NOT NULL  UNIQUE,
+  author  VARCHAR(200)  NOT NULL,
+  cover   VARCHAR(200)  NOT NULL  UNIQUE)
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Images(
   id          SMALLINT      UNSIGNED    PRIMARY KEY  AUTO_INCREMENT,
-  name        VARCHAR(100)  NOT NULL    UNIQUE,
+  name        VARCHAR(200)  NOT NULL    UNIQUE,
   description VARCHAR(200)  NOT NULL,
   galleryId   SMALLINT      UNSIGNED    NOT NULL,
   CONSTRAINT  fk_galleryId  FOREIGN KEY (galleryId)  REFERENCES Galleries(id))
@@ -32,17 +32,17 @@ ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Links(
   id    SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
-  name  VARCHAR(100)  NOT NULL  UNIQUE,
+  name  VARCHAR(200)  NOT NULL  UNIQUE,
   url   VARCHAR(200)  NOT NULL  UNIQUE,
   cat   VARCHAR(20)   NOT NULL)
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Products(
   id          SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
-  name        VARCHAR(100)  NOT NULL  UNIQUE,
+  name        VARCHAR(200)  NOT NULL  UNIQUE,
   description TEXT          NOT NULL  UNIQUE,
-  image       VARCHAR(100)  NOT NULL  UNIQUE,
-  alt         VARCHAR(100)  NOT NULL  UNIQUE,
+  image       VARCHAR(200)  NOT NULL  UNIQUE,
+  alt         VARCHAR(200)  NOT NULL  UNIQUE,
   price       DECIMAL       NOT NULL,
   options     TEXT          NOT NULL,
   cat         VARCHAR(20)   NOT NULL)
@@ -50,23 +50,23 @@ ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Users(
   id        SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
-  name      VARCHAR(100)  NOT NULL  UNIQUE,
-  email     VARCHAR(100)  NOT NULL  UNIQUE,
-  image     VARCHAR(100)  NOT NULL  UNIQUE,
-  pass      VARCHAR(100)  NOT NULL,
-  role      VARCHAR(10)   NOT NULL,
+  name      VARCHAR(200)  NOT NULL  UNIQUE,
+  email     VARCHAR(200)  NOT NULL  UNIQUE,
+  image     VARCHAR(200)  NOT NULL  UNIQUE,
+  pass      VARCHAR(200)  NOT NULL,
+  role      VARCHAR(20)   NOT NULL,
   createdAt DATETIME      NOT NULL,
   updatedAt DATETIME      NOT NULL)
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE Orders(
   id          SMALLINT    UNSIGNED    PRIMARY KEY AUTO_INCREMENT,
-  products    TEXT        NOT NULL,
-  total       DECIMAL     NOT NULL,
-  paymentId   VARCHAR(50) NOT NULL    UNIQUE,
-  status      VARCHAR(10) NOT NULL,
-  userId      SMALLINT    UNSIGNED    NOT NULL,
-  createdAt   DATETIME    NOT NULL,
-  updatedAt   DATETIME    NOT NULL,
-  CONSTRAINT  fk_userId   FOREIGN KEY (userId)    REFERENCES Users(id))
+  products    TEXT          NOT NULL,
+  total       DECIMAL       NOT NULL,
+  paymentId   VARCHAR(200)  NOT NULL    UNIQUE,
+  status      VARCHAR(20)   NOT NULL,
+  userId      SMALLINT      UNSIGNED    NOT NULL,
+  createdAt   DATETIME      NOT NULL,
+  updatedAt   DATETIME      NOT NULL,
+  CONSTRAINT  fk_userId     FOREIGN KEY (userId)    REFERENCES Users(id))
 ENGINE=INNODB DEFAULT CHARSET=utf8;
