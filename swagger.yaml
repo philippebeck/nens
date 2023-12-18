@@ -350,7 +350,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Gallery Read Successully
+          description: OK
           schema:
             $ref: "#/definitions/GalleryRes"
         "404":
@@ -384,7 +384,7 @@ paths:
         - application/json
       responses:
         "200":
-          description: Gallery Updated Successully
+          description: OK
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
@@ -681,13 +681,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: All Orders have been Successully Listed
+          description: OK
           schema:
             type: array
             items:
               $ref: "#/definitions/OrderRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -712,11 +712,15 @@ paths:
         - application/json
       responses:
         "201":
-          description: Order Created Successfully
+          description: Created
           schema:
             $ref: "#/definitions/BasicRes"
+        "202":
+          description: Accepted
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -731,15 +735,21 @@ paths:
         - Order Module
       summary: List User Orders
       description: API to List User Orders
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Order
+          required: true
       produces:
       - application/json
       responses:
         "200":
-          description: User Orders have been Successully Listed
+          description: OK
           schema:
             $ref: "#/definitions/OrderRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
         "500":
           description: Internal Server Error
 
@@ -754,6 +764,11 @@ paths:
       consumes:
         - multipart/form-data
       parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Order
+          required: true
         - in: body
           name: body
           description: updateOrder() Payload
@@ -764,11 +779,11 @@ paths:
         - application/json
       responses:
         "200":
-          description: Order Updated Successully
+          description: OK
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
         "500":
           description: Internal Server Error
 
@@ -780,15 +795,21 @@ paths:
         - Order Module
       summary: Delete Gallery
       description: API to Delete an Order
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Order
+          required: true
       produces:
       - application/json
       responses:
         "204":
-          description: Order successully Deleted
+          description: No Content
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
         "500":
           description: Internal Server Error
 
@@ -805,13 +826,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: All Products have been Successully Listed
+          description: OK
           schema:
             type: array
             items:
-              $ref: "#/definitions/ArticleRes"
-        "400":
-          description: Invalid Fields
+              $ref: "#/definitions/ProductRes"
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -831,16 +852,18 @@ paths:
           description: createProduct() Payload
           required: true
           schema:
-            $ref: "#/definitions/ArticleReq"
+            $ref: "#/definitions/ProductReq"
       produces:
         - application/json
       responses:
         "201":
-          description: Product Created Successfully
+          description: Created
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -853,13 +876,19 @@ paths:
         - Product Module
       summary: Read Product
       description: API to Read an Product
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Product
+          required: true
       produces:
       - application/json
       responses:
         "200":
           description: Product Read Successully
           schema:
-            $ref: "#/definitions/ArticleRes"
+            $ref: "#/definitions/ProductRes"
         "400":
           description: Invalid Fields
         "500":
@@ -876,21 +905,28 @@ paths:
       consumes:
         - multipart/form-data
       parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Product
+          required: true
         - in: body
           name: body
           description: updateProduct() Payload
           required: true
           schema:
-            $ref: "#/definitions/ArticleReq"
+            $ref: "#/definitions/ProductReq"
       produces:
         - application/json
       responses:
         "200":
-          description: Product Updated Successully
+          description: OK
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -902,15 +938,23 @@ paths:
         - Product Module
       summary: Delete Product
       description: API to Delete an Product
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Product
+          required: true
       produces:
       - application/json
       responses:
         "204":
-          description: Product Successully Deleted
+          description: No Content
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -929,13 +973,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: All Users have been Successully Listed
+          description: OK
           schema:
             type: array
             items:
               $ref: "#/definitions/UserRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -958,11 +1002,13 @@ paths:
         - application/json
       responses:
         "201":
-          description: User Created Successfully
+          description: Created
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -977,15 +1023,21 @@ paths:
         - User Module
       summary: Read User
       description: API to Read a User
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the User
+          required: true
       produces:
       - application/json
       responses:
         "200":
-          description: User Read Successully
+          description: OK
           schema:
             $ref: "#/definitions/UserRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -1000,6 +1052,11 @@ paths:
       consumes:
         - multipart/form-data
       parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the User
+          required: true
         - in: body
           name: body
           description: updateUser() Payload
@@ -1010,11 +1067,13 @@ paths:
         - application/json
       responses:
         "200":
-          description: User Updated Successully
+          description: OK
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -1026,15 +1085,23 @@ paths:
         - User Module
       summary: Delete User
       description: API to Delete a User
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the User
+          required: true
       produces:
       - application/json
       responses:
         "204":
-          description: User Successully Deleted
+          description: No Content
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -1057,12 +1124,10 @@ paths:
       produces:
         - application/json
       responses:
-        "200":
-          description: Message Sent Successfully
+        "202":
+          description: Accepted
           schema:
             $ref: "#/definitions/MessageRes"
-        "400":
-          description: Invalid Fields
         "500":
           description: Internal Server Error
 
@@ -1165,9 +1230,7 @@ definitions:
   OrderReq:
     properties:
       products:
-        type: array
-        items:
-          type: number
+        type: string
         description: order products
       total:
         type: number
@@ -1181,14 +1244,32 @@ definitions:
       userId:
         type: number
         description: user id
-      created:
+
+  # PRODUCT REQUEST
+  ProductReq:
+    type: object
+    properties:
+      name:
         type: string
-        format: date
-        description: order creation
-      updated:
+        description: product name
+      description:
         type: string
-        format: date
-        description: order update
+        description: product content
+      image:
+        type: string
+        description: product image
+      alt:
+        type: string
+        description: alternative text of product image
+      price:
+        type: number
+        description: product price
+      options:
+        type: string
+        description: product options
+      cat:
+        type: string
+        description: product category
 
   # USER REQUEST
   UserReq:
@@ -1347,9 +1428,7 @@ definitions:
         type: number
         description: order id
       products:
-        type: array
-        items:
-          type: number
+        type: string
         description: order products
       total:
         type: number
@@ -1363,14 +1442,46 @@ definitions:
       userId:
         type: number
         description: user id
-      created:
+      User:
+        type: string
+        description: user name
+      createdAt:
         type: string
         format: date
         description: order creation
-      updated:
+      updatedAt:
         type: string
         format: date
         description: order update
+
+  # PRODUCT RESPONSE
+  ProductRes:
+    type: object
+    properties:
+      id:
+        type: number
+        description: product id
+      name:
+        type: string
+        description: product name
+      description:
+        type: string
+        description: product content
+      image:
+        type: string
+        description: product image
+      alt:
+        type: string
+        description: alternative text of product image
+      price:
+        type: number
+        description: product price
+      options:
+        type: string
+        description: product options
+      cat:
+        type: string
+        description: product category
 
   # USER RESPONSE
   UserRes:
@@ -1391,11 +1502,11 @@ definitions:
       role:
         type: string
         description: user role
-      created:
+      createdAt:
         type: string
         format: date
         description: user creation
-      upated:
+      upatedAt:
         type: string
         format: date
         description: user update
