@@ -23,13 +23,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: All Articles have been Successully Listed
+          description: OK
           schema:
             type: array
             items:
               $ref: "#/definitions/ArticleRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -54,11 +54,13 @@ paths:
         - application/json
       responses:
         "201":
-          description: Article Created Successfully
+          description: Created
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -75,11 +77,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: Article Read Successully
+          description: OK
           schema:
             $ref: "#/definitions/ArticleRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -104,11 +106,13 @@ paths:
         - application/json
       responses:
         "200":
-          description: Article Updated Successully
+          description: OK
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -124,18 +128,19 @@ paths:
       - application/json
       responses:
         "204":
-          description: Article Successully Deleted
+          description: No Content
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
   # ! AUTH
-  /auth:
-
-    # GET /auth/{id} => Read Avatar
+  # GET /auth/{id} => Read Avatar
+  /auth/{id}:
     get:
       tags:
         - Auth Module
@@ -145,15 +150,16 @@ paths:
       - application/json
       responses:
         "200":
-          description: Avatar Read Successully
+          description: OK
           schema:
             $ref: "#/definitions/AvatarRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
     # POST /auth => Login User
+  /auth:
     post:
       tags:
         - Auth Module
@@ -171,12 +177,16 @@ paths:
       produces:
         - application/json
       responses:
-        "201":
-          description: User Logged In Successfully
+        "200":
+          description: OK
           schema:
             $ref: "#/definitions/AuthRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -199,16 +209,19 @@ paths:
       produces:
         - application/json
       responses:
-        "200":
-          description: New Password Sended Successfully
+        "202":
+          description: Accepted
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
-  # TODO create req & res then replace auth req & res
   # POST /auth/recaptcha => Check Recaptcha
   /auth/recaptcha:
     post:
@@ -228,12 +241,16 @@ paths:
       produces:
         - application/json
       responses:
-        "200":
-          description: Recaptcha Checked Successfully
+        "202":
+          description: Accepted
           schema:
-            $ref: "#/definitions/AuthRes"
+            $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -1144,14 +1161,17 @@ definitions:
       alt:
         type: string
         description: alternative text of article image
+      likes:
+        type: string
+        description: article likes
       cat:
         type: string
         description: article category
-      created:
+      createdAt:
         type: string
         format: date
         description: article creation
-      upated:
+      upatedAt:
         type: string
         format: date
         description: article update
