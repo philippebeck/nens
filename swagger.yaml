@@ -1,13 +1,13 @@
 swagger: "2.0"
 info:
-  title: SEN API documentation
+  title: NENS API documentation
   description: Contains all available API endpoints in this codebase
   version: "1.0.0"
   termsOfService: "http://swagger.io/terms/"
 host: localhost:3000
 basePath: /
 schemes:
-  - http
+  - https
 paths:
 
   # ! ARTICLES
@@ -73,6 +73,12 @@ paths:
         - Article Module
       summary: Read Article
       description: API to Read an Article
+      parameters:
+      - name: id
+        type: number
+        in: path
+        description: Id of the Article
+        required: true
       produces:
       - application/json
       responses:
@@ -96,6 +102,11 @@ paths:
       consumes:
         - multipart/form-data
       parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Article
+          required: true
         - in: body
           name: body
           description: updateArticle() Payload
@@ -124,6 +135,12 @@ paths:
         - Article Module
       summary: Delete Article
       description: API to Delete an Article
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Article
+          required: true
       produces:
       - application/json
       responses:
@@ -146,6 +163,12 @@ paths:
         - Auth Module
       summary: Read Avatar
       description: API to Read an Avatar
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the User
+          required: true
       produces:
       - application/json
       responses:
@@ -267,17 +290,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: All Galleries have been Successully Listed
+          description: OK
           schema:
             type: array
             items:
               $ref: "#/definitions/GalleryRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
-    # POST /galleries => Create Article
+    # POST /galleries => Create Gallery
     post:
       security:
         - Bearer: []
@@ -298,23 +321,31 @@ paths:
         - application/json
       responses:
         "201":
-          description: Gallery Created Successfully
+          description: Created
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
   # ! GALLERIES WITH ID
   /galleries/{id}:
 
-    # GET /galleries/{id} => Read Article
+    # GET /galleries/{id} => Read Gallery
     get:
       tags:
         - Gallery Module
       summary: Read Gallery
       description: API to Read a Gallery
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Gallery
+          required: true
       produces:
       - application/json
       responses:
@@ -322,12 +353,12 @@ paths:
           description: Gallery Read Successully
           schema:
             $ref: "#/definitions/GalleryRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
-    # PUT /galleries/{id} => Update Article
+    # PUT /galleries/{id} => Update Gallery
     put:
       security:
         - Bearer: []
@@ -338,6 +369,11 @@ paths:
       consumes:
         - multipart/form-data
       parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Gallery
+          required: true
         - in: body
           name: body
           description: updateGallery() Payload
@@ -352,7 +388,9 @@ paths:
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -366,39 +404,26 @@ paths:
       description: API to Delete a Gallery
       produces:
       - application/json
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Gallery
+          required: true
       responses:
         "204":
-          description: Gallery successully Deleted
+          description: No Content
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
   # ! IMAGES
   /images:
-
-    # GET /images => List Images
-    get:
-      tags:
-        - Image Module
-      summary: List Images
-      description: API to List all Images
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: All Images have been Successully Listed
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/ImageRes"
-        "400":
-          description: Invalid Fields
-        "500":
-          description: Internal Server Error
-
     # POST /images => Create Image
     post:
       security:
@@ -420,32 +445,41 @@ paths:
         - application/json
       responses:
         "201":
-          description: Image Created Successfully
+          description: Created
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
   # ! IMAGES WITH ID
   /images/{id}:
-
-    # GET /images/{id} => Read Image
+    # GET /images => List Images
     get:
       tags:
         - Image Module
-      summary: Read Image
-      description: API to Read an Image
+      summary: List Images
+      description: API to List Gallery Images
+      parameters:
+      - name: id
+        type: number
+        in: path
+        description: Id of the Gallery
+        required: true
       produces:
       - application/json
       responses:
         "200":
-          description: Gallery Read Successully
+          description: OK
           schema:
-            $ref: "#/definitions/ImageRes"
-        "400":
-          description: Invalid Fields
+            type: array
+            items:
+              $ref: "#/definitions/ImageRes"
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -460,6 +494,11 @@ paths:
       consumes:
         - multipart/form-data
       parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Image
+          required: true
         - in: body
           name: body
           description: updateImage() Payload
@@ -474,7 +513,7 @@ paths:
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
         "500":
           description: Internal Server Error
 
@@ -486,15 +525,23 @@ paths:
         - Image Module
       summary: Delete Image
       description: API to Delete an Image
+      parameters:
+      - name: id
+        type: number
+        in: path
+        description: Id of the Image
+        required: true
       produces:
       - application/json
       responses:
         "204":
-          description: Image successully Deleted
+          description: No Content
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -511,13 +558,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: All Links have been Successully Listed
+          description: OK
           schema:
             type: array
             items:
               $ref: "#/definitions/LinkRes"
-        "400":
-          description: Invalid Fields
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -542,11 +589,13 @@ paths:
         - application/json
       responses:
         "201":
-          description: Link Created Successfully
+          description: Created
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -564,6 +613,11 @@ paths:
       consumes:
         - multipart/form-data
       parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Link
+          required: true
         - in: body
           name: body
           description: updateLink() Payload
@@ -574,11 +628,13 @@ paths:
         - application/json
       responses:
         "200":
-          description: Link Updated Successully
+          description: OK
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -590,15 +646,23 @@ paths:
         - Link Module
       summary: Delete Link
       description: API to Delete a Link
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Link
+          required: true
       produces:
       - application/json
       responses:
         "204":
-          description: Link successully Deleted
+          description: No Content
           schema:
             $ref: "#/definitions/BasicRes"
         "400":
-          description: Invalid Fields
+          description: Bad Request
+        "404":
+          description: Not Found
         "500":
           description: Internal Server Error
 
@@ -1009,7 +1073,6 @@ securityDefinitions:
     name: Authorization
     in: header
 
-# TODO review all req & res for missing fields between front & back
 definitions:
   # ! REQUESTS
 
@@ -1061,6 +1124,9 @@ definitions:
       description:
         type: string
         description: image description
+      galleryId:
+        type: number
+        description: gallery id
 
   # LINK REQUEST
   LinkReq:
@@ -1214,6 +1280,9 @@ definitions:
   # GALLERY RESPONSE
   GalleryRes:
     properties:
+      id:
+        type: number
+        description: gallery id
       name:
         type: string
         description: gallery name
@@ -1227,6 +1296,9 @@ definitions:
   # IMAGE RESPONSE
   ImageRes:
     properties:
+      id:
+        type: number
+        description: image id
       name:
         type: string
         description: image name
@@ -1236,10 +1308,16 @@ definitions:
       galleryId:
         type: number
         description: gallery id
+      Gallery:
+        type: string
+        description: gallery name
 
   # LINK RESPONSE
   LinkRes:
     properties:
+      id:
+        type: number
+        description: link id
       name:
         type: string
         description: link name
