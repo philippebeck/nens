@@ -14,6 +14,8 @@ const form      = formidable();
 const recaptcha = new Recaptcha({ secret: process.env.RECAPTCHA_SECRET });
 const User      = db.user;
 
+//! ******************** PUBLIC ********************
+
 /**
  * ? READ AVATAR
  * * Retrieves the avatar information for a specific user.
