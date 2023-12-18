@@ -177,5 +177,5 @@ exports.deleteImage = (req, res) => {
         })
       })
     })
-    .catch(() => res.status(400).json({ message: IMAGE_NOT_FOUND }));
+    .catch(() => res.status(404).json({ message: IMAGE_NOT_FOUND }));
 };
