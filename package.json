@@ -1,6 +1,6 @@
 {
   "name": "nens",
-  "version": "0.2.4-alpha",
+  "version": "0.2.5-alpha",
   "description": "API with Node, Express, NemJS & SQL",
   "keywords": [
     "api",
