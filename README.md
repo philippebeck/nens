@@ -92,7 +92,7 @@ Available API Files :
 ## Documentation
 
 Available Documentation :  
--  [**API**](https://github.com/philippebeck/nens/tree/master/swagger.yaml)  
+-  [**API**](https://github.com/philippebeck/nens/blob/main/swagger.yaml)  
 
 Available Readme :  
 -  [**NemJS**](https://github.com/philippebeck/nemjs)  
