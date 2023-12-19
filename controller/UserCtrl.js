@@ -218,6 +218,7 @@ exports.readUser = (req, res) => {
  */
 exports.updateUser = (req, res, next) => {
   const { USER_NOT_UPDATED, USER_UPDATED } = process.env;
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
@@ -225,10 +226,7 @@ exports.updateUser = (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
-    const ID  = parseInt(req.params.id, 10);
-    const IMG = nem.getName(name) + "." + IMG_EXT;
-
-    let user;
+    let user, img;
     this.checkUserData(name, email, role, res);
 
     User.findAll()
@@ -236,17 +234,23 @@ exports.updateUser = (req, res, next) => {
         users.filter(user => user.id !== ID).forEach(user => 
           this.checkUserUnique(name, email, user, res));
 
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+        if (image && image.newFilename) {
+          img = nem.getName(name) + "." + IMG_EXT;
+          this.setImage(image.newFilename, img);
+
+        } else {
+          img = users.find(user => user.id === ID)?.image;
+        }
 
         if (pass) {
           this.checkUserPass(pass, res);
 
           bcrypt.hash(pass, 10)
-            .then((hash) => { user = { ...fields, image: IMG, pass: hash }})
+            .then((hash) => { user = { ...fields, image: img, pass: hash } })
             .catch(() => res.status(400).json({ message: USER_NOT_PASS }));
 
         } else { 
-          user = { ...fields, image: IMG }
+          user = { ...fields, image: img };
         }
 
         User.update(user, { where: { id: ID }})
