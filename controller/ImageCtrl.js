@@ -94,27 +94,28 @@ exports.createImage = (req, res, next) => {
     Gallery.findOne({ where: { id: galleryId }})
       .then((gallery) => {
 
+        const IMG = `${nem.getName(gallery.name)}-${index}.${IMG_EXT}`;
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+
         Image.findAll({ where: { galleryId: galleryId }})
-        .then((images) => { 
-          let index = images.length + 1;
-          if (index < 10) index = `0${index}`;
+          .then((images) => {
 
-          const NAME  = `${nem.getName(gallery.name)}-${index}.${IMG_EXT}`;
-          const img   = { ...fields, name: NAME };
+            let index = images.length + 1;
+            if (index < 10) index = `0${index}`;
 
-          if (image && image.newFilename) this.setImage(image.newFilename, NAME);
+            const img = { ...fields, name: IMG };
 
-          Image.create(img)
-            .then(() => {
-              if (image && image.newFilename) {
-                fs.unlink(GALLERIES_IMG + image.newFilename, () => { 
-                  res.status(201).json({ message: IMAGE_CREATED })
-                })
-              }
-            })
-            .catch(() => res.status(400).json({ message: IMAGE_NOT_CREATED }));
-        })
-        .catch(() => res.status(404).json({ message: IMAGES_NOT_FOUND }));
+            Image.create(img)
+              .then(() => {
+                if (image && image.newFilename) {
+                  fs.unlink(GALLERIES_IMG + image.newFilename, () => { 
+                    res.status(201).json({ message: IMAGE_CREATED })
+                  })
+                }
+              })
+              .catch(() => res.status(400).json({ message: IMAGE_NOT_CREATED }));
+          })
+          .catch(() => res.status(404).json({ message: IMAGES_NOT_FOUND }));
       })
       .catch(() => res.status(404).json({ message: GALLERY_NOT_FOUND }));
   })
@@ -138,10 +139,12 @@ exports.updateImage = (req, res, next) => {
 
     const { name, description } = fields;
     const { image } = files;
-    const img = { ...fields };
+
+    if (image && image.newFilename) this.setImage(image.newFilename, name);
 
     this.checkImageData(description, res);
-    if (image && image.newFilename) this.setImage(image.newFilename, name);
+
+    const img = { ...fields };
 
     Image.update(img, { where: { id: ID }})
       .then(() => {

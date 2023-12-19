@@ -127,6 +127,9 @@ exports.createProduct = (req, res, next) => {
     const { alt, cat, description, name, price } = fields;
     const { image } = files;
 
+    const IMG = nem.getName(fields.name) + "." + IMG_EXT;
+    if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+
     this.checkProductData(name, description, alt, price, cat, res);
 
     Product.findAll()
@@ -135,10 +138,7 @@ exports.createProduct = (req, res, next) => {
           this.checkProductUnique(name, description, product, res)
         }
 
-        const IMG     = nem.getName(fields.name) + "." + IMG_EXT;
         const product = { ...fields, image: IMG };
-
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         Product.create(product)
           .then(() => {
@@ -177,13 +177,20 @@ exports.updateProduct = (req, res, next) => {
 
     Product.findAll()
       .then((products) => {
+        let img;
+
+        if (image && image.newFilename) {
+          img = nem.getName(name) + "." + IMG_EXT;
+          this.setImage(image.newFilename, img);
+
+        } else {
+          img = products.find(product => product.id === ID)?.image;
+        }
+
         products.filter(product => product.id !== ID).forEach(product => 
           this.checkProductUnique(name, description, product, res));
 
-        const IMG     = nem.getName(name) + "." + IMG_EXT;
-        const product = { ...fields, image: IMG };
-
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+        const product = { ...fields, image: img };
 
         Product.update(product, { where: { id: ID }})
           .then(() => {

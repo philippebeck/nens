@@ -103,14 +103,16 @@ exports.createUser = (req, res, next) => {
     const { image } = files;
 
     const IMG = nem.getName(name) + "." + IMG_EXT;
+    if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
     this.checkUserData(name, email, role, res);
     this.checkUserPass(pass, res);
 
     User.findAll()
       .then((users) => {
-        for (const user of users) this.checkUserUnique(name, email, user, res);
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+        for (const user of users) {
+          this.checkUserUnique(name, email, user, res);
+        }
 
         bcrypt.hash(pass, 10)
           .then((hash) => {
@@ -218,6 +220,7 @@ exports.readUser = (req, res) => {
  */
 exports.updateUser = (req, res, next) => {
   const { USER_NOT_UPDATED, USER_UPDATED } = process.env;
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
@@ -225,28 +228,32 @@ exports.updateUser = (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
-    const ID  = parseInt(req.params.id, 10);
-    const IMG = nem.getName(name) + "." + IMG_EXT;
-
-    let user;
     this.checkUserData(name, email, role, res);
 
     User.findAll()
       .then((users) => {
+        let user, img;
+
+        if (image && image.newFilename) {
+          img = nem.getName(name) + "." + IMG_EXT;
+          this.setImage(image.newFilename, img);
+
+        } else {
+          img = users.find(user => user.id === ID)?.image;
+        }
+
         users.filter(user => user.id !== ID).forEach(user => 
           this.checkUserUnique(name, email, user, res));
-
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         if (pass) {
           this.checkUserPass(pass, res);
 
           bcrypt.hash(pass, 10)
-            .then((hash) => { user = { ...fields, image: IMG, pass: hash }})
+            .then((hash) => { user = { ...fields, image: img, pass: hash } })
             .catch(() => res.status(400).json({ message: USER_NOT_PASS }));
 
         } else { 
-          user = { ...fields, image: IMG }
+          user = { ...fields, image: img };
         }
 
         User.update(user, { where: { id: ID }})
