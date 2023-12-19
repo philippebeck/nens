@@ -226,11 +226,12 @@ exports.updateUser = (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
-    let user, img;
     this.checkUserData(name, email, role, res);
 
     User.findAll()
       .then((users) => {
+        let user, img;
+
         users.filter(user => user.id !== ID).forEach(user => 
           this.checkUserUnique(name, email, user, res));
 

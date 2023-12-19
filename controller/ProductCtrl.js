@@ -177,13 +177,20 @@ exports.updateProduct = (req, res, next) => {
 
     Product.findAll()
       .then((products) => {
+        let img;
+
         products.filter(product => product.id !== ID).forEach(product => 
           this.checkProductUnique(name, description, product, res));
 
-        const IMG     = nem.getName(name) + "." + IMG_EXT;
-        const product = { ...fields, image: IMG };
+        if (image && image.newFilename) {
+          img = nem.getName(name) + "." + IMG_EXT;
+          this.setImage(image.newFilename, img);
 
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+        } else {
+          img = products.find(product => product.id === ID)?.image;
+        }
+
+        const product = { ...fields, image: img };
 
         Product.update(product, { where: { id: ID }})
           .then(() => {

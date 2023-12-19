@@ -165,6 +165,7 @@ exports.createArticle = (req, res, next) => {
  */
 exports.updateArticle = (req, res, next) => {
   const { ARTICLE_UPDATED, ARTICLE_NOT_UPDATED } = process.env;
+  const ID = parseInt(req.params.id, 10);
 
   form.parse(req, (err, fields, files) => {
     if (err) { next(err); return }
@@ -172,18 +173,24 @@ exports.updateArticle = (req, res, next) => {
     const { name, text, alt, cat } = fields;
     const { image } = files;
 
-    const ID  = parseInt(req.params.id, 10);
-    const IMG = nem.getName(name) + "." + IMG_EXT;
-
     this.checkArticleData(name, text, alt, cat, res);
 
     Article.findAll()
       .then((articles) => {
+        let img;
+
         articles.filter(article => article.id !== ID).forEach(article => 
           this.checkArticleUnique(name, text, article, res));
 
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
-        const article = { ...fields, image: IMG };
+        if (image && image.newFilename) {
+          img = nem.getName(name) + "." + IMG_EXT;
+          this.setImage(image.newFilename, img);
+
+        } else {
+          img = articles.find(article => article.id === ID)?.image;
+        }
+
+        const article = { ...fields, image: img };
 
         Article.update(article, { where: { id: ID }})
           .then(() => {
