@@ -128,6 +128,9 @@ exports.createArticle = (req, res, next) => {
     const { name, text, alt, cat } = fields;
     const { image } = files;
 
+    const IMG = nem.getName(name) + "." + IMG_EXT;
+    if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+
     this.checkArticleData(name, text, alt, cat, res);
 
     Article.findAll()
@@ -136,10 +139,7 @@ exports.createArticle = (req, res, next) => {
           this.checkArticleUnique(name, text, article, res);
         }
 
-        const IMG     = nem.getName(name) + "." + IMG_EXT;
         const article = { ...fields, image: IMG };
-
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         Article.create(article)
           .then(() => {
@@ -181,9 +181,6 @@ exports.updateArticle = (req, res, next) => {
       .then((articles) => {
         let img;
 
-        articles.filter(article => article.id !== ID).forEach(article => 
-          this.checkArticleUnique(name, text, article, res));
-
         if (image && image.newFilename) {
           img = nem.getName(name) + "." + IMG_EXT;
           this.setImage(image.newFilename, img);
@@ -191,6 +188,9 @@ exports.updateArticle = (req, res, next) => {
         } else {
           img = articles.find(article => article.id === ID)?.image;
         }
+
+        articles.filter(article => article.id !== ID).forEach(article => 
+          this.checkArticleUnique(name, text, article, res));
 
         const article = { ...fields, image: img };
 

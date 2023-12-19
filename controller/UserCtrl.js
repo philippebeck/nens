@@ -102,6 +102,9 @@ exports.createUser = (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
+    const IMG = nem.getName(name) + "." + IMG_EXT;
+    if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+
     this.checkUserData(name, email, role, res);
     this.checkUserPass(pass, res);
 
@@ -110,10 +113,6 @@ exports.createUser = (req, res, next) => {
         for (const user of users) {
           this.checkUserUnique(name, email, user, res);
         }
-
-        const IMG = nem.getName(name) + "." + IMG_EXT;
-
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         bcrypt.hash(pass, 10)
           .then((hash) => {
@@ -235,9 +234,6 @@ exports.updateUser = (req, res, next) => {
       .then((users) => {
         let user, img;
 
-        users.filter(user => user.id !== ID).forEach(user => 
-          this.checkUserUnique(name, email, user, res));
-
         if (image && image.newFilename) {
           img = nem.getName(name) + "." + IMG_EXT;
           this.setImage(image.newFilename, img);
@@ -245,6 +241,9 @@ exports.updateUser = (req, res, next) => {
         } else {
           img = users.find(user => user.id === ID)?.image;
         }
+
+        users.filter(user => user.id !== ID).forEach(user => 
+          this.checkUserUnique(name, email, user, res));
 
         if (pass) {
           this.checkUserPass(pass, res);
