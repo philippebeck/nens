@@ -102,14 +102,17 @@ exports.createUser = (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
-    const IMG = nem.getName(name) + "." + IMG_EXT;
-
     this.checkUserData(name, email, role, res);
     this.checkUserPass(pass, res);
 
     User.findAll()
       .then((users) => {
-        for (const user of users) this.checkUserUnique(name, email, user, res);
+        for (const user of users) {
+          this.checkUserUnique(name, email, user, res);
+        }
+
+        const IMG = nem.getName(name) + "." + IMG_EXT;
+
         if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         bcrypt.hash(pass, 10)

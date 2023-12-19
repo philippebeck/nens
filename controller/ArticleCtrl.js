@@ -128,16 +128,18 @@ exports.createArticle = (req, res, next) => {
     const { name, text, alt, cat } = fields;
     const { image } = files;
 
-    const IMG = nem.getName(name) + "." + IMG_EXT;
-
     this.checkArticleData(name, text, alt, cat, res);
 
     Article.findAll()
       .then((articles) => {
-        for (const article of articles) this.checkArticleUnique(name, text, article, res);
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+        for (const article of articles) {
+          this.checkArticleUnique(name, text, article, res);
+        }
 
+        const IMG     = nem.getName(name) + "." + IMG_EXT;
         const article = { ...fields, image: IMG };
+
+        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
 
         Article.create(article)
           .then(() => {
