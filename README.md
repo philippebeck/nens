@@ -15,8 +15,6 @@ API with Node, Express, NemJS & SQL
 
 ## Overview
 
-**Warning : This is an alpha version in development, the API is not ready yet.**
-
 Nens is an API made with Node, Express & MySQL, where you can find an "homemade" package complementary, NemJS, for JWT, Nodemailer, Sharp & back securities, as the backend services  
 
 ## Summary
@@ -65,7 +63,7 @@ Install the backend dependencies :
 ## Configuration
 
 To configure the backend, replace values :  
-`.env.en  || .env.fr` *(then rename it .env)*  
+`.env.example` *(then rename it .env)*  
 
 ---
 
@@ -78,14 +76,14 @@ To run the backend server :
 ## Content
 
 Available API Files :
+-  **AuthCtrl, AuthRoute** *(Auth)*  
+-  **UserModel, UserCtrl, UserRoute** *(Users)*  
 -  **ProductModel, ProductCtrl, ProductRoute** *(Products)*  
 -  **OrderModel, OrderCtrl, OrderRoute** *(Product Orders)*  
 -  **ArticleModel, ArticleCtrl, ArticleRoute** *(Articles)*  
+-  **LinkModel, LinkCtrl, LinkRoute** *(Links)*  
 -  **GalleryModel, GalleryCtrl, GalleryRoute** *(Galleries)*  
 -  **ImageModel, ImageCtrl, ImageRoute** *(Gallery Images)*  
--  **AuthCtrl, AuthRoute** *(Auth)*  
--  **UserModel, UserCtrl, UserRoute** *(Users)*  
--  **LinkModel, LinkCtrl, LinkRoute** *(Links)*  
 
 ---
 
