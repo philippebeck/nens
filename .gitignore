@@ -1,3 +1,4 @@
 .env
+coverage/
 data/DBPrivate.sql
 node_modules/
