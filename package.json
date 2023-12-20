@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "start": "nodemon server",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "license": "Apache-2.0 License",
   "main": "server.js",
@@ -26,7 +26,7 @@
     "google-recaptcha": "^1.1.0",
     "helmet": "^5.0.2",
     "mysql2": "^3.6.5",
-    "nemjs": "^2.1.0",
+    "nemjs": "^2.1.1",
     "sequelize": "^6.35.1"
   },
   "author": {
