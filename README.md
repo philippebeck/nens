@@ -26,6 +26,7 @@ Nens is an API made with Node, Express & MySQL, where you can find an "homemade"
   - [Package](#package)
   - [Installation](#installation)
   - [Configuration](#configuration)
+  - [DataBase](#database)
   - [Usage](#usage)
   - [Content](#content)
   - [Documentation](#documentation)
@@ -67,6 +68,20 @@ Concat the .env.example of NemJS with the .env.example of Nens :
 
 Configure the .env.compile by replacing the values *(like DB, Mailer & Token)* :  
 `.env.compile` *(then rename it .env)*  
+
+Your personal .env will be hidden in .gitignore automatically  
+
+---
+
+## DataBase
+
+Import the database tables :  
+`$ mysql -u root -p < data/DBTables.sql` or with a UI like phpMyAdmin  
+
+Replace data from DBPublic.sql, add your own data, especially for users & products, then import this file :  
+`$ mysql -u root -p < data/DBPublic.sql` or with a UI like phpMyAdmin  
+
+Personally, I have another SQL file for private data (users & products), hidden in .gitignore  
 
 ---
 
