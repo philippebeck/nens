@@ -3,8 +3,8 @@
 API with Node, Express, NemJS & SQL
 
 [![NPM Version](https://badgen.net/npm/v/nens)](https://www.npmjs.com/package/nens)
-[![NPM Downloads](https://badgen.net/npm/dt/nens)](https://www.npmjs.com/package/nens)
 
+[![NPM Downloads](https://badgen.net/npm/dt/nens)](https://www.npmjs.com/package/nens)
 [![GitHub Last Commit](https://badgen.net/github/last-commit/philippebeck/nens)](https://github.com/philippebeck/nens/commits/master)
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7e8b050c9e1a4350a1cbc93a1cbf85c0)](https://app.codacy.com/gh/philippebeck/nens/dashboard)
@@ -62,8 +62,11 @@ Install the backend dependencies :
 
 ## Configuration
 
-To configure the backend, replace values :  
-`.env.example` *(then rename it .env)*  
+Concat the .env.example of NemJS with the .env.example of Nens :  
+`$ grunt`
+
+Configure the .env.compile by replacing the values *(like DB, Mailer & Token)* :  
+`.env.compile` *(then rename it .env)*  
 
 ---
 
