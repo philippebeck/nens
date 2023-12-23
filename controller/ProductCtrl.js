@@ -1,9 +1,10 @@
 "use strict";
 
-const db          = require("../model");
-const formidable  = require("formidable");
-const fs          = require("fs");
-const nem         = require("nemjs");
+const db            = require("../model");
+const formidable    = require("formidable");
+const fs            = require("fs");
+const nem           = require("nemjs");
+const { promisify } = require("util");
 
 require("dotenv").config();
 
@@ -12,8 +13,9 @@ const {IMG_EXT, IMG_URL, PRODUCT_NOT_FOUND, PRODUCTS_NOT_FOUND, THUMB_URL } = pr
 const PRODUCTS_IMG    = IMG_URL + "products/";
 const PRODUCTS_THUMB  = THUMB_URL + "products/";
 
-const form    = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
-const Product = db.product;
+const form        = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
+const Product     = db.product;
+const unlinkAsync = promisify(fs.unlink);
 
 //! ******************** UTILS ********************
 
@@ -67,7 +69,7 @@ exports.checkProductUnique = (name, description, product, res) => {
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = (input, output) => {
+exports.setImage = async (input, output) => {
   const INPUT   = `products/${input}`;
   const OUTPUT  = `products/${output}`;
 
@@ -118,39 +120,33 @@ exports.readProduct = (req, res) => {
  * @return {Object} A message indicating that the product was created.
  * @throws {Error} If the product is not created.
  */
-exports.createProduct = (req, res, next) => {
+exports.createProduct = async (req, res, next) => {
   const { PRODUCT_CREATED, PRODUCT_NOT_CREATED } = process.env;
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { alt, cat, description, name, price } = fields;
     const { image } = files;
 
     const IMG = nem.getName(fields.name) + "." + IMG_EXT;
-    if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+    if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
 
     this.checkProductData(name, description, alt, price, cat, res);
 
-    Product.findAll()
-      .then((products) => {
-        for (let product of products) {
-          this.checkProductUnique(name, description, product, res)
-        }
+    try {
+      const products = await Product.findAll();
+      for (let product of products) this.checkProductUnique(name, description, product, res);
 
-        const product = { ...fields, image: IMG };
+      const product = { ...fields, image: IMG };
+      await Product.create(product);
 
-        Product.create(product)
-          .then(() => {
-            if (image && image.newFilename) {
-              fs.unlink(PRODUCTS_IMG + image.newFilename, () => { 
-                res.status(201).json({ message: PRODUCT_CREATED })
-              })
-            }
-          })
-          .catch(() => res.status(400).json({ message: PRODUCT_NOT_CREATED }));
-      })
-      .catch(() => res.status(404).json({ message: PRODUCTS_NOT_FOUND }));
+      if (image && image.newFilename) await unlinkAsync(PRODUCTS_IMG + image.newFilename);
+      res.status(201).json({ message: PRODUCT_CREATED });
+
+    } catch (error) {
+      res.status(400).json({ message: PRODUCT_NOT_CREATED });
+    }
   })
 };
 
@@ -163,11 +159,11 @@ exports.createProduct = (req, res, next) => {
  * @return {Object} A message indicating that the product was updated.
  * @throws {Error} If the product is not updated.
  */
-exports.updateProduct = (req, res, next) => {
+exports.updateProduct = async (req, res, next) => {
   const { PRODUCT_NOT_UPDATED, PRODUCT_UPDATED } = process.env;
   const ID = parseInt(req.params.id, 10);
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { name, description, alt, price, cat } = fields;
@@ -175,33 +171,30 @@ exports.updateProduct = (req, res, next) => {
 
     this.checkProductData(name, description, alt, price, cat, res);
 
-    Product.findAll()
-      .then((products) => {
-        let img;
+    try {
+      const products = await Product.findAll();
+      let img;
 
-        if (image && image.newFilename) {
-          img = nem.getName(name) + "." + IMG_EXT;
-          this.setImage(image.newFilename, img);
+      if (image && image.newFilename) {
+        img = nem.getName(name) + "." + IMG_EXT;
+        await this.setImage(image.newFilename, img);
 
-        } else {
-          img = products.find(product => product.id === ID)?.image;
-        }
+      } else {
+        img = products.find(product => product.id === ID)?.image;
+      }
 
-        products.filter(product => product.id !== ID).forEach(product => 
-          this.checkProductUnique(name, description, product, res));
+      products.filter(product => product.id !== ID).forEach(product =>
+        this.checkProductUnique(name, description, product, res));
 
-        const product = { ...fields, image: img };
+      const product = { ...fields, image: img };
+      await Product.update(product, { where: { id: ID }});
 
-        Product.update(product, { where: { id: ID }})
-          .then(() => {
-            if (image && image.newFilename) {
-              fs.unlink(PRODUCTS_IMG + image.newFilename, () => {})
-            }
-            res.status(200).json({ message: PRODUCT_UPDATED });
-          })
-          .catch(() => res.status(400).json({ message: PRODUCT_NOT_UPDATED }));
-      })
-      .catch(() => res.status(404).json({ message: PRODUCTS_NOT_FOUND }));
+      if (image && image.newFilename) await unlinkAsync(PRODUCTS_IMG + image.newFilename);
+      res.status(200).json({ message: PRODUCT_UPDATED });
+
+    } catch (error) {
+      res.status(400).json({ message: PRODUCT_NOT_UPDATED });
+    }
   })
 };
 
