@@ -104,22 +104,30 @@ exports.createUser = async (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
-    const IMG = nem.getName(name) + "." + IMG_EXT;
-    if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
-
-    this.checkUserData(name, email, role, res);a
-    this.checkUserPass(pass, res);
-
     try {
+      this.checkUserData(name, email, role, res);
+      this.checkUserPass(pass, res);
+
       const users = await User.findAll();
-      for (const user of users) this.checkUserUnique(name, email, user, res);
+
+      if (!users || users.length === 0) {
+        return res.status(404).json({ message: USER_NOT_FOUND });
+      }
+
+      for (const user of users) {
+        this.checkUserUnique(name, email, user, res);
+      }
+
+      const IMG = nem.getName(name) + "." + IMG_EXT;
+
+      if (image && image.newFilename) {
+        await this.setImage(image.newFilename, IMG);
+        await unlinkAsync(USERS_IMG + image.newFilename);
+      }
 
       const hash = bcrypt.hash(pass, 10);
-      const user = { ...fields, image: IMG, pass: hash };
 
-      await User.create(user);
-
-      if (image && image.newFilename) await unlinkAsync(USERS_IMG + image.newFilename);
+      await User.create({ ...fields, image: IMG, pass: hash });
       res.status(201).json({ message: USER_CREATED });
 
     } catch (error) {
@@ -223,22 +231,31 @@ exports.updateUser = async (req, res, next) => {
     const { name, email, role, pass } = fields;
     const { image } = files;
 
-    this.checkUserData(name, email, role, res);
-
     try {
+      this.checkUserData(name, email, role, res);
+
       const users = await User.findAll();
-      let user, img;
+
+      if (!users || users.length === 0) {
+        res.status(404).json({ message: USER_NOT_FOUND });
+        return;
+      }
+
+      users
+        .filter(user => user.id !== ID)
+        .forEach(user => this.checkUserUnique(name, email, user, res));
+
+      let img, user;
 
       if (image && image.newFilename) {
         img = nem.getName(name) + "." + IMG_EXT;
+
         await this.setImage(image.newFilename, img);
+        await unlinkAsync(USERS_IMG + image.newFilename);
 
       } else {
         img = users.find(user => user.id === ID)?.image;
       }
-
-      users.filter(user => user.id !== ID).forEach(user => 
-        this.checkUserUnique(name, email, user, res));
 
       if (pass) {
         this.checkUserPass(pass, res);
@@ -251,8 +268,6 @@ exports.updateUser = async (req, res, next) => {
       }
 
       await User.update(user, { where: { id: ID }});
-
-      if (image && image.newFilename) await unlinkAsync(USERS_IMG + image.newFilename);
       res.status(200).json({ message: USER_UPDATED });
 
     } catch (error) {

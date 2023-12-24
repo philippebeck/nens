@@ -126,22 +126,31 @@ exports.createProduct = async (req, res, next) => {
   form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
-    const { alt, cat, description, name, price } = fields;
+    const { name, description, alt, price, cat } = fields;
     const { image } = files;
 
-    const IMG = nem.getName(fields.name) + "." + IMG_EXT;
-    if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
-
-    this.checkProductData(name, description, alt, price, cat, res);
-
     try {
+      this.checkProductData(name, description, alt, price, cat, res);
+
       const products = await Product.findAll();
-      for (let product of products) this.checkProductUnique(name, description, product, res);
 
-      const product = { ...fields, image: IMG };
-      await Product.create(product);
+      if (!products || products.length === 0) {
+        res.status(404).json({ message: PRODUCTS_NOT_FOUND });
+        return;
+      }
 
-      if (image && image.newFilename) await unlinkAsync(PRODUCTS_IMG + image.newFilename);
+      for (const product of products) {
+        this.checkProductUnique(name, description, product, res);
+      }
+
+      const IMG = nem.getName(name) + "." + IMG_EXT;
+
+      if (image && image.newFilename) {
+        await this.setImage(image.newFilename, IMG);
+        await unlinkAsync(PRODUCTS_IMG + image.newFilename);
+      } 
+
+      await Product.create({ ...fields, image: IMG });
       res.status(201).json({ message: PRODUCT_CREATED });
 
     } catch (error) {
@@ -169,27 +178,33 @@ exports.updateProduct = async (req, res, next) => {
     const { name, description, alt, price, cat } = fields;
     const { image } = files;
 
-    this.checkProductData(name, description, alt, price, cat, res);
-
     try {
+      this.checkProductData(name, description, alt, price, cat, res);
+
       const products = await Product.findAll();
+
+      if (!products || products.length === 0) {
+        res.status(404).json({ message: PRODUCTS_NOT_FOUND });
+        return;
+      }
+
+      products
+        .filter(product => product.id !== ID)
+        .forEach(product => this.checkProductUnique(name, description, product, res));
+
       let img;
 
       if (image && image.newFilename) {
         img = nem.getName(name) + "." + IMG_EXT;
+
         await this.setImage(image.newFilename, img);
+        await unlinkAsync(PRODUCTS_IMG + image.newFilename);
 
       } else {
         img = products.find(product => product.id === ID)?.image;
       }
 
-      products.filter(product => product.id !== ID).forEach(product =>
-        this.checkProductUnique(name, description, product, res));
-
-      const product = { ...fields, image: img };
-      await Product.update(product, { where: { id: ID }});
-
-      if (image && image.newFilename) await unlinkAsync(PRODUCTS_IMG + image.newFilename);
+      await Product.update({ ...fields, image: img }, { where: { id: ID }});
       res.status(200).json({ message: PRODUCT_UPDATED });
 
     } catch (error) {

@@ -130,19 +130,28 @@ exports.createArticle = async (req, res, next) => {
     const { name, text, alt, cat } = fields;
     const { image } = files;
 
-    const IMG = nem.getName(name) + "." + IMG_EXT;
-    if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
-
-    this.checkArticleData(name, text, alt, cat, res);
-
     try {
+      this.checkArticleData(name, text, alt, cat, res);
+
       const articles = await Article.findAll();
-      for (const article of articles) this.checkArticleUnique(name, text, article, res);
 
-      const article = { ...fields, image: IMG };
-      await Article.create(article);
+      if (!articles || articles.length === 0) {
+        res.status(404).json({ message: ARTICLES_NOT_FOUND });
+        return;
+      }
 
-      if (image && image.newFilename) await unlinkAsync(ARTICLES_IMG + image.newFilename);  
+      for (const article of articles) {
+        this.checkArticleUnique(name, text, article, res);
+      }
+
+      const IMG = nem.getName(name) + "." + IMG_EXT;
+
+      if (image && image.newFilename) {
+        await this.setImage(image.newFilename, IMG);
+        await unlinkAsync(ARTICLES_IMG + image.newFilename);
+      }
+
+      await Article.create({ ...fields, image: IMG });
       res.status(201).json({ message: ARTICLE_CREATED });
 
     } catch (error) {
@@ -171,27 +180,33 @@ exports.updateArticle = async (req, res, next) => {
     const { name, text, alt, cat } = fields;
     const { image } = files;
 
-    this.checkArticleData(name, text, alt, cat, res);
-
     try {
+      this.checkArticleData(name, text, alt, cat, res);
+
       const articles = await Article.findAll();
+
+      if (!articles || articles.length === 0) {
+        res.status(404).json({ message: ARTICLES_NOT_FOUND });
+        return;
+      }
+
+      articles
+        .filter(article => article.id !== ID)
+        .forEach(article => this.checkArticleUnique(name, text, article, res));
+
       let img;
 
       if (image && image.newFilename) {
         img = nem.getName(name) + "." + IMG_EXT;
+
         await this.setImage(image.newFilename, img);
+        await unlinkAsync(ARTICLES_IMG + image.newFilename);
 
       } else {
         img = articles.find(article => article.id === ID)?.image;
       }
 
-      articles.filter(article => article.id !== ID).forEach(article =>
-        this.checkArticleUnique(name, text, article, res));
-
-      const article = { ...fields, image: img };
-      await Article.update(article, { where: { id: ID }});
-
-      if (image && image.newFilename) await unlinkAsync(ARTICLES_IMG + image.newFilename);
+      await Article.update({ ...fields, image: img }, { where: { id: ID }});
       res.status(200).json({ message: ARTICLE_UPDATED });
 
     } catch (error) {

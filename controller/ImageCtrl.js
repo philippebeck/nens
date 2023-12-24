@@ -91,37 +91,36 @@ exports.createImage = async (req, res, next) => {
     const { description, galleryId } = fields;
     const { image } = files;
 
-    this.checkImageData(description, res);
-
     try {
+      this.checkImageData(description, res);
+
       const gallery = await Gallery.findOne({ where: { id: galleryId }});
+      const images  = await Image.findAll({ where: { galleryId: galleryId }});
 
       if (!gallery) {
         res.status(404).json({ message: GALLERY_NOT_FOUND });
         return;
-      }
 
-      const images = await Image.findAll({ where: { galleryId: galleryId }});
+      } else if (!images || images.length === 0) {
+        res.status(404).json({ message: IMAGES_NOT_FOUND });
+        return;
+      }
 
       let index = images.length + 1;
       if (index < 10) index = `0${index}`;
 
       const IMG = `${nem.getName(gallery.name)}-${index}.${IMG_EXT}`;
-      if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
 
-      const img = { ...fields, name: IMG };
-      await Image.create(img);
+      if (image && image.newFilename) {
+        await this.setImage(image.newFilename, IMG);
+        await unlinkAsync(GALLERIES_IMG + image.newFilename);
+      }
 
-      if (image && image.newFilename) await unlinkAsync(GALLERIES_IMG + image.newFilename);
+      await Image.create({ ...fields, name: IMG });
       res.status(201).json({ message: IMAGE_CREATED });
 
     } catch (error) {
-      if (error.name === 'SequelizeDatabaseError') {
-        res.status(404).json({ message: IMAGES_NOT_FOUND });
-
-      } else {
-        res.status(400).json({ message: IMAGE_NOT_CREATED });
-      }
+      res.status(400).json({ message: IMAGE_NOT_CREATED });
     }
   })
 };
@@ -145,15 +144,15 @@ exports.updateImage = async (req, res, next) => {
     const { name, description } = fields;
     const { image } = files;
 
-    if (image && image.newFilename) await this.setImage(image.newFilename, name);
-
-    this.checkImageData(description, res);
-    const img = { ...fields };
-
     try {
-      await Image.update(img, { where: { id: ID }});
+      this.checkImageData(description, res);
 
-      if (image && image.newFilename) await unlinkAsync(GALLERIES_IMG + image.newFilename);
+      if (image && image.newFilename) {
+        await this.setImage(image.newFilename, name);
+        await unlinkAsync(GALLERIES_IMG + image.newFilename);
+      }
+
+      await Image.update({ ...fields }, { where: { id: ID }});
       res.status(200).json({ message: IMAGE_UPDATED });
 
     } catch (error) {
