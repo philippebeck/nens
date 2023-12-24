@@ -1,28 +1,28 @@
 "use strict";
 
-const db            = require("../model");
-const formidable    = require("formidable");
-const fs            = require("fs");
-const nem           = require("nemjs");
-const { promisify } = require('util');
+const db          = require("../model");
+const formidable  = require("formidable");
+const fs          = require("fs");
+const nem         = require("nemjs");
 
 require("dotenv").config();
 
 const { IMAGES_NOT_FOUND, IMG_URL, THUMB_URL } = process.env;
 
-const GALLERIES_IMG   = IMG_URL + "galleries/";
-const GALLERIES_THUMB = THUMB_URL + "galleries/";
+const GALLERIES_IMG   = `${IMG_URL}galleries/`;
+const GALLERIES_THUMB = `${THUMB_URL}galleries/`;
 
-const form        = formidable({ uploadDir: GALLERIES_IMG, keepExtensions: true });
-const Gallery     = db.gallery;
-const Image       = db.image;
-const unlinkAsync = promisify(fs.unlink);
+const form = formidable({ uploadDir: GALLERIES_IMG, keepExtensions: true });
+
+const Gallery = db.gallery;
+const Image   = db.image;
 
 //! ******************** UTILS ********************
 
 /**
  * ? CHECK IMAGE DATA
  * * Checks the image data.
+ * 
  * @param {string} description - The description of the image data.
  * @param {object} res - The response object.
  * @return {object} The JSON response.
@@ -38,6 +38,7 @@ exports.checkImageData = (description, res) => {
 /**
  * ? SET IMAGE
  * * Sets the image & thumbnail for a gallery.
+ * 
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
@@ -45,8 +46,8 @@ exports.setImage = async (input, output) => {
   const INPUT   = `galleries/${input}`;
   const OUTPUT  = `galleries/${output}`;
 
-  nem.setImage(INPUT, OUTPUT);
-  nem.setThumbnail(INPUT, OUTPUT);
+  await nem.setImage(INPUT, OUTPUT);
+  await nem.setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -54,21 +55,28 @@ exports.setImage = async (input, output) => {
 /**
  * ? LIST IMAGES
  * * Retrieves a list of gallery images based on the provided gallery ID.
+ * 
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Promise} A promise that resolves to a response containing the list of gallery images.
  * @throws {Error} If the images are not found in the database.
  */
-exports.listImages = (req, res) => {
-  Image.belongsTo(Gallery, { foreignKey: "galleryId" });
+exports.listImages = async (req, res) => {
+  try {
+    Image.belongsTo(Gallery, { foreignKey: "galleryId" });
 
-  Image.findAll({
+    const images = await Image.findAll({
       where: { galleryId: req.params.id },
       attributes: ["id", "name", "description", "galleryId"],
       include: { model: Gallery, attributes: ["name"] }
-    })
-    .then((images) => { res.status(200).json(images) })
-    .catch(() => res.status(404).json({ message: IMAGES_NOT_FOUND }));
+    });
+
+    res.status(200).json(images);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: IMAGES_NOT_FOUND });
+  }
 };
 
 //! ******************** PRIVATE ********************
@@ -76,6 +84,7 @@ exports.listImages = (req, res) => {
 /**
  * ? CREATE IMAGE
  * * Creates an image based on the request data.
+ * 
  * @param {Object} req - the request object
  * @param {Object} res - the response object
  * @param {Function} next - the next middleware function
@@ -98,28 +107,24 @@ exports.createImage = async (req, res, next) => {
       const images  = await Image.findAll({ where: { galleryId: galleryId }});
 
       if (!gallery) {
-        res.status(404).json({ message: GALLERY_NOT_FOUND });
-        return;
+        return res.status(404).json({ message: GALLERY_NOT_FOUND });
 
       } else if (!images || images.length === 0) {
-        res.status(404).json({ message: IMAGES_NOT_FOUND });
-        return;
+        return res.status(404).json({ message: IMAGES_NOT_FOUND });
       }
 
-      let index = images.length + 1;
-      if (index < 10) index = `0${index}`;
-
-      const IMG = `${nem.getName(gallery.name)}-${index}.${IMG_EXT}`;
+      const IMG = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
         await this.setImage(image.newFilename, IMG);
-        await unlinkAsync(GALLERIES_IMG + image.newFilename);
+        await fs.promises.unlink(GALLERIES_IMG + image.newFilename);
       }
 
       await Image.create({ ...fields, name: IMG });
       res.status(201).json({ message: IMAGE_CREATED });
 
     } catch (error) {
+      console.error(error);
       res.status(400).json({ message: IMAGE_NOT_CREATED });
     }
   })
@@ -127,7 +132,8 @@ exports.createImage = async (req, res, next) => {
 
 /**
  * ? UPDATE IMAGE
- * * Updates an image.
+ * * Updates an image by its ID & based on the request data.
+ * 
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @param {Function} next - The next middleware function.
@@ -149,13 +155,14 @@ exports.updateImage = async (req, res, next) => {
 
       if (image && image.newFilename) {
         await this.setImage(image.newFilename, name);
-        await unlinkAsync(GALLERIES_IMG + image.newFilename);
+        await fs.promises.unlink(GALLERIES_IMG + image.newFilename);
       }
 
       await Image.update({ ...fields }, { where: { id: ID }});
       res.status(200).json({ message: IMAGE_UPDATED });
 
     } catch (error) {
+      console.error(error);
       res.status(400).json({ message: IMAGE_NOT_UPDATED });
     }
   })
@@ -163,26 +170,32 @@ exports.updateImage = async (req, res, next) => {
 
 /**
  * ? DELETE IMAGE
- * * Deletes an image from the server and database.
+ * * Deletes an image by its ID.
+ * 
  * @param {Object} req - The HTTP request object.
  * @param {Object} res - The HTTP response object.
  * @return {Object} A message indicating that the image was deleted.
  * @throws {Error} If the image is not deleted in the database.
  */
-exports.deleteImage = (req, res) => {
+exports.deleteImage = async (req, res) => {
   const { IMAGE_DELETED, IMAGE_NOT_DELETED, IMAGE_NOT_FOUND } = process.env;
   const ID = parseInt(req.params.id, 10);
 
-  Image.findByPk(ID)
-    .then((image) => {
-      fs.unlink(GALLERIES_THUMB + image.name, () => {
-        fs.unlink(GALLERIES_IMG + image.name, () => {
+  try {
+    const image = await Image.findByPk(ID);
 
-          Image.destroy({ where: { id: ID }})
-            .then(() => res.status(204).json({ message: IMAGE_DELETED }))
-            .catch(() => res.status(400).json({ message: IMAGE_NOT_DELETED }));
-        })
-      })
-    })
-    .catch(() => res.status(404).json({ message: IMAGE_NOT_FOUND }));
+    if (!image) {
+      return res.status(404).json({ message: IMAGE_NOT_FOUND });
+    }
+
+    await fs.promises.unlink(GALLERIES_THUMB + image.name);
+    await fs.promises.unlink(GALLERIES_IMG + image.name);
+
+    await Image.destroy({ where: { id: ID } });
+    res.status(204).json({ message: IMAGE_DELETED });
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: IMAGE_NOT_DELETED });
+  }
 };
