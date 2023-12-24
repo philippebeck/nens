@@ -1,27 +1,27 @@
 "use strict";
 
-const db            = require("../model");
-const formidable    = require("formidable");
-const fs            = require("fs");
-const nem           = require("nemjs");
-const { promisify } = require('util');
+const db          = require("../model");
+const formidable  = require("formidable");
+const fs          = require("fs");
+const nem         = require("nemjs");
 
 require("dotenv").config();
 
 const { ARTICLE_NOT_FOUND, ARTICLES_NOT_FOUND, IMG_EXT, IMG_URL, THUMB_URL } = process.env;
 
-const ARTICLES_IMG    = IMG_URL + "articles/";
-const ARTICLES_THUMB  = THUMB_URL + "articles/";
+const ARTICLES_IMG    = `${IMG_URL}articles/`;
+const ARTICLES_THUMB  = `${THUMB_URL}articles/`;
 
-const Article     = db.article;
-const form        = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
-const unlinkAsync = promisify(fs.unlink);
+const form = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
+
+const Article = db.article;
 
 //! ******************** UTILS ********************
 
 /**
  * ? CHECK ARTICLE DATA
  * * Checks the validity of article data.
+ * 
  * @param {string} name - The name of the article.
  * @param {string} text - The text of the article.
  * @param {string} alt - The alternative text for the article.
@@ -32,12 +32,12 @@ const unlinkAsync = promisify(fs.unlink);
 exports.checkArticleData = (name, text, alt, cat, res) => {
   const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
-  if (
-    !nem.checkRange(cat, STRING_MIN, STRING_MAX) ||
-    !nem.checkRange(alt, STRING_MIN, STRING_MAX) ||
-    !nem.checkRange(text, TEXT_MIN, TEXT_MAX) ||
-    !nem.checkRange(name, STRING_MIN, STRING_MAX)
-  ) {
+  const IS_NAME_CHECKED = nem.checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_TEXT_CHECKED = nem.checkRange(text, TEXT_MIN, TEXT_MAX);
+  const IS_ALT_CHECKED  = nem.checkRange(alt, STRING_MIN, STRING_MAX);
+  const ID_CAT_CHECKED  = nem.checkRange(cat, STRING_MIN, STRING_MAX);
+
+  if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !ID_CAT_CHECKED) {
     return res.status(403).json({ 
       message: CHECK_CAT || CHECK_NAME || CHECK_TEXT || CHECK_NAME
     });
@@ -47,6 +47,7 @@ exports.checkArticleData = (name, text, alt, cat, res) => {
 /**
  * ? CHECK ARTICLE UNIQUE
  * * Checks if an article is unique based on its name & text.
+ * 
  * @param {string} name - The name of the article.
  * @param {string} text - The text of the article.
  * @param {object} article - The existing article to compare with.
@@ -64,6 +65,7 @@ exports.checkArticleUnique = (name, text, article, res) => {
 /**
  * ? SET IMAGE
  * * Sets the image for an article.
+ * 
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
@@ -71,8 +73,8 @@ exports.setImage = async (input, output) => {
   const INPUT   = `articles/${input}`;
   const OUTPUT  = `articles/${output}`;
 
-  nem.setImage(INPUT, OUTPUT);
-  nem.setThumbnail(INPUT, OUTPUT);
+  await nem.setImage(INPUT, OUTPUT);
+  await nem.setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -86,27 +88,37 @@ exports.setImage = async (input, output) => {
  * @return {Object} The JSON response containing the list of articles.
  * @throws {Error} If the articles are not found in the database.
  */
-exports.listArticles = (req, res) => {
-  Article.findAll()
-    .then((articles) => { res.status(200).json(articles) })
-    .catch(() => res.status(404).json({ message: ARTICLES_NOT_FOUND }));
+exports.listArticles = async (req, res) => {
+  try {
+    const articles = await Article.findAll();
+    res.status(200).json(articles);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: ARTICLES_NOT_FOUND });
+  }
 }
 
 /**
  * ? READ ARTICLE
- * * Retrieves an article by its ID & sends it as a JSON response.
+ * * Retrieves an article by its ID.
  *
  * @param {Object} req - The HTTP request object.
  * @param {Object} res - The HTTP response object.
  * @return {Object} The retrieved article as a JSON response.
  * @throws {Error} If the article is not found in the database.
  */
-exports.readArticle = (req, res) => {
+exports.readArticle = async (req, res) => {
   const ID = parseInt(req.params.id, 10);
 
-  Article.findByPk(ID)
-    .then((article) => { res.status(200).json(article) })
-    .catch(() => res.status(404).json({ message: ARTICLE_NOT_FOUND }));
+  try {
+    const article = await Article.findByPk(ID);
+    res.status(200).json(article);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: ARTICLE_NOT_FOUND });
+  }
 }
 
 //! ******************** PRIVATE ********************
@@ -136,25 +148,25 @@ exports.createArticle = async (req, res, next) => {
       const articles = await Article.findAll();
 
       if (!articles || articles.length === 0) {
-        res.status(404).json({ message: ARTICLES_NOT_FOUND });
-        return;
+        return res.status(404).json({ message: ARTICLES_NOT_FOUND });
       }
 
       for (const article of articles) {
         this.checkArticleUnique(name, text, article, res);
       }
 
-      const IMG = nem.getName(name) + "." + IMG_EXT;
+      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
         await this.setImage(image.newFilename, IMG);
-        await unlinkAsync(ARTICLES_IMG + image.newFilename);
+        await fs.promises.unlink(ARTICLES_IMG + image.newFilename);
       }
 
       await Article.create({ ...fields, image: IMG });
       res.status(201).json({ message: ARTICLE_CREATED });
 
     } catch (error) {
+      console.error(error);
       res.status(400).json({ message: ARTICLE_NOT_CREATED });
     }
   })
@@ -162,7 +174,7 @@ exports.createArticle = async (req, res, next) => {
 
 /**
  * ? UPDATE ARTICLE
- * * Updates an article based on the request.
+ * * Updates an article by its ID & based on the request data.
  *
  * @param {Object} req - the request object
  * @param {Object} res - the response object
@@ -186,8 +198,7 @@ exports.updateArticle = async (req, res, next) => {
       const articles = await Article.findAll();
 
       if (!articles || articles.length === 0) {
-        res.status(404).json({ message: ARTICLES_NOT_FOUND });
-        return;
+        return res.status(404).json({ message: ARTICLES_NOT_FOUND });
       }
 
       articles
@@ -200,7 +211,7 @@ exports.updateArticle = async (req, res, next) => {
         img = nem.getName(name) + "." + IMG_EXT;
 
         await this.setImage(image.newFilename, img);
-        await unlinkAsync(ARTICLES_IMG + image.newFilename);
+        await fs.promises.unlink(ARTICLES_IMG + image.newFilename);
 
       } else {
         img = articles.find(article => article.id === ID)?.image;
@@ -210,6 +221,7 @@ exports.updateArticle = async (req, res, next) => {
       res.status(200).json({ message: ARTICLE_UPDATED });
 
     } catch (error) {
+      console.error(error);
       res.status(400).json({ message: ARTICLE_NOT_UPDATED });
     }
   })
@@ -217,27 +229,32 @@ exports.updateArticle = async (req, res, next) => {
 
 /**
  * ? DELETE ARTICLE
- * * Deletes an article from the database.
- *
+ * * Deletes an article by its ID.
+ * 
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} A message indicating that the article was deleted.
  * @throws {Error} If the article is not deleted in the database.
  */
-exports.deleteArticle = (req, res) => {
+exports.deleteArticle = async (req, res) => {
   const { ARTICLE_DELETED, ARTICLE_NOT_DELETED } = process.env;
   const ID = parseInt(req.params.id, 10);
 
-  Article.findByPk(ID)
-    .then(article => {
-      fs.unlink(ARTICLES_THUMB + article.image, () => {
-        fs.unlink(ARTICLES_IMG + article.image, () => {
+  try {
+    const article = await Article.findByPk(ID);
 
-          Article.destroy({ where: { id: ID }})
-            .then(() => res.status(204).json({ message: ARTICLE_DELETED }))
-            .catch(() => res.status(400).json({ message: ARTICLE_NOT_DELETED }));
-        })
-      })
-    })
-    .catch(() => res.status(404).json({ message: ARTICLE_NOT_FOUND }));
-}
+    if (!article) {
+      return res.status(404).json({ message: ARTICLE_NOT_FOUND });
+    }
+
+    await fs.promises.unlink(ARTICLES_THUMB + article.image);
+    await fs.promises.unlink(ARTICLES_IMG + article.image);
+
+    await Article.destroy({ where: { id: ID } });
+    res.status(204).json({ message: ARTICLE_DELETED });
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: ARTICLE_NOT_DELETED });
+  }
+};
