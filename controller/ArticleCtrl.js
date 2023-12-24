@@ -1,9 +1,10 @@
 "use strict";
 
-const db          = require("../model");
-const formidable  = require("formidable");
-const fs          = require("fs");
-const nem         = require("nemjs");
+const db            = require("../model");
+const formidable    = require("formidable");
+const fs            = require("fs");
+const nem           = require("nemjs");
+const { promisify } = require('util');
 
 require("dotenv").config();
 
@@ -12,8 +13,9 @@ const { ARTICLE_NOT_FOUND, ARTICLES_NOT_FOUND, IMG_EXT, IMG_URL, THUMB_URL } = p
 const ARTICLES_IMG    = IMG_URL + "articles/";
 const ARTICLES_THUMB  = THUMB_URL + "articles/";
 
-const Article = db.article;
-const form    = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
+const Article     = db.article;
+const form        = formidable({ uploadDir: ARTICLES_IMG, keepExtensions: true });
+const unlinkAsync = promisify(fs.unlink);
 
 //! ******************** UTILS ********************
 
@@ -65,7 +67,7 @@ exports.checkArticleUnique = (name, text, article, res) => {
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = (input, output) => {
+exports.setImage = async (input, output) => {
   const INPUT   = `articles/${input}`;
   const OUTPUT  = `articles/${output}`;
 
@@ -119,39 +121,33 @@ exports.readArticle = (req, res) => {
  * @return {Object} A message indicating that the article was created.
  * @throws {Error} If the article is not created in the database.
  */
-exports.createArticle = (req, res, next) => {
+exports.createArticle = async (req, res, next) => {
   const { ARTICLE_CREATED, ARTICLE_NOT_CREATED } = process.env;
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { name, text, alt, cat } = fields;
     const { image } = files;
 
     const IMG = nem.getName(name) + "." + IMG_EXT;
-    if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+    if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
 
     this.checkArticleData(name, text, alt, cat, res);
 
-    Article.findAll()
-      .then((articles) => {
-        for (const article of articles) {
-          this.checkArticleUnique(name, text, article, res);
-        }
+    try {
+      const articles = await Article.findAll();
+      for (const article of articles) this.checkArticleUnique(name, text, article, res);
 
-        const article = { ...fields, image: IMG };
+      const article = { ...fields, image: IMG };
+      await Article.create(article);
 
-        Article.create(article)
-          .then(() => {
-            if (image && image.newFilename) {
-              fs.unlink(ARTICLES_IMG + image.newFilename, () => {
-                res.status(201).json({ message: ARTICLE_CREATED })
-              })
-            }
-          })
-          .catch(() => res.status(400).json({ message: ARTICLE_NOT_CREATED }));
-      })
-      .catch(() => res.status(404).json({ message: ARTICLES_NOT_FOUND }));
+      if (image && image.newFilename) await unlinkAsync(ARTICLES_IMG + image.newFilename);  
+      res.status(201).json({ message: ARTICLE_CREATED });
+
+    } catch (error) {
+      res.status(400).json({ message: ARTICLE_NOT_CREATED });
+    }
   })
 }
 
@@ -165,11 +161,11 @@ exports.createArticle = (req, res, next) => {
  * @return {Object} A message indicating that the article was updated.
  * @throws {Error} If the article is not updated in the database.
  */
-exports.updateArticle = (req, res, next) => {
+exports.updateArticle = async (req, res, next) => {
   const { ARTICLE_UPDATED, ARTICLE_NOT_UPDATED } = process.env;
   const ID = parseInt(req.params.id, 10);
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { name, text, alt, cat } = fields;
@@ -177,33 +173,30 @@ exports.updateArticle = (req, res, next) => {
 
     this.checkArticleData(name, text, alt, cat, res);
 
-    Article.findAll()
-      .then((articles) => {
-        let img;
+    try {
+      const articles = await Article.findAll();
+      let img;
 
-        if (image && image.newFilename) {
-          img = nem.getName(name) + "." + IMG_EXT;
-          this.setImage(image.newFilename, img);
+      if (image && image.newFilename) {
+        img = nem.getName(name) + "." + IMG_EXT;
+        await this.setImage(image.newFilename, img);
 
-        } else {
-          img = articles.find(article => article.id === ID)?.image;
-        }
+      } else {
+        img = articles.find(article => article.id === ID)?.image;
+      }
 
-        articles.filter(article => article.id !== ID).forEach(article => 
-          this.checkArticleUnique(name, text, article, res));
+      articles.filter(article => article.id !== ID).forEach(article =>
+        this.checkArticleUnique(name, text, article, res));
 
-        const article = { ...fields, image: img };
+      const article = { ...fields, image: img };
+      await Article.update(article, { where: { id: ID }});
 
-        Article.update(article, { where: { id: ID }})
-          .then(() => {
-            if (image && image.newFilename) {
-              fs.unlink(ARTICLES_IMG + image.newFilename, () => {})
-            }
-            res.status(200).json({ message: ARTICLE_UPDATED });
-          })
-          .catch(() => res.status(400).json({ message: ARTICLE_NOT_UPDATED }));
-      })
-      .catch(() => res.status(404).json({ message: ARTICLES_NOT_FOUND }));
+      if (image && image.newFilename) await unlinkAsync(ARTICLES_IMG + image.newFilename);
+      res.status(200).json({ message: ARTICLE_UPDATED });
+
+    } catch (error) {
+      res.status(400).json({ message: ARTICLE_NOT_UPDATED });
+    }
   })
 }
 
