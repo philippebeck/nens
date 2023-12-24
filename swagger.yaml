@@ -181,7 +181,7 @@ paths:
         "500":
           description: Internal Server Error
 
-    # POST /auth => Login User
+  # POST /auth => Login User
   /auth:
     post:
       tags:
