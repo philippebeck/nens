@@ -9,6 +9,7 @@ require("dotenv").config();
 const { ORDERS_NOT_FOUND } = process.env;
 
 const form  = formidable();
+
 const Order = db.order;
 const User  = db.user;
 
@@ -17,6 +18,7 @@ const User  = db.user;
 /**
  * ? SET MESSAGE
  * * Sets the message content for an order.
+ * 
  * @param {number} total - The total amount of the order.
  * @param {string} paymentId - The ID of the payment.
  * @param {Array} products - An array of products in the order.
@@ -62,72 +64,81 @@ exports.setMessage = (total, paymentId, products) => {
 /**
  * ? LIST ORDERS
  * * Retrieves a list of orders.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of orders.
  * @throws {Error} If the orders are not found in the database.
  */
-exports.listOrders = (req, res) => {
-  Order.findAll()
-    .then((orders) => { res.status(200).json(orders) })
-    .catch(() => res.status(404).json({ message: ORDERS_NOT_FOUND }));
+exports.listOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll();
+    res.status(200).json(orders);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: ORDERS_NOT_FOUND });
+  }
 };
 
 /**
  * ? LIST USER ORDERS
  * * Retrieves a list of orders for a specific user.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of user orders.
  * @throws {Error} If the orders are not found in the database.
  */
-exports.listUserOrders = (req, res) => {
+exports.listUserOrders = async (req, res) => {
   const ID = parseInt(req.params.id, 10);
 
-  Order.findAll({ where: { userId: ID }})
-    .then((orders) => res.status(200).json(orders))
-    .catch(() => res.status(404).json({ message: ORDERS_NOT_FOUND }));
+  try {
+    const orders = await Order.findAll({ where: { userId: ID }});
+    res.status(200).json(orders);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: ORDERS_NOT_FOUND });
+  }
 };
 
 /**
  * ? CREATE ORDER
  * * Creates an order based on the request data.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @param {Function} next - The next middleware function.
  * @return {Object} A message indicating that the order was created.
  * @throws {Error} If an error occurs while creating the order.
  */
-exports.createOrder = (req, res, next) => {
+exports.createOrder = async (req, res, next) => {
   const { ORDER_CREATED, ORDER_MESSAGE, ORDER_NOT_CREATED, USER_NOT_FOUND } = process.env;
 
-  form.parse(req, (err, fields) => {
+  form.parse(req, async (err, fields) => {
     if (err) { next(err); return }
 
     const { paymentId, products, total } = fields;
     let message = this.setMessage(total, paymentId, products);
 
-    Order.create(fields)
-      .then(() => {
+    try {
+      await Order.create(fields);
 
-        User.findByPk(fields.userId)
-          .then((user) => {
-            message.email = user.email;
-            const mailer  = nem.getMailer();
-            const mail    = nem.getMessage(message);
+      const user = await User.findByPk(fields.userId);
+      if (!user) return res.status(404).json({ message: USER_NOT_FOUND });
 
-            (async function(){
-              try {
-                await mailer.sendMail(mail, function() { 
-                  res.status(202).json({ message: ORDER_MESSAGE })
-                });
-              } catch(e){ console.error(e); }
-            })();
-          })
-          .catch(() => res.status(404).json({ message: USER_NOT_FOUND }));
-      })
-      .then(() => res.status(201).json({ message: ORDER_CREATED }))
-      .catch(() => res.status(400).json({ message: ORDER_NOT_CREATED }));
+      message.email = user.email;
+      const mailer  = nem.getMailer();
+      const mail    = nem.getMessage(message);
+
+      await mailer.sendMail(mail);
+      res.status(202).json({ message: `${ORDER_CREATED} & ${ORDER_MESSAGE}` });
+
+    } catch (error) {
+      console.error(error);
+      res.status(400).json({ message: ORDER_NOT_CREATED });
+    }
   })
 };
 
@@ -155,17 +166,23 @@ exports.updateOrder = (req, res, next) => {
 
 /**
  * ? DELETE ORDER
- * * Deletes an order.
+ * * Deletes an order by its ID.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} A message indicating that the order was deleted.
  * @throws {Error} If the order is not deleted.
  */
-exports.deleteOrder = (req, res) => {
+exports.deleteOrder = async (req, res) => {
   const { ORDER_DELETED, ORDER_NOT_DELETED } = process.env;
   const ID = parseInt(req.params.id, 10);
+  
+  try {
+    await Order.destroy({ where: { id: ID }});
+    res.status(204).json({ message: ORDER_DELETED });
 
-  Order.destroy({ where: { id: ID }})
-    .then(() => res.status(204).json({ message: ORDER_DELETED }))
-    .catch(() => res.status(400).json({ message: ORDER_NOT_DELETED }))
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: ORDER_NOT_DELETED });
+  }
 };
