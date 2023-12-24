@@ -1,9 +1,10 @@
 "use strict";
 
-const db          = require("../model");
-const formidable  = require("formidable");
-const fs          = require("fs");
-const nem         = require("nemjs");
+const db            = require("../model");
+const formidable    = require("formidable");
+const fs            = require("fs");
+const nem           = require("nemjs");
+const { promisify } = require('util');
 
 require("dotenv").config();
 
@@ -12,9 +13,10 @@ const { IMAGES_NOT_FOUND, IMG_URL, THUMB_URL } = process.env;
 const GALLERIES_IMG   = IMG_URL + "galleries/";
 const GALLERIES_THUMB = THUMB_URL + "galleries/";
 
-const form    = formidable({ uploadDir: GALLERIES_IMG, keepExtensions: true });
-const Gallery = db.gallery;
-const Image   = db.image;
+const form        = formidable({ uploadDir: GALLERIES_IMG, keepExtensions: true });
+const Gallery     = db.gallery;
+const Image       = db.image;
+const unlinkAsync = promisify(fs.unlink);
 
 //! ******************** UTILS ********************
 
@@ -39,7 +41,7 @@ exports.checkImageData = (description, res) => {
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = (input, output) => {
+exports.setImage = async (input, output) => {
   const INPUT   = `galleries/${input}`;
   const OUTPUT  = `galleries/${output}`;
 
@@ -80,10 +82,10 @@ exports.listImages = (req, res) => {
  * @return {Object} A message indicating that the image was created.
  * @throws {Error} If the image is not created in the database.
  */
-exports.createImage = (req, res, next) => {
-  const { GALLERY_NOT_FOUND, IMAGE_CREATED, IMAGE_NOT_CREATED, IMAGES_NOT_FOUND, IMG_EXT } = process.env;
+exports.createImage = async (req, res, next) => {
+  const { GALLERY_NOT_FOUND, IMAGE_CREATED, IMAGE_NOT_CREATED, IMG_EXT } = process.env;
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { description, galleryId } = fields;
@@ -91,33 +93,36 @@ exports.createImage = (req, res, next) => {
 
     this.checkImageData(description, res);
 
-    Gallery.findOne({ where: { id: galleryId }})
-      .then((gallery) => {
+    try {
+      const gallery = await Gallery.findOne({ where: { id: galleryId }});
 
-        const IMG = `${nem.getName(gallery.name)}-${index}.${IMG_EXT}`;
-        if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+      if (!gallery) {
+        res.status(404).json({ message: GALLERY_NOT_FOUND });
+        return;
+      }
 
-        Image.findAll({ where: { galleryId: galleryId }})
-          .then((images) => {
+      const images = await Image.findAll({ where: { galleryId: galleryId }});
 
-            let index = images.length + 1;
-            if (index < 10) index = `0${index}`;
+      let index = images.length + 1;
+      if (index < 10) index = `0${index}`;
 
-            const img = { ...fields, name: IMG };
+      const IMG = `${nem.getName(gallery.name)}-${index}.${IMG_EXT}`;
+      if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
 
-            Image.create(img)
-              .then(() => {
-                if (image && image.newFilename) {
-                  fs.unlink(GALLERIES_IMG + image.newFilename, () => { 
-                    res.status(201).json({ message: IMAGE_CREATED })
-                  })
-                }
-              })
-              .catch(() => res.status(400).json({ message: IMAGE_NOT_CREATED }));
-          })
-          .catch(() => res.status(404).json({ message: IMAGES_NOT_FOUND }));
-      })
-      .catch(() => res.status(404).json({ message: GALLERY_NOT_FOUND }));
+      const img = { ...fields, name: IMG };
+      await Image.create(img);
+
+      if (image && image.newFilename) await unlinkAsync(GALLERIES_IMG + image.newFilename);
+      res.status(201).json({ message: IMAGE_CREATED });
+
+    } catch (error) {
+      if (error.name === 'SequelizeDatabaseError') {
+        res.status(404).json({ message: IMAGES_NOT_FOUND });
+
+      } else {
+        res.status(400).json({ message: IMAGE_NOT_CREATED });
+      }
+    }
   })
 };
 
@@ -130,30 +135,30 @@ exports.createImage = (req, res, next) => {
  * @return {Object} A message indicating that the image was updated.
  * @throws {Error} If the image is not updated in the database.
  */
-exports.updateImage = (req, res, next) => {
+exports.updateImage = async (req, res, next) => {
   const { IMAGE_NOT_UPDATED, IMAGE_UPDATED } = process.env;
   const ID = parseInt(req.params.id, 10);
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { name, description } = fields;
     const { image } = files;
 
-    if (image && image.newFilename) this.setImage(image.newFilename, name);
+    if (image && image.newFilename) await this.setImage(image.newFilename, name);
 
     this.checkImageData(description, res);
-
     const img = { ...fields };
 
-    Image.update(img, { where: { id: ID }})
-      .then(() => {
-        if (image && image.newFilename) {
-          fs.unlink(GALLERIES_IMG + image.newFilename, () => {})
-        }
-        res.status(200).json({ message: IMAGE_UPDATED });
-      })
-      .catch(() => res.status(400).json({ message: IMAGE_NOT_UPDATED }));
+    try {
+      await Image.update(img, { where: { id: ID }});
+
+      if (image && image.newFilename) await unlinkAsync(GALLERIES_IMG + image.newFilename);
+      res.status(200).json({ message: IMAGE_UPDATED });
+
+    } catch (error) {
+      res.status(400).json({ message: IMAGE_NOT_UPDATED });
+    }
   })
 };
 
