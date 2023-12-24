@@ -1,20 +1,22 @@
 "use strict";
 
-const bcrypt      = require("bcrypt");
-const db          = require("../model");
-const formidable  = require("formidable");
-const fs          = require("fs");
-const nem         = require("nemjs");
+const bcrypt        = require("bcrypt");
+const db            = require("../model");
+const formidable    = require("formidable");
+const fs            = require("fs");
+const nem           = require("nemjs");
+const { promisify } = require('util');
 
 require("dotenv").config();
 
-const { IMG_EXT, USER_NOT_FOUND, USER_NOT_PASS, USERS_NOT_FOUND } = process.env;
+const { IMG_EXT, USER_NOT_FOUND } = process.env;
 
 const USERS_IMG   = process.env.IMG_URL + "users/";
 const USERS_THUMB = process.env.THUMB_URL + "users/";
 
-const form = formidable({ uploadDir: USERS_IMG, keepExtensions: true });
-const User = db.user;
+const form        = formidable({ uploadDir: USERS_IMG, keepExtensions: true });
+const User        = db.user;
+const unlinkAsync = promisify(fs.unlink);
 
 //! ******************** UTILS ********************
 
@@ -75,7 +77,7 @@ exports.checkUserUnique = (name, email, user, res) => {
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = (input, output) => {
+exports.setImage = async (input, output) => {
   const INPUT   = `users/${input}`;
   const OUTPUT  = `users/${output}`;
 
@@ -93,44 +95,36 @@ exports.setImage = (input, output) => {
  * @return {Object} A message indicating that the user was created.
  * @throws {Error} If the user is not created.
  */
-exports.createUser = (req, res, next) => {
+exports.createUser = async (req, res, next) => {
   const { USER_CREATED, USER_NOT_CREATED } = process.env;
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { name, email, role, pass } = fields;
     const { image } = files;
 
     const IMG = nem.getName(name) + "." + IMG_EXT;
-    if (image && image.newFilename) this.setImage(image.newFilename, IMG);
+    if (image && image.newFilename) await this.setImage(image.newFilename, IMG);
 
-    this.checkUserData(name, email, role, res);
+    this.checkUserData(name, email, role, res);a
     this.checkUserPass(pass, res);
 
-    User.findAll()
-      .then((users) => {
-        for (const user of users) {
-          this.checkUserUnique(name, email, user, res);
-        }
+    try {
+      const users = await User.findAll();
+      for (const user of users) this.checkUserUnique(name, email, user, res);
 
-        bcrypt.hash(pass, 10)
-          .then((hash) => {
-            const user = { ...fields, image: IMG, pass: hash };
+      const hash = bcrypt.hash(pass, 10);
+      const user = { ...fields, image: IMG, pass: hash };
 
-            User.create(user)
-              .then(() => {
-                if (image && image.newFilename) {
-                  fs.unlink(USERS_IMG + image.newFilename, () => { 
-                    res.status(201).json({ message: USER_CREATED })
-                  })
-                }
-              })
-              .catch(() => res.status(400).json({ message: USER_NOT_CREATED }));
-          })
-          .catch(() => res.status(400).json({ message: USER_NOT_PASS }));
-      })
-      .catch(() => { res.status(404).json({ message: USERS_NOT_FOUND })});
+      await User.create(user);
+
+      if (image && image.newFilename) await unlinkAsync(USERS_IMG + image.newFilename);
+      res.status(201).json({ message: USER_CREATED });
+
+    } catch (error) {
+      res.status(400).json({ message: USER_NOT_CREATED });
+    }
   });
 }
 
@@ -172,6 +166,7 @@ exports.sendMessage = (req, res, next) => {
  * @throws {Error} If the users are not found in the database.
  */
 exports.listUsers = (req, res) => {
+  const { USERS_NOT_FOUND } = process.env;
   const usersList = [];
 
   User.findAll()
@@ -218,11 +213,11 @@ exports.readUser = (req, res) => {
  * @return {undefined} This function does not return anything.
  * @throws {Error} If the user is not updated in the database.
  */
-exports.updateUser = (req, res, next) => {
+exports.updateUser = async (req, res, next) => {
   const { USER_NOT_UPDATED, USER_UPDATED } = process.env;
   const ID = parseInt(req.params.id, 10);
 
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
     const { name, email, role, pass } = fields;
@@ -230,42 +225,39 @@ exports.updateUser = (req, res, next) => {
 
     this.checkUserData(name, email, role, res);
 
-    User.findAll()
-      .then((users) => {
-        let user, img;
+    try {
+      const users = await User.findAll();
+      let user, img;
 
-        if (image && image.newFilename) {
-          img = nem.getName(name) + "." + IMG_EXT;
-          this.setImage(image.newFilename, img);
+      if (image && image.newFilename) {
+        img = nem.getName(name) + "." + IMG_EXT;
+        await this.setImage(image.newFilename, img);
 
-        } else {
-          img = users.find(user => user.id === ID)?.image;
-        }
+      } else {
+        img = users.find(user => user.id === ID)?.image;
+      }
 
-        users.filter(user => user.id !== ID).forEach(user => 
-          this.checkUserUnique(name, email, user, res));
+      users.filter(user => user.id !== ID).forEach(user => 
+        this.checkUserUnique(name, email, user, res));
 
-        if (pass) {
-          this.checkUserPass(pass, res);
+      if (pass) {
+        this.checkUserPass(pass, res);
 
-          bcrypt.hash(pass, 10)
-            .then((hash) => { user = { ...fields, image: img, pass: hash } })
-            .catch(() => res.status(400).json({ message: USER_NOT_PASS }));
+        const hash = bcrypt.hash(pass, 10);
+        user = { ...fields, image: img, pass: hash };
 
-        } else { 
-          user = { ...fields, image: img };
-        }
+      } else { 
+        user = { ...fields, image: img };
+      }
 
-        User.update(user, { where: { id: ID }})
-          .then(() => {
-            if (image && image.newFilename) {
-              fs.unlink(USERS_IMG + image.newFilename, () => {})
-            }
-            res.status(200).json({ message: USER_UPDATED });
-          })
-          .catch(() => res.status(400).json({ message: USER_NOT_UPDATED }));
-      })
-      .catch(() => res.status(404).json({ message: USERS_NOT_FOUND }));
+      await User.update(user, { where: { id: ID }});
+
+      if (image && image.newFilename) await unlinkAsync(USERS_IMG + image.newFilename);
+      res.status(200).json({ message: USER_UPDATED });
+
+    } catch (error) {
+      res.status(400).json({ message: USER_NOT_UPDATED });
+    }
   })
 }
 
