@@ -1,27 +1,27 @@
 "use strict";
 
-const db            = require("../model");
-const formidable    = require("formidable");
-const fs            = require("fs");
-const nem           = require("nemjs");
-const { promisify } = require("util");
+const db          = require("../model");
+const formidable  = require("formidable");
+const fs          = require("fs");
+const nem         = require("nemjs");
 
 require("dotenv").config();
 
 const {IMG_EXT, IMG_URL, PRODUCT_NOT_FOUND, PRODUCTS_NOT_FOUND, THUMB_URL } = process.env;
 
-const PRODUCTS_IMG    = IMG_URL + "products/";
-const PRODUCTS_THUMB  = THUMB_URL + "products/";
+const PRODUCTS_IMG    = `${IMG_URL}products/`;
+const PRODUCTS_THUMB  = `${THUMB_URL}products/`;
 
-const form        = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
-const Product     = db.product;
-const unlinkAsync = promisify(fs.unlink);
+const form = formidable({ uploadDir: PRODUCTS_IMG, keepExtensions: true });
+
+const Product = db.product;
 
 //! ******************** UTILS ********************
 
 /**
  * ? CHECK PRODUCT DATA
  * * Validates and checks the product data before processing it.
+ *
  * @param {string} name - The name of the product.
  * @param {string} description - The description of the product.
  * @param {string} alt - The alternative name of the product.
@@ -33,15 +33,15 @@ const unlinkAsync = promisify(fs.unlink);
 exports.checkProductData = (name, description, alt, price, cat, res) => {
   const { CHECK_CAT, CHECK_NAME, CHECK_PRICE, CHECK_TEXT, PRICE_MAX, PRICE_MIN, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
-  if (
-    !nem.checkRange(cat, STRING_MIN, STRING_MAX) ||
-    !nem.checkRange(price, PRICE_MIN, PRICE_MAX) ||
-    !nem.checkRange(alt, STRING_MIN, STRING_MAX) ||
-    !nem.checkRange(description, TEXT_MIN, TEXT_MAX) ||
-    !nem.checkRange(name, STRING_MIN, STRING_MAX)
-  ) {
+  const IS_NAME_CHECKED   = nem.checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_DESC_CHECKED   = nem.checkRange(description, TEXT_MIN, TEXT_MAX);
+  const IS_ALT_CHECKED    = nem.checkRange(alt, STRING_MIN, STRING_MAX);
+  const IS_PRICE_CHECKED  = nem.checkRange(price, PRICE_MIN, PRICE_MAX);
+  const ID_CAT_CHECKED    = nem.checkRange(cat, STRING_MIN, STRING_MAX);
+
+  if (!IS_NAME_CHECKED || !IS_DESC_CHECKED || !IS_ALT_CHECKED || !IS_PRICE_CHECKED || !ID_CAT_CHECKED) {
     return res.status(403).json({ 
-      message: CHECK_CAT || CHECK_PRICE || CHECK_NAME || CHECK_TEXT || CHECK_NAME 
+      message: CHECK_NAME || CHECK_DESC || CHECK_ALT || CHECK_PRICE || CHECK_CAT
     });
   }
 }
@@ -49,6 +49,7 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
 /**
  * ? CHECK PRODUCT UNIQUE
  * * Checks if the given product name and description are unique.
+ *
  * @param {string} name - The name of the product.
  * @param {string} description - The description of the product.
  * @param {object} product - The product object to compare with.
@@ -66,6 +67,7 @@ exports.checkProductUnique = (name, description, product, res) => {
 /**
  * ? SET IMAGE
  * * Sets the image for a product.
+ *
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
@@ -73,8 +75,8 @@ exports.setImage = async (input, output) => {
   const INPUT   = `products/${input}`;
   const OUTPUT  = `products/${output}`;
 
-  nem.setImage(INPUT, OUTPUT);
-  nem.setThumbnail(INPUT, OUTPUT);
+  await nem.setImage(INPUT, OUTPUT);
+  await nem.setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -82,38 +84,51 @@ exports.setImage = async (input, output) => {
 /**
  * ? LIST PRODUCTS
  * * Retrieves a list of all products.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The list of products in JSON format.
  * @throws {Error} If the products are not found in the database.
  */
-exports.listProducts = (req, res) => {
-  Product.findAll()
-    .then((products) => { res.status(200).json(products) })
-    .catch(() => res.status(404).json({ message: PRODUCTS_NOT_FOUND }));
+exports.listProducts = async (req, res) => {
+  try {
+    const products = await Product.findAll();
+    res.status(200).json(products);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: PRODUCTS_NOT_FOUND });
+  }
 };
 
 /**
  * ? READ PRODUCT
  * * Reads a product by its ID.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} The product in JSON format.
  * @throws {Error} If the product is not found in the database.
  */
-exports.readProduct = (req, res) => {
+exports.readProduct = async (req, res) => {
   const ID = parseInt(req.params.id, 10);
 
-  Product.findByPk(ID)
-    .then((product) => { res.status(200).json(product) })
-    .catch(() => res.status(404).json({ message: PRODUCT_NOT_FOUND }));
+  try {
+    const product = await Product.findByPk(ID);
+    res.status(200).json(product);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: PRODUCT_NOT_FOUND });
+  }
 }
 
 //! ******************** PRIVATE ********************
 
 /**
  * ? CREATE PRODUCT
- * * Creates a new product.
+ * * Creates a new product based on the request data.
+ *
  * @param {Object} req - the request object
  * @param {Object} res - the response object
  * @param {Function} next - the next middleware function
@@ -135,25 +150,25 @@ exports.createProduct = async (req, res, next) => {
       const products = await Product.findAll();
 
       if (!products || products.length === 0) {
-        res.status(404).json({ message: PRODUCTS_NOT_FOUND });
-        return;
+        return res.status(404).json({ message: PRODUCTS_NOT_FOUND });
       }
 
       for (const product of products) {
         this.checkProductUnique(name, description, product, res);
       }
 
-      const IMG = nem.getName(name) + "." + IMG_EXT;
+      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
         await this.setImage(image.newFilename, IMG);
-        await unlinkAsync(PRODUCTS_IMG + image.newFilename);
+        await fs.promises.unlink(PRODUCTS_IMG + image.newFilename);
       } 
 
       await Product.create({ ...fields, image: IMG });
       res.status(201).json({ message: PRODUCT_CREATED });
 
     } catch (error) {
+      console.error(error);
       res.status(400).json({ message: PRODUCT_NOT_CREATED });
     }
   })
@@ -161,7 +176,8 @@ exports.createProduct = async (req, res, next) => {
 
 /**
  * ? UPDATE PRODUCT
- * * Updates a product.
+ * * Updates a product by its ID & based on the request data.
+ *
  * @param {Object} req - the request object
  * @param {Object} res - the response object
  * @param {Function} next - the next middleware function
@@ -184,8 +200,7 @@ exports.updateProduct = async (req, res, next) => {
       const products = await Product.findAll();
 
       if (!products || products.length === 0) {
-        res.status(404).json({ message: PRODUCTS_NOT_FOUND });
-        return;
+        return res.status(404).json({ message: PRODUCTS_NOT_FOUND });
       }
 
       products
@@ -198,7 +213,7 @@ exports.updateProduct = async (req, res, next) => {
         img = nem.getName(name) + "." + IMG_EXT;
 
         await this.setImage(image.newFilename, img);
-        await unlinkAsync(PRODUCTS_IMG + image.newFilename);
+        await fs.promises.unlink(PRODUCTS_IMG + image.newFilename);
 
       } else {
         img = products.find(product => product.id === ID)?.image;
@@ -208,6 +223,7 @@ exports.updateProduct = async (req, res, next) => {
       res.status(200).json({ message: PRODUCT_UPDATED });
 
     } catch (error) {
+      console.error(error);
       res.status(400).json({ message: PRODUCT_NOT_UPDATED });
     }
   })
@@ -215,26 +231,32 @@ exports.updateProduct = async (req, res, next) => {
 
 /**
  * ? DELETE PRODUCT
- * * Deletes a product from the database.
+ * * Deletes a product by its ID.
+ *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  * @return {Object} A message indicating that the product was deleted.
  * @throws {Error} If the product is not found in the database.
  */
-exports.deleteProduct = (req, res) => {
+exports.deleteProduct = async (req, res) => {
   const { PRODUCT_DELETED, PRODUCT_NOT_DELETED } = process.env;
   const ID = parseInt(req.params.id, 10);
 
-  Product.findByPk(ID)
-    .then(product => {
-      fs.unlink(PRODUCTS_THUMB + product.image, () => {
-        fs.unlink(PRODUCTS_IMG + product.image, () => {
+  try {
+    const product = await Product.findByPk(ID);
 
-          Product.destroy({ where: { id: ID }})
-            .then(() => res.status(204).json({ message: PRODUCT_DELETED }))
-            .catch(() => res.status(400).json({ message: PRODUCT_NOT_DELETED }))
-        })
-      })
-    })
-    .catch(() => res.status(404).json({ message: PRODUCT_NOT_FOUND }));
-}
+    if (!product) {
+      return res.status(404).json({ message: PRODUCT_NOT_FOUND });
+    }
+
+    await fs.promises.unlink(PRODUCTS_THUMB + product.image);
+    await fs.promises.unlink(PRODUCTS_IMG + product.image);
+
+    await Product.destroy({ where: { id: ID } });
+    res.status(204).json({ message: PRODUCT_DELETED });
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: PRODUCT_NOT_DELETED });
+  }
+};
