@@ -41,7 +41,7 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
 
   if (!IS_NAME_CHECKED || !IS_DESC_CHECKED || !IS_ALT_CHECKED || !IS_PRICE_CHECKED || !ID_CAT_CHECKED) {
     return res.status(403).json({ 
-      message: CHECK_NAME || CHECK_DESC || CHECK_ALT || CHECK_PRICE || CHECK_CAT
+      message: CHECK_NAME || CHECK_TEXT || CHECK_NAME || CHECK_PRICE || CHECK_CAT
     });
   }
 }
