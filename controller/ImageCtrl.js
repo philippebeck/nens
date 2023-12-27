@@ -36,6 +36,24 @@ exports.checkImageData = (description, res) => {
 }
 
 /**
+ * ? CHECK IMAGE UNIQUE
+ * * Checks if the given image name & description are unique.
+ *
+ * @param {string} name - The name of the image.
+ * @param {string} description - The description of the image.
+ * @param {object} image - The image object to compare with.
+ * @param {object} res - The response object.
+ * @return {object} The JSON response object with the appropriate message and status code.
+ */
+exports.checkImageUnique = (name, description, image, res) => {
+  const { DISPO_DESCRIPTION, DISPO_NAME } = process.env;
+
+  if (image.name === name || image.description === description) {
+    return res.status(403).json({ message: DISPO_NAME || DISPO_DESCRIPTION });
+  }
+}
+
+/**
  * ? SET IMAGE
  * * Sets the image & thumbnail for a gallery.
  * 
