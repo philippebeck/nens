@@ -8,7 +8,7 @@ CREATE TABLE Articles(
   name      VARCHAR(200)  NOT NULL  UNIQUE,
   text      TEXT          NOT NULL  UNIQUE,
   image     VARCHAR(200)  NOT NULL  UNIQUE,
-  alt       VARCHAR(200)  NOT NULL  UNIQUE,
+  alt       VARCHAR(200)  NOT NULL,
   likes     TEXT          NOT NULL,
   cat       VARCHAR(20)   NOT NULL,
   createdAt DATETIME      NOT NULL,
@@ -25,7 +25,7 @@ ENGINE=INNODB DEFAULT CHARSET=utf8;
 CREATE TABLE Images(
   id          SMALLINT      UNSIGNED    PRIMARY KEY  AUTO_INCREMENT,
   name        VARCHAR(200)  NOT NULL    UNIQUE,
-  description VARCHAR(200)  NOT NULL,
+  description VARCHAR(200)  NOT NULL    UNIQUE,
   galleryId   SMALLINT      UNSIGNED    NOT NULL,
   CONSTRAINT  fk_galleryId  FOREIGN KEY (galleryId)  REFERENCES Galleries(id))
 ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -42,7 +42,7 @@ CREATE TABLE Products(
   name        VARCHAR(200)  NOT NULL  UNIQUE,
   description TEXT          NOT NULL  UNIQUE,
   image       VARCHAR(200)  NOT NULL  UNIQUE,
-  alt         VARCHAR(200)  NOT NULL  UNIQUE,
+  alt         VARCHAR(200)  NOT NULL,
   price       DECIMAL       NOT NULL,
   options     TEXT          NOT NULL,
   cat         VARCHAR(20)   NOT NULL)
