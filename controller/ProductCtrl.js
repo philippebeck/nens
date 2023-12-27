@@ -48,7 +48,7 @@ exports.checkProductData = (name, description, alt, price, cat, res) => {
 
 /**
  * ? CHECK PRODUCT UNIQUE
- * * Checks if the given product name and description are unique.
+ * * Checks if the given product name & description are unique.
  *
  * @param {string} name - The name of the product.
  * @param {string} description - The description of the product.
