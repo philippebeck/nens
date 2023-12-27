@@ -115,7 +115,7 @@ exports.createImage = async (req, res, next) => {
   form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
-    const { description, galleryId } = fields;
+    const { name, description, galleryId } = fields;
     const { image } = files;
 
     try {
@@ -129,6 +129,10 @@ exports.createImage = async (req, res, next) => {
 
       } else if (!images || images.length === 0) {
         return res.status(404).json({ message: IMAGES_NOT_FOUND });
+      }
+
+      for (const image of images) {
+        this.checkImageUnique(name, description, image, res);
       }
 
       const IMG = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
@@ -165,13 +169,34 @@ exports.updateImage = async (req, res, next) => {
   form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
-    const { name, description } = fields;
+    const { name, description, galleryId } = fields;
     const { image } = files;
 
     try {
       this.checkImageData(description, res);
 
+      const gallery = await Gallery.findOne({ where: { id: galleryId }});
+      const images  = await Image.findAll({ where: { galleryId: galleryId }});
+
+      if (!gallery) {
+        return res.status(404).json({ message: GALLERY_NOT_FOUND });
+
+      } else if (!images || images.length === 0) {
+        return res.status(404).json({ message: IMAGES_NOT_FOUND });
+      }
+
+      images
+        .filter(image => image.id !== ID)
+        .forEach(image => this.checkImageUnique(name, description, image, res));
+
+      let img = images.find(image => image.id === ID)?.image;
+
       if (image && image.newFilename) {
+        await fs.promises.unlink(GALLERIES_IMG + img);
+        await fs.promises.unlink(GALLERIES_THUMB + img);
+
+        img = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
+
         await this.setImage(image.newFilename, name);
         await fs.promises.unlink(GALLERIES_IMG + image.newFilename);
       }
@@ -206,8 +231,8 @@ exports.deleteImage = async (req, res) => {
       return res.status(404).json({ message: IMAGE_NOT_FOUND });
     }
 
-    await fs.promises.unlink(GALLERIES_THUMB + image.name);
     await fs.promises.unlink(GALLERIES_IMG + image.name);
+    await fs.promises.unlink(GALLERIES_THUMB + image.name);
 
     await Image.destroy({ where: { id: ID } });
     res.status(204).json({ message: IMAGE_DELETED });
