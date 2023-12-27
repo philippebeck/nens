@@ -146,10 +146,7 @@ exports.createArticle = async (req, res, next) => {
       this.checkArticleData(name, text, alt, cat, res);
 
       const articles = await Article.findAll();
-
-      if (!articles || articles.length === 0) {
-        return res.status(404).json({ message: ARTICLES_NOT_FOUND });
-      }
+      if (!articles) return res.status(404).json({ message: ARTICLES_NOT_FOUND });
 
       for (const article of articles) {
         this.checkArticleUnique(name, text, article, res);

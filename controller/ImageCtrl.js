@@ -127,7 +127,7 @@ exports.createImage = async (req, res, next) => {
       if (!gallery) {
         return res.status(404).json({ message: GALLERY_NOT_FOUND });
 
-      } else if (!images || images.length === 0) {
+      } else if (!images) {
         return res.status(404).json({ message: IMAGES_NOT_FOUND });
       }
 

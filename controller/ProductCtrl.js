@@ -148,10 +148,7 @@ exports.createProduct = async (req, res, next) => {
       this.checkProductData(name, description, alt, price, cat, res);
 
       const products = await Product.findAll();
-
-      if (!products || products.length === 0) {
-        return res.status(404).json({ message: PRODUCTS_NOT_FOUND });
-      }
+      if (!products) return res.status(404).json({ message: PRODUCTS_NOT_FOUND });
 
       for (const product of products) {
         this.checkProductUnique(name, description, product, res);

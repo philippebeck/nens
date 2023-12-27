@@ -113,10 +113,7 @@ exports.createUser = async (req, res, next) => {
       this.checkUserPass(pass, res);
 
       const users = await User.findAll();
-
-      if (!users || users.length === 0) {
-        return res.status(404).json({ message: USER_NOT_FOUND });
-      }
+      if (!users) return res.status(404).json({ message: USER_NOT_FOUND });
 
       for (const user of users) {
         this.checkUserUnique(name, email, user, res);
