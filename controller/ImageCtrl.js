@@ -36,6 +36,24 @@ exports.checkImageData = (description, res) => {
 }
 
 /**
+ * ? CHECK IMAGE UNIQUE
+ * * Checks if the given image name & description are unique.
+ *
+ * @param {string} name - The name of the image.
+ * @param {string} description - The description of the image.
+ * @param {object} image - The image object to compare with.
+ * @param {object} res - The response object.
+ * @return {object} The JSON response object with the appropriate message and status code.
+ */
+exports.checkImageUnique = (name, description, image, res) => {
+  const { DISPO_DESCRIPTION, DISPO_NAME } = process.env;
+
+  if (image.name === name || image.description === description) {
+    return res.status(403).json({ message: DISPO_NAME || DISPO_DESCRIPTION });
+  }
+}
+
+/**
  * ? SET IMAGE
  * * Sets the image & thumbnail for a gallery.
  * 
@@ -97,7 +115,7 @@ exports.createImage = async (req, res, next) => {
   form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
-    const { description, galleryId } = fields;
+    const { name, description, galleryId } = fields;
     const { image } = files;
 
     try {
@@ -109,8 +127,12 @@ exports.createImage = async (req, res, next) => {
       if (!gallery) {
         return res.status(404).json({ message: GALLERY_NOT_FOUND });
 
-      } else if (!images || images.length === 0) {
+      } else if (!images) {
         return res.status(404).json({ message: IMAGES_NOT_FOUND });
+      }
+
+      for (const image of images) {
+        this.checkImageUnique(name, description, image, res);
       }
 
       const IMG = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
@@ -147,13 +169,34 @@ exports.updateImage = async (req, res, next) => {
   form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
-    const { name, description } = fields;
+    const { name, description, galleryId } = fields;
     const { image } = files;
 
     try {
       this.checkImageData(description, res);
 
+      const gallery = await Gallery.findOne({ where: { id: galleryId }});
+      const images  = await Image.findAll({ where: { galleryId: galleryId }});
+
+      if (!gallery) {
+        return res.status(404).json({ message: GALLERY_NOT_FOUND });
+
+      } else if (!images || images.length === 0) {
+        return res.status(404).json({ message: IMAGES_NOT_FOUND });
+      }
+
+      images
+        .filter(image => image.id !== ID)
+        .forEach(image => this.checkImageUnique(name, description, image, res));
+
+      let img = images.find(image => image.id === ID)?.image;
+
       if (image && image.newFilename) {
+        await fs.promises.unlink(GALLERIES_IMG + img);
+        await fs.promises.unlink(GALLERIES_THUMB + img);
+
+        img = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
+
         await this.setImage(image.newFilename, name);
         await fs.promises.unlink(GALLERIES_IMG + image.newFilename);
       }
@@ -188,8 +231,8 @@ exports.deleteImage = async (req, res) => {
       return res.status(404).json({ message: IMAGE_NOT_FOUND });
     }
 
-    await fs.promises.unlink(GALLERIES_THUMB + image.name);
     await fs.promises.unlink(GALLERIES_IMG + image.name);
+    await fs.promises.unlink(GALLERIES_THUMB + image.name);
 
     await Image.destroy({ where: { id: ID } });
     res.status(204).json({ message: IMAGE_DELETED });

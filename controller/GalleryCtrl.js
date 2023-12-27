@@ -126,7 +126,7 @@ exports.createGallery = async (req, res, next) => {
 
       const galleries = await Gallery.findAll();
 
-      if (!galleries || galleries.length === 0) {
+      if (!galleries) {
         return res.status(404).json({ message: GALLERIES_NOT_FOUND });
       }
 
@@ -202,7 +202,7 @@ exports.deleteGallery = async (req, res) => {
   try {
     const images = await Image.findAll({ where: { galleryId: ID }});
 
-    if (!images || images.length === 0) {
+    if (!images) {
       return res.status(404).json({ message: IMAGES_NOT_FOUND });
     }
 

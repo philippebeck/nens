@@ -34,8 +34,7 @@ module.exports = (Sequelize, DataTypes) => {
     },
     alt: {
       type: DataTypes.STRING(200),
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     likes: {
       type: DataTypes.TEXT,

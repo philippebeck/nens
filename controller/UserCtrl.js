@@ -113,23 +113,20 @@ exports.createUser = async (req, res, next) => {
       this.checkUserPass(pass, res);
 
       const users = await User.findAll();
-
-      if (!users || users.length === 0) {
-        return res.status(404).json({ message: USER_NOT_FOUND });
-      }
+      if (!users) return res.status(404).json({ message: USER_NOT_FOUND });
 
       for (const user of users) {
         this.checkUserUnique(name, email, user, res);
       }
 
-      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`
+      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
         await this.setImage(image.newFilename, IMG);
         await fs.promises.unlink(USERS_IMG + image.newFilename);
       }
 
-      const hash = bcrypt.hash(pass, 10);
+      const hash = await bcrypt.hash(pass, 10);
 
       await User.create({ ...fields, image: IMG, pass: hash });
       res.status(201).json({ message: USER_CREATED });
@@ -253,21 +250,22 @@ exports.updateUser = async (req, res, next) => {
         .filter(user => user.id !== ID)
         .forEach(user => this.checkUserUnique(name, email, user, res));
 
-      let img, user;
+      let img = users.find(user => user.id === ID)?.image;
 
       if (image && image.newFilename) {
+        await fs.promises.unlink(USERS_THUMB + img);
+
         img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`
 
         await this.setImage(image.newFilename, img);
         await fs.promises.unlink(USERS_IMG + image.newFilename);
-
-      } else {
-        img = users.find(user => user.id === ID)?.image;
       }
+
+      let user;
 
       if (pass) {
         this.checkUserPass(pass, res);
-        const hash = bcrypt.hash(pass, 10);
+        const hash = await bcrypt.hash(pass, 10);
 
         user = { ...fields, image: img, pass: hash };
 
