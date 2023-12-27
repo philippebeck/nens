@@ -122,7 +122,7 @@ exports.createUser = async (req, res, next) => {
         this.checkUserUnique(name, email, user, res);
       }
 
-      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`
+      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
         await this.setImage(image.newFilename, IMG);
