@@ -207,16 +207,16 @@ exports.updateProduct = async (req, res, next) => {
         .filter(product => product.id !== ID)
         .forEach(product => this.checkProductUnique(name, description, product, res));
 
-      let img;
+      let img = products.find(product => product.id === ID)?.image;
 
       if (image && image.newFilename) {
-        img = nem.getName(name) + "." + IMG_EXT;
+        await fs.promises.unlink(PRODUCTS_IMG + img);
+        await fs.promises.unlink(PRODUCTS_THUMB + img);
+
+        img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
 
         await this.setImage(image.newFilename, img);
         await fs.promises.unlink(PRODUCTS_IMG + image.newFilename);
-
-      } else {
-        img = products.find(product => product.id === ID)?.image;
       }
 
       await Product.update({ ...fields, image: img }, { where: { id: ID }});
@@ -249,8 +249,8 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ message: PRODUCT_NOT_FOUND });
     }
 
-    await fs.promises.unlink(PRODUCTS_THUMB + product.image);
     await fs.promises.unlink(PRODUCTS_IMG + product.image);
+    await fs.promises.unlink(PRODUCTS_THUMB + product.image);
 
     await Product.destroy({ where: { id: ID } });
     res.status(204).json({ message: PRODUCT_DELETED });

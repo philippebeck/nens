@@ -205,16 +205,16 @@ exports.updateArticle = async (req, res, next) => {
         .filter(article => article.id !== ID)
         .forEach(article => this.checkArticleUnique(name, text, article, res));
 
-      let img;
+      let img = articles.find(article => article.id === ID)?.image;
 
       if (image && image.newFilename) {
-        img = nem.getName(name) + "." + IMG_EXT;
+        await fs.promises.unlink(ARTICLES_IMG + img);
+        await fs.promises.unlink(ARTICLES_THUMB + img);
+
+        img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
 
         await this.setImage(image.newFilename, img);
         await fs.promises.unlink(ARTICLES_IMG + image.newFilename);
-
-      } else {
-        img = articles.find(article => article.id === ID)?.image;
       }
 
       await Article.update({ ...fields, image: img }, { where: { id: ID }});
@@ -247,8 +247,8 @@ exports.deleteArticle = async (req, res) => {
       return res.status(404).json({ message: ARTICLE_NOT_FOUND });
     }
 
-    await fs.promises.unlink(ARTICLES_THUMB + article.image);
     await fs.promises.unlink(ARTICLES_IMG + article.image);
+    await fs.promises.unlink(ARTICLES_THUMB + article.image);
 
     await Article.destroy({ where: { id: ID } });
     res.status(204).json({ message: ARTICLE_DELETED });
