@@ -253,17 +253,18 @@ exports.updateUser = async (req, res, next) => {
         .filter(user => user.id !== ID)
         .forEach(user => this.checkUserUnique(name, email, user, res));
 
-      let img, user;
+      let img = users.find(user => user.id === ID)?.image;
 
       if (image && image.newFilename) {
+        await fs.promises.unlink(USERS_THUMB + img);
+
         img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`
 
         await this.setImage(image.newFilename, img);
         await fs.promises.unlink(USERS_IMG + image.newFilename);
-
-      } else {
-        img = users.find(user => user.id === ID)?.image;
       }
+
+      let user;
 
       if (pass) {
         this.checkUserPass(pass, res);
