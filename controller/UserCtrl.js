@@ -129,7 +129,7 @@ exports.createUser = async (req, res, next) => {
         await fs.promises.unlink(USERS_IMG + image.newFilename);
       }
 
-      const hash = bcrypt.hash(pass, 10);
+      const hash = await bcrypt.hash(pass, 10);
 
       await User.create({ ...fields, image: IMG, pass: hash });
       res.status(201).json({ message: USER_CREATED });
@@ -267,7 +267,7 @@ exports.updateUser = async (req, res, next) => {
 
       if (pass) {
         this.checkUserPass(pass, res);
-        const hash = bcrypt.hash(pass, 10);
+        const hash = await bcrypt.hash(pass, 10);
 
         user = { ...fields, image: img, pass: hash };
 
