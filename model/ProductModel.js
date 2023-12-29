@@ -42,7 +42,7 @@ module.exports = (Sequelize, DataTypes) => {
     },
     options: {
       type: DataTypes.TEXT,
-      defaultValue: "[]"
+      defaultValue: ""
     },
     cat: {
       type: DataTypes.STRING(20),
