@@ -180,7 +180,7 @@ exports.createArticle = async (req, res, next) => {
  * @throws {Error} If the article is not updated in the database.
  */
 exports.updateArticle = async (req, res, next) => {
-  const { ARTICLE_UPDATED, ARTICLE_NOT_UPDATED } = process.env;
+  const { ARTICLE_NOT_UPDATED , ARTICLE_UPDATED} = process.env;
   const ID = parseInt(req.params.id, 10);
 
   form.parse(req, async (err, fields, files) => {
