@@ -286,7 +286,8 @@ INSERT INTO Links (name, url, cat) VALUES
 ('Sequelize Doc','sequelize.org/docs/v6','Dev'),
 ('How to become a 10x dev','dev.to/idboussadel/how-to-become-a-10x-dev-ake','JS'),
 ('Sequelize with Vue & Node', 'www.bezkoder.com/vue-js-node-js-express-mysql-crud-example', 'JS'),
-('Before & After animations', 'blog.logrocket.com/css-before-after-custom-animations-transitions', 'CSS3');
+('Before & After animations', 'blog.logrocket.com/css-before-after-custom-animations-transitions', 'CSS3'),
+('Google My Business', 'www.francenum.gouv.fr/formations/creer-sa-fiche-google-my-business', 'Dev');
 
 INSERT INTO Images (name, description, galleryId) VALUES
 ('964-kitab-suwar-al-kawakib-01.webp','Ursa Minor',1),
