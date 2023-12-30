@@ -37,19 +37,18 @@ exports.checkImageData = (description, res) => {
 
 /**
  * ? CHECK IMAGE UNIQUE
- * * Checks if the given image name & description are unique.
+ * * Checks if the given image name is unique.
  *
  * @param {string} name - The name of the image.
- * @param {string} description - The description of the image.
  * @param {object} image - The image object to compare with.
  * @param {object} res - The response object.
- * @return {object} The JSON response object with the appropriate message and status code.
+ * @return {object} The JSON response object with the appropriate message & status code.
  */
-exports.checkImageUnique = (name, description, image, res) => {
-  const { DISPO_DESCRIPTION, DISPO_NAME } = process.env;
+exports.checkImageUnique = (name, image, res) => {
+  const { DISPO_NAME } = process.env;
 
-  if (image.name === name || image.description === description) {
-    return res.status(403).json({ message: DISPO_NAME || DISPO_DESCRIPTION });
+  if (image.name === name) {
+    return res.status(403).json({ message: DISPO_NAME });
   }
 }
 
@@ -132,7 +131,7 @@ exports.createImage = async (req, res, next) => {
       }
 
       for (const image of images) {
-        this.checkImageUnique(name, description, image, res);
+        this.checkImageUnique(name, image, res);
       }
 
       const IMG = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
@@ -187,7 +186,7 @@ exports.updateImage = async (req, res, next) => {
 
       images
         .filter(image => image.id !== ID)
-        .forEach(image => this.checkImageUnique(name, description, image, res));
+        .forEach(image => this.checkImageUnique(name, image, res));
 
       let img = images.find(image => image.id === ID)?.image;
 
