@@ -40,6 +40,8 @@ exports.setMessage = (total, paymentId, products) => {
     </p>
     <p>${ORDER_LIST}</p>`;
 
+  products = JSON.parse(products);
+
   for (let product of products) {
     const { id, name, option, quantity, price } = product;
 
