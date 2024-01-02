@@ -6,7 +6,8 @@ const nem         = require("nemjs");
 const ImageCtrl   = require("../controller/ImageCtrl");
 
 /* Public */
-router.get("/:id", ImageCtrl.listImages);
+router.get("/", ImageCtrl.listImages);
+router.get("/:id", ImageCtrl.listGalleryImages);
 
 /* Private */
 router.post("/", nem.checkAuth, ImageCtrl.createImage);
