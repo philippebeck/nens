@@ -424,6 +424,26 @@ paths:
 
   # ! IMAGES
   /images:
+    # GET /images => List Images
+    get:
+      tags:
+        - Image Module
+      summary: List Images
+      description: API to List Images
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ImageRes"
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
     # POST /images => Create Image
     post:
       security:
@@ -457,11 +477,11 @@ paths:
 
   # ! IMAGES WITH ID
   /images/{id}:
-    # GET /images => List Images
+    # GET /images => List Gallery Images
     get:
       tags:
         - Image Module
-      summary: List Images
+      summary: List Gallery Images
       description: API to List Gallery Images
       parameters:
       - name: id
