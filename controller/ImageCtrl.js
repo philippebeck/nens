@@ -68,9 +68,28 @@ exports.setImage = async (input, output) => {
 }
 
 //! ******************** PUBLIC ********************
-
 /**
  * ? LIST IMAGES
+ * * Retrieves a list of all images.
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @return {Object} The list of images in JSON format.
+ * @throws {Error} If the images are not found in the database.
+ */
+exports.listImages = async (req, res) => {
+  try {
+    const images = await Image.findAll();
+    res.status(200).json(images);
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ message: IMAGES_NOT_FOUND });
+  }
+}
+
+/**
+ * ? LIST GALLERY IMAGES
  * * Retrieves a list of gallery images based on the provided gallery ID.
  * 
  * @param {Object} req - The request object.
@@ -78,7 +97,7 @@ exports.setImage = async (input, output) => {
  * @return {Promise} A promise that resolves to a response containing the list of gallery images.
  * @throws {Error} If the images are not found in the database.
  */
-exports.listImages = async (req, res) => {
+exports.listGalleryImages = async (req, res) => {
   try {
     Image.belongsTo(Gallery, { foreignKey: "galleryId" });
 
