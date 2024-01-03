@@ -18,17 +18,17 @@ module.exports = (Sequelize, DataTypes) => {
       autoIncrement: true
     },
     name: {
-      type: DataTypes.STRING(200),
+      type: DataTypes.STRING(250),
       allowNull: false,
       unique: true
     },
     url: {
-      type: DataTypes.STRING(200),
+      type: DataTypes.STRING(250),
       allowNull: false,
       unique: true
     },
     cat: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(25),
       allowNull: false
     }
   }, {
