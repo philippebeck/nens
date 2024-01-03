@@ -35,9 +35,9 @@ exports.checkArticleData = (name, text, alt, cat, res) => {
   const IS_NAME_CHECKED = nem.checkRange(name, STRING_MIN, STRING_MAX);
   const IS_TEXT_CHECKED = nem.checkRange(text, TEXT_MIN, TEXT_MAX);
   const IS_ALT_CHECKED  = nem.checkRange(alt, STRING_MIN, STRING_MAX);
-  const ID_CAT_CHECKED  = nem.checkRange(cat, STRING_MIN, STRING_MAX);
+  const IS_CAT_CHECKED  = nem.checkRange(cat, STRING_MIN, STRING_MAX);
 
-  if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !ID_CAT_CHECKED) {
+  if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !IS_CAT_CHECKED) {
     return res.status(403).json({ 
       message: CHECK_CAT || CHECK_NAME || CHECK_TEXT || CHECK_NAME
     });
