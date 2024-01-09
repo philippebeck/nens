@@ -36,6 +36,9 @@ module.exports = (Sequelize, DataTypes) => {
       type: DataTypes.STRING(250),
       allowNull: false
     },
+    url: {
+      type: DataTypes.STRING(250)
+    },
     likes: {
       type: DataTypes.TEXT,
       defaultValue: "[]"

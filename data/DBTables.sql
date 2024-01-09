@@ -9,6 +9,7 @@ CREATE TABLE Articles(
   text      TEXT          NOT NULL  UNIQUE,
   image     VARCHAR(250)  NOT NULL  UNIQUE,
   alt       VARCHAR(250)  NOT NULL,
+  url       VARCHAR(250),
   likes     TEXT          NOT NULL,
   cat       VARCHAR(25)   NOT NULL,
   createdAt DATETIME      NOT NULL,
