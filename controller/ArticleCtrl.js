@@ -39,7 +39,7 @@ exports.checkArticleData = (name, text, alt, cat, res) => {
 
   if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !IS_CAT_CHECKED) {
     return res.status(403).json({ 
-      message: CHECK_CAT || CHECK_NAME || CHECK_TEXT || CHECK_NAME
+      message: CHECK_NAME || CHECK_TEXT || CHECK_NAME || CHECK_CAT
     });
   }
 }

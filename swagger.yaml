@@ -1176,6 +1176,9 @@ definitions:
       alt:
         type: string
         description: alternative text of article image
+      url:
+        type: string
+        description: article url
       cat:
         type: string
         description: article category
@@ -1328,6 +1331,9 @@ definitions:
       alt:
         type: string
         description: alternative text of article image
+      url:
+        type: string
+        description: article url
       likes:
         type: string
         description: article likes
