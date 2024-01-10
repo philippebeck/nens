@@ -17,6 +17,7 @@ app
   .use(process.env.ROUTE_LINK, require("./route/LinkRoute"))
   .use(process.env.ROUTE_ORDER, require("./route/OrderRoute"))
   .use(process.env.ROUTE_PRODUCT, require("./route/ProductRoute"))
+  .use(process.env.ROUTE_PROJECT, require("./route/ProjectRoute"))
   .use(process.env.ROUTE_USER, require("./route/UserRoute"));
 
 module.exports = app;
