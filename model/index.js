@@ -21,6 +21,7 @@ db.image    = require("./ImageModel.js")(sequelize, Sequelize);
 db.link     = require("./LinkModel.js")(sequelize, Sequelize);
 db.order    = require("./OrderModel.js")(sequelize, Sequelize);
 db.product  = require("./ProductModel.js")(sequelize, Sequelize);
+db.project  = require("./ProjectModel.js")(sequelize, Sequelize);
 db.user     = require("./UserModel.js")(sequelize, Sequelize);
 
 module.exports = db;
