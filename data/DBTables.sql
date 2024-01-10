@@ -49,6 +49,18 @@ CREATE TABLE Products(
   cat         VARCHAR(25)   NOT NULL)
 ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+CREATE TABLE Projects(
+  id          SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
+  name        VARCHAR(250)  NOT NULL  UNIQUE,
+  description TEXT          NOT NULL  UNIQUE,
+  image       VARCHAR(250)  NOT NULL  UNIQUE,
+  alt         VARCHAR(250)  NOT NULL,
+  url         VARCHAR(250),
+  cat         VARCHAR(25)   NOT NULL,
+  createdAt   DATETIME      NOT NULL,
+  updatedAt   DATETIME      NOT NULL)
+ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 CREATE TABLE Users(
   id        SMALLINT      UNSIGNED  PRIMARY KEY AUTO_INCREMENT,
   name      VARCHAR(250)  NOT NULL  UNIQUE,

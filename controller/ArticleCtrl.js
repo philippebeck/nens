@@ -25,21 +25,24 @@ const Article = db.article;
  * @param {string} name - The name of the article.
  * @param {string} text - The text of the article.
  * @param {string} alt - The alternative text for the article.
+ * @param {string} url - The url of the article.
  * @param {string} cat - The category of the article.
  * @param {Object} res - The response object.
  * @return {object} The response object with an error message if the article is not correct.
  */
-exports.checkArticleData = (name, text, alt, cat, res) => {
-  const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
+exports.checkArticleData = (name, text, alt, url, cat, res) => {
+  const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, CHECK_URL, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
   const IS_NAME_CHECKED = nem.checkRange(name, STRING_MIN, STRING_MAX);
   const IS_TEXT_CHECKED = nem.checkRange(text, TEXT_MIN, TEXT_MAX);
   const IS_ALT_CHECKED  = nem.checkRange(alt, STRING_MIN, STRING_MAX);
+
+  const IS_URL_CHECKED  = url ? nem.checkUrl("https://" + url) : true;
   const IS_CAT_CHECKED  = nem.checkRange(cat, STRING_MIN, STRING_MAX);
 
-  if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !IS_CAT_CHECKED) {
+  if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !IS_URL_CHECKED || !IS_CAT_CHECKED) {
     return res.status(403).json({ 
-      message: CHECK_NAME || CHECK_TEXT || CHECK_NAME || CHECK_CAT
+      message: CHECK_NAME || CHECK_TEXT || CHECK_NAME || CHECK_URL || CHECK_CAT
     });
   }
 }
@@ -139,11 +142,11 @@ exports.createArticle = async (req, res, next) => {
   form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
-    const { name, text, alt, cat } = fields;
+    const { name, text, alt, url, cat } = fields;
     const { image } = files;
 
     try {
-      this.checkArticleData(name, text, alt, cat, res);
+      this.checkArticleData(name, text, alt, url, cat, res);
 
       const articles = await Article.findAll();
       if (!articles) return res.status(404).json({ message: ARTICLES_NOT_FOUND });
@@ -186,11 +189,11 @@ exports.updateArticle = async (req, res, next) => {
   form.parse(req, async (err, fields, files) => {
     if (err) { next(err); return }
 
-    const { name, text, alt, cat } = fields;
+    const { name, text, alt, url, cat } = fields;
     const { image } = files;
 
     try {
-      this.checkArticleData(name, text, alt, cat, res);
+      this.checkArticleData(name, text, alt, url, cat, res);
 
       const articles = await Article.findAll();
 

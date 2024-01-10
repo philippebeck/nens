@@ -978,6 +978,127 @@ paths:
         "500":
           description: Internal Server Error
 
+  # ! PROJECTS
+  /projects:
+
+    # GET /projects => List Projects
+    get:
+      tags:
+        - Project Module
+      summary: List Projects
+      description: API to List all Projects
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ProjectRes"
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+    # POST /projects => Create Project
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Project Module
+      summary: Create Project
+      description: API to Create a Project
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: body
+          name: body
+          description: createProject() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ProjectReq"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # ! PROJECTS WITH ID
+  /projects/{id}:
+
+    # PUT /projects/{id} => Update Project
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Project Module
+      summary: Update Project
+      description: API to Update a Project
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Project
+          required: true
+        - in: body
+          name: body
+          description: updateProject() Payload
+          required: true
+          schema:
+            $ref: "#/definitions/ProjectReq"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+    # DELETE /projects/{id} => Delete Project
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - Project Module
+      summary: Delete Project
+      description: API to Delete a Project
+      parameters:
+        - name: id
+          type: number
+          in: path
+          description: Id of the Project
+          required: true
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: "#/definitions/BasicRes"
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
   # ! USERS
   /users:
 
@@ -1294,6 +1415,28 @@ definitions:
         type: string
         description: product category
 
+  # PROJECTS REQUEST
+  ProjectReq:
+    properties:
+      name:
+        type: string
+        description: project name
+      description:
+        type: string
+        description: project content
+      image:
+        type: string
+        description: project image
+      alt:
+        type: string
+        description: alternative text of project image
+      url:
+        type: string
+        description: project url
+      cat:
+        type: string
+        description: project category
+
   # USER REQUEST
   UserReq:
     properties:
@@ -1508,6 +1651,40 @@ definitions:
       cat:
         type: string
         description: product category
+
+  # PROJECT RESPONSE
+  ProjectRes:
+    type: object
+    properties:
+      id:
+        type: number
+        description: project id
+      name:
+        type: string
+        description: project name
+      description:
+        type: string
+        description: project content
+      image:
+        type: string
+        description: project image
+      alt:
+        type: string
+        description: alternative text of project image
+      url:
+        type: string
+        description: project url
+      cat:
+        type: string
+        description: project category
+      createdAt:
+        type: string
+        format: date
+        description: project creation
+      upatedAt:
+        type: string
+        format: date
+        description: project update
 
   # USER RESPONSE
   UserRes:
