@@ -99,6 +99,7 @@ Available API Files :
 -  **ProductModel, ProductCtrl, ProductRoute** *(Products)*  
 -  **OrderModel, OrderCtrl, OrderRoute** *(Product Orders)*  
 -  **ArticleModel, ArticleCtrl, ArticleRoute** *(Articles)*  
+-  **ProjectModel, ProjectCtrl, ProjectRoute** *(Projects)*  
 -  **LinkModel, LinkCtrl, LinkRoute** *(Links)*  
 -  **GalleryModel, GalleryCtrl, GalleryRoute** *(Galleries)*  
 -  **ImageModel, ImageCtrl, ImageRoute** *(Gallery Images)*  

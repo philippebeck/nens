@@ -1,6 +1,21 @@
 USE nens;
 
-INSERT INTO Galleries (name, author, cover) VALUES
+INSERT INTO `Projects` (`name`, `description`, `image`, `alt`, `url`, `cat`, `createdAt`, `updatedAt`) VALUES
+('Pam', 'Microframework Adaptatif PHP', 'pam-1704902995457.webp', 'Logo PHP', 'github.com/philippebeck/pam', 'Packages', '2024-01-10 16:09:55', '2024-01-10 16:09:55'),
+('Animadio', 'Librairie de Design Sass/CSS', 'animadio-1704902556596.webp', 'Logo Sass', 'github.com/philippebeck/animadio', 'Packages', '2024-01-10 16:02:36', '2024-01-10 19:09:47'),
+('Servidio', 'Librairie de Services Frontend JavaScript', 'servidio-1704902700717.webp', 'Logo JavaScript', 'github.com/philippebeck/servidio', 'Packages', '2024-01-10 16:05:00', '2024-01-10 19:10:03'),
+('NemJS', 'Librairie de Services Backend NodeJS', 'nemjs-1704902413272.webp', 'Logo JavaScript', 'github.com/philippebeck/nemjs', 'Packages', '2024-01-10 14:08:31', '2024-01-10 19:10:57'),
+('Vue-Elt', 'Librairie de Composants VueJS', 'vue-elt-1704902815318.webp', 'Logo Vue', 'github.com/philippebeck/vue-elt', 'Packages', '2024-01-10 16:06:55', '2024-01-10 19:11:28'),
+('Vesan', 'UI VueJS avec Vue-Elt, Servidio & Animadio', 'vesan-1704902896998.webp', 'Logo Vue', 'github.com/philippebeck/vesan', 'Packages', '2024-01-10 16:08:17', '2024-01-10 19:12:39'),
+('Nens', 'API NodeJS avec ExpressJS, NemJS & MySQL', 'nens-1704902430493.webp', 'Logo JS', 'github.com/philippebeck/nens', 'Packages', '2024-01-10 14:11:18', '2024-01-10 19:12:18'),
+('Asperger', 'Site Web sur le syndrome d\'Asperger proposant des tests diagnostiques', 'asperger-1704911463725.webp', 'Page d\'accueil du site Asperger', 'github.com/philippebeck/asperger', 'Sites', '2024-01-10 16:18:04', '2024-01-10 19:24:46'),
+('Astronomy', 'Site Web sur l\'astronomie utilisant des API de la NASA & du CDS', 'astronomy-1704909484973.webp', 'Page d\'accueil du site Astronomy', 'github.com/philippebeck/astronomy', 'Sites', '2024-01-10 16:16:29', '2024-01-10 19:13:34'),
+('DevsAgency', 'Site Web d\'une agence digitale proposant des services de développement', 'devsagency-1704911204755.webp', 'Page d\'accueil de site DevsAgency', 'github.com/philippebeck/devsagency', 'Sites', '2024-01-10 16:21:04', '2024-01-10 20:25:42'),
+('Tools2Code', 'Site Web de ressources pour développeurs', 'tools2code-1704916206530.webp', 'Page d\'accueil du site Tools2Code', 'github.com/philippebeck/tools2code', 'Sites', '2024-01-10 19:50:06', '2024-01-10 19:55:13'),
+('Animadio Doc', 'Site Web & documentation de la librairie Animadio', 'animadio-doc-1704916461822.webp', 'Page d\'accueil de la documentation d\'Animadio', 'github.com/philippebeck/animadio.org', 'Sites', '2024-01-10 18:50:03', '2024-01-10 19:55:24'),
+('Pam Doc', 'Site Web & documentation du microframework Pam', 'pam-doc-1704913678513.webp', 'Page d\'accueil de la documentation de Pam', 'github.com/philippebeck/pam.net', 'Sites', '2024-01-10 19:07:19', '2024-01-10 19:54:55');
+
+INSERT INTO `Galleries` (`name`, `author`, `cover`) VALUES
 ('964 Kitab Suwar al Kawakib','Abd al-Rahman al-Sufi','964-kitab-suwar-al-kawakib-01.webp'),
 ('1417 Kitab Suwar al Kawakib','Abd al-Rahman al-Sufi','1417-kitab-suwar-al-kawakib-01.webp'),
 ('1436 Souwar al-Kawakib al-Thabita','Zahir al-Din Ulugh Beg Kurakan','1436-souwar-al-kawakib-al-thabita-01.webp'),
@@ -22,7 +37,13 @@ INSERT INTO Galleries (name, author, cover) VALUES
 ('1865 The Stars','Society for the Diffusion of Useful Knowledge','1865-the-stars-01.webp'),
 ('1869 Atlas of Astronomy','Alexander Keith Johnston','1869-atlas-of-astronomy-01.webp');
 
-INSERT INTO Links (name, url, cat) VALUES
+INSERT INTO `Articles` (`name`, `text`, `image`, `alt`, `url`, `likes`, `cat`, `createdAt`, `updatedAt`) VALUES
+('HTML5 : Balises & Attributs', '<p class=\"graf graf--p\">D&eacute;finitions, principales balises &amp; principaux attributs.</p>', 'html5-:-tags-&-attributes-1704819260984.webp', 'Le Logo HTML5', 'medium.com/@philippebeck/html5-tags-attributes-292d6553398c', '[1]', 'HTML', '2024-01-09 16:54:21', '2024-01-09 19:19:43'),
+('HTML5 : Bonnes Pratiques', '<p>Indentation, syntaxe, s&eacute;mantique, attributs, contr&ocirc;les &amp; validations.</p>', 'html5-:-best-practices-1704819453824.webp', 'Un logo avec HTML5 écrit en dessous sur un panneau à l\'entrée d\'une entreprise.', 'medium.com/@philippebeck/html5-best-practices-09c08cf46c21', '[1]', 'HTML', '2024-01-09 16:57:34', '2024-01-09 19:18:07'),
+('HTML5 : Mauvaises Pratiques', '<p>Div soup, titres incorrects, sauts de ligne, table layout, design HTML &amp; attributs obsol&egrave;tes.</p>', 'html5-:-bad-practices-1704819638715.webp', 'Un panneau de signalisation indiquant un sens d\'interdiction avec HTML5 écrit sous ce panneau', 'medium.com/@philippebeck/html5-bad-practices-56f2028f698c', '[1]', 'HTML', '2024-01-09 17:00:38', '2024-01-09 19:17:19'),
+('HTML5 : SEO', '<p>Titres, meta description, optimisation d\'images, liens internes, vitesse de chargement &amp; compatibilit&eacute; mobile</p>', 'html5-:-seo-1704873994279.webp', 'Un mur de briques avec une pancarte en bois où il est écrit SEO', 'medium.com/@philippebeck/html5-seo-c246b5de3cdf', '[1]', 'HTML', '2024-01-10 08:06:34', '2024-01-10 08:10:58');
+
+INSERT INTO `Links` (`name`, `url`, `cat`) VALUES
 ('Référence HTML','developer.mozilla.org/fr/docs/Web/HTML/Reference','HTML5'),
 ('Référence CSS','developer.mozilla.org/fr/docs/Web/CSS/Reference','CSS3'),
 ('Référence JavaScript','developer.mozilla.org/fr/docs/Web/JavaScript/Reference','JS'),
@@ -289,7 +310,7 @@ INSERT INTO Links (name, url, cat) VALUES
 ('Before & After animations', 'blog.logrocket.com/css-before-after-custom-animations-transitions', 'CSS3'),
 ('Google My Business', 'www.francenum.gouv.fr/formations/creer-sa-fiche-google-my-business', 'Dev');
 
-INSERT INTO Images (name, description, galleryId) VALUES
+INSERT INTO `Images` (`name`, `description`, `galleryId`) VALUES
 ('964-kitab-suwar-al-kawakib-01.webp','Ursa Minor',1),
 ('964-kitab-suwar-al-kawakib-02.webp','Ursa Major',1),
 ('964-kitab-suwar-al-kawakib-03.webp','Draco',1),
