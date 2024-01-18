@@ -1,9 +1,10 @@
 "use strict";
 
-const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
-const nem         = require("nemjs");
+
+const { getName } = require("../middleware/getters");
+const db          = require("../model");
 
 require("dotenv").config();
 
@@ -28,9 +29,10 @@ const Image   = db.image;
  * @return {object} The JSON response.
  */
 exports.checkImageData = (description, res) => {
+  const { checkRange } = require("../middleware/checkers");
   const { CHECK_NAME, STRING_MIN, TEXT_MAX } = process.env;
 
-  if (!nem.checkRange(description, STRING_MIN, TEXT_MAX)) {
+  if (!checkRange(description, STRING_MIN, TEXT_MAX)) {
     return res.status(403).json({ message: CHECK_NAME })
   }
 }
@@ -53,18 +55,19 @@ exports.checkImageUnique = (name, image, res) => {
 }
 
 /**
- * ? SET IMAGE
+ * ? SET IMAGES
  * * Sets the image & thumbnail for a gallery.
  * 
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = async (input, output) => {
+exports.setImages = async (input, output) => {
+  const { setImage, setThumbnail } = require("../middleware/setters");
   const INPUT   = `galleries/${input}`;
   const OUTPUT  = `galleries/${output}`;
 
-  await nem.setImage(INPUT, OUTPUT);
-  await nem.setThumbnail(INPUT, OUTPUT);
+  await setImage(INPUT, OUTPUT);
+  await setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -83,7 +86,6 @@ exports.listImages = async (req, res) => {
     res.status(200).json(images);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: IMAGES_NOT_FOUND });
   }
 }
@@ -110,7 +112,6 @@ exports.listGalleryImages = async (req, res) => {
     res.status(200).json(images);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: IMAGES_NOT_FOUND });
   }
 };
@@ -153,10 +154,10 @@ exports.createImage = async (req, res, next) => {
         this.checkImageUnique(name, image, res);
       }
 
-      const IMG = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
+      const IMG = `${getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
-        await this.setImage(image.newFilename, IMG);
+        await this.setImages(image.newFilename, IMG);
         await fs.promises.unlink(GALLERIES_IMG + image.newFilename);
       }
 
@@ -164,7 +165,6 @@ exports.createImage = async (req, res, next) => {
       res.status(201).json({ message: IMAGE_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: IMAGE_NOT_CREATED });
     }
   })
@@ -213,9 +213,9 @@ exports.updateImage = async (req, res, next) => {
         await fs.promises.unlink(GALLERIES_IMG + img);
         await fs.promises.unlink(GALLERIES_THUMB + img);
 
-        img = `${nem.getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
+        img = `${getName(gallery.name)}-${Date.now()}.${IMG_EXT}`;
 
-        await this.setImage(image.newFilename, name);
+        await this.setImages(image.newFilename, name);
         await fs.promises.unlink(GALLERIES_IMG + image.newFilename);
       }
 
@@ -223,7 +223,6 @@ exports.updateImage = async (req, res, next) => {
       res.status(200).json({ message: IMAGE_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: IMAGE_NOT_UPDATED });
     }
   })
@@ -256,7 +255,6 @@ exports.deleteImage = async (req, res) => {
     res.status(204).json({ message: IMAGE_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: IMAGE_NOT_DELETED });
   }
 };

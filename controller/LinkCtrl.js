@@ -1,15 +1,13 @@
 "use strict";
 
-const db          = require("../model");
 const formidable  = require("formidable");
-const nem         = require("nemjs");
+const db          = require("../model");
 
 require("dotenv").config();
 
 const { LINKS_NOT_FOUND } = process.env;
 
 const form = formidable();
-
 const Link = db.link;
 
 //! ******************** UTILS ********************
@@ -25,11 +23,13 @@ const Link = db.link;
  * @return {object} The error message if any validation fails.
  */
 exports.checkLinkData = (name, url, cat, res) => {
+  const { checkRange, checkUrl } = require("../middleware/checkers");
+
   const { CHECK_CAT, CHECK_NAME, CHECK_URL, STRING_MAX, STRING_MIN } = process.env;
 
-  const IS_NAME_CHECKED = nem.checkRange(name, STRING_MIN, STRING_MAX);
-  const IS_URL_CHECKED  = nem.checkUrl("https://" + url);
-  const IS_CAT_CHECKED  = nem.checkRange(cat, STRING_MIN, STRING_MAX);
+  const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_URL_CHECKED  = checkUrl("https://" + url);
+  const IS_CAT_CHECKED  = checkRange(cat, STRING_MIN, STRING_MAX);
 
   if (!IS_NAME_CHECKED || !IS_URL_CHECKED || !IS_CAT_CHECKED) {
     return res.status(403).json({ message: CHECK_NAME || CHECK_URL || CHECK_CAT });
@@ -71,7 +71,6 @@ exports.listLinks = async (req, res) => {
     res.status(200).json(links);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: LINKS_NOT_FOUND });
   }
 };
@@ -108,7 +107,6 @@ exports.createLink = async (req, res, next) => {
       res.status(201).json({ message: LINK_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: LINK_NOT_CREATED });
     }
   })
@@ -150,7 +148,6 @@ exports.updateLink = async (req, res, next) => {
       res.status(200).json({ message: LINK_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: LINK_NOT_UPDATED });
     }
   })
@@ -174,7 +171,6 @@ exports.deleteLink = async (req, res) => {
     res.status(204).json({ message: LINK_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: LINK_NOT_DELETED });
   }
 };

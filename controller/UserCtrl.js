@@ -1,10 +1,11 @@
 "use strict";
 
 const bcrypt      = require("bcrypt");
-const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
-const nem         = require("nemjs");
+
+const { getName } = require("../middleware/getters");
+const db          = require("../model");
 
 require("dotenv").config();
 
@@ -30,11 +31,13 @@ const User = db.user;
  * @return {object} - JSON response with an error message if any validation fails.
  */
 exports.checkUserData = (name, email, role, res) => {
+  const { checkEmail, checkRange } = require("../middleware/checkers");
+
   const { CHECK_EMAIL, CHECK_NAME, CHECK_ROLE, STRING_MAX, STRING_MIN } = process.env;
 
-  const IS_NAME_CHECKED = nem.checkRange(name, STRING_MIN, STRING_MAX);
-  const IS_EMAIL_CHECKED = nem.checkEmail(email);
-  const IS_ROLE_CHECKED = nem.checkRange(role, STRING_MIN, STRING_MAX);
+  const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_EMAIL_CHECKED = checkEmail(email);
+  const IS_ROLE_CHECKED = checkRange(role, STRING_MIN, STRING_MAX);
 
   if (!IS_NAME_CHECKED || !IS_EMAIL_CHECKED || !IS_ROLE_CHECKED) {
     return res.status(403).json({ message: CHECK_NAME || CHECK_EMAIL || CHECK_ROLE });
@@ -50,9 +53,10 @@ exports.checkUserData = (name, email, role, res) => {
  * @return {object} - The response object with an error message if the password is invalid.
  */
 exports.checkUserPass = (pass, res) => {
+  const { checkPass } = require("../middleware/checkers");
   const { CHECK_PASS } = process.env;
 
-  if (!nem.checkPass(pass)) return res.status(403).json({ message: CHECK_PASS });
+  if (!checkPass(pass)) return res.status(403).json({ message: CHECK_PASS });
 }
 
 /**
@@ -81,10 +85,12 @@ exports.checkUserUnique = (name, email, user, res) => {
  * @param {string} output - The name of the output image.
  */
 exports.setImage = async (input, output) => {
+  const { setThumbnail } = require("../middleware/setters");
+
   const INPUT   = `users/${input}`;
   const OUTPUT  = `users/${output}`;
 
-  await nem.setThumbnail(INPUT, OUTPUT);
+  await setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -119,7 +125,7 @@ exports.createUser = async (req, res, next) => {
         this.checkUserUnique(name, email, user, res);
       }
 
-      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
+      const IMG = `${getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
         await this.setImage(image.newFilename, IMG);
@@ -146,13 +152,15 @@ exports.createUser = async (req, res, next) => {
  * @param {Function} next - the next middleware function
  */
 exports.sendMessage = (req, res, next) => {
+  const { getMailer, getMessage } = require("../middleware/getters");
+
   const { USER_MESSAGE } = process.env;
-  const mailer = nem.getMailer();
+  const mailer = getMailer();
 
   form.parse(req, (err, fields) => {
     if (err) { next(err); return }
 
-    const mail  = nem.getMessage(fields);
+    const mail  = getMessage(fields);
     fields.html = `<p>${fields.html}</p>`;
 
     (async function () {
@@ -195,7 +203,6 @@ exports.listUsers = async (req, res) => {
     res.status(200).json(usersList);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: USERS_NOT_FOUND });
   }
 }
@@ -255,7 +262,7 @@ exports.updateUser = async (req, res, next) => {
       if (image && image.newFilename) {
         await fs.promises.unlink(USERS_THUMB + img);
 
-        img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`
+        img = `${getName(name)}-${Date.now()}.${IMG_EXT}`
 
         await this.setImage(image.newFilename, img);
         await fs.promises.unlink(USERS_IMG + image.newFilename);
@@ -277,7 +284,6 @@ exports.updateUser = async (req, res, next) => {
       res.status(200).json({ message: USER_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: USER_NOT_UPDATED });
     }
   })
@@ -309,7 +315,6 @@ exports.deleteUser = async (req, res) => {
     res.status(204).json({ message: USER_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: USER_NOT_FOUND });
   }
 }

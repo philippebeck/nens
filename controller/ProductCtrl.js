@@ -1,9 +1,10 @@
 "use strict";
 
-const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
-const nem         = require("nemjs");
+
+const { getName } = require("../middleware/getters");
+const db          = require("../model");
 
 require("dotenv").config();
 
@@ -31,13 +32,15 @@ const Product = db.product;
  * @return {object} The response object with a JSON message if there are errors.
  */
 exports.checkProductData = (name, description, alt, price, cat, res) => {
+  const { checkRange } = require("../middleware/checkers");
+
   const { CHECK_CAT, CHECK_NAME, CHECK_PRICE, CHECK_TEXT, PRICE_MAX, PRICE_MIN, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
-  const IS_NAME_CHECKED   = nem.checkRange(name, STRING_MIN, STRING_MAX);
-  const IS_DESC_CHECKED   = nem.checkRange(description, TEXT_MIN, TEXT_MAX);
-  const IS_ALT_CHECKED    = nem.checkRange(alt, STRING_MIN, STRING_MAX);
-  const IS_PRICE_CHECKED  = nem.checkRange(price, PRICE_MIN, PRICE_MAX);
-  const ID_CAT_CHECKED    = nem.checkRange(cat, STRING_MIN, STRING_MAX);
+  const IS_NAME_CHECKED   = checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_DESC_CHECKED   = checkRange(description, TEXT_MIN, TEXT_MAX);
+  const IS_ALT_CHECKED    = checkRange(alt, STRING_MIN, STRING_MAX);
+  const IS_PRICE_CHECKED  = checkRange(price, PRICE_MIN, PRICE_MAX);
+  const ID_CAT_CHECKED    = checkRange(cat, STRING_MIN, STRING_MAX);
 
   if (!IS_NAME_CHECKED || !IS_DESC_CHECKED || !IS_ALT_CHECKED || !IS_PRICE_CHECKED || !ID_CAT_CHECKED) {
     return res.status(403).json({ 
@@ -71,12 +74,14 @@ exports.checkProductUnique = (name, description, product, res) => {
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = async (input, output) => {
+exports.setImages = async (input, output) => {
+  const { setImage, setThumbnail } = require("../middleware/setters");
+
   const INPUT   = `products/${input}`;
   const OUTPUT  = `products/${output}`;
 
-  await nem.setImage(INPUT, OUTPUT);
-  await nem.setThumbnail(INPUT, OUTPUT);
+  await setImage(INPUT, OUTPUT);
+  await setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -96,7 +101,6 @@ exports.listProducts = async (req, res) => {
     res.status(200).json(products);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: PRODUCTS_NOT_FOUND });
   }
 };
@@ -118,7 +122,6 @@ exports.readProduct = async (req, res) => {
     res.status(200).json(product);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: PRODUCT_NOT_FOUND });
   }
 }
@@ -154,10 +157,10 @@ exports.createProduct = async (req, res, next) => {
         this.checkProductUnique(name, description, product, res);
       }
 
-      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
+      const IMG = `${getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
-        await this.setImage(image.newFilename, IMG);
+        await this.setImages(image.newFilename, IMG);
         await fs.promises.unlink(PRODUCTS_IMG + image.newFilename);
       } 
 
@@ -165,7 +168,6 @@ exports.createProduct = async (req, res, next) => {
       res.status(201).json({ message: PRODUCT_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: PRODUCT_NOT_CREATED });
     }
   })
@@ -210,9 +212,9 @@ exports.updateProduct = async (req, res, next) => {
         await fs.promises.unlink(PRODUCTS_IMG + img);
         await fs.promises.unlink(PRODUCTS_THUMB + img);
 
-        img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
+        img = `${getName(name)}-${Date.now()}.${IMG_EXT}`;
 
-        await this.setImage(image.newFilename, img);
+        await this.setImages(image.newFilename, img);
         await fs.promises.unlink(PRODUCTS_IMG + image.newFilename);
       }
 
@@ -220,7 +222,6 @@ exports.updateProduct = async (req, res, next) => {
       res.status(200).json({ message: PRODUCT_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: PRODUCT_NOT_UPDATED });
     }
   })
@@ -253,7 +254,6 @@ exports.deleteProduct = async (req, res) => {
     res.status(204).json({ message: PRODUCT_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: PRODUCT_NOT_DELETED });
   }
 };

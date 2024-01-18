@@ -2,16 +2,17 @@
 
 const express     = require("express");
 const router      = express.Router();
-const nem         = require("nemjs");
-const ProductCtrl = require("../controller/ProductCtrl");
+
+const ProductCtrl   = require("../controller/ProductCtrl");
+const { checkAuth } = require("../middleware/checkers");
 
 /* Public */
 router.get("/", ProductCtrl.listProducts);
 router.get("/:id", ProductCtrl.readProduct);
 
 /* Private */
-router.post("/", nem.checkAuth, ProductCtrl.createProduct);
-router.put("/:id", nem.checkAuth, ProductCtrl.updateProduct);
-router.delete("/:id", nem.checkAuth, ProductCtrl.deleteProduct);
+router.post("/", checkAuth, ProductCtrl.createProduct);
+router.put("/:id", checkAuth, ProductCtrl.updateProduct);
+router.delete("/:id", checkAuth, ProductCtrl.deleteProduct);
 
 module.exports = router;

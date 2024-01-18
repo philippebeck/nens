@@ -2,16 +2,17 @@
 
 const express     = require("express");
 const router      = express.Router();
-const nem         = require("nemjs");
-const GalleryCtrl = require("../controller/GalleryCtrl");
+
+const GalleryCtrl   = require("../controller/GalleryCtrl");
+const { checkAuth } = require("../middleware/checkers");
 
 /* Public */
 router.get("/", GalleryCtrl.listGalleries);
 router.get("/:id", GalleryCtrl.readGallery);
 
 /* Private */
-router.post("/", nem.checkAuth, GalleryCtrl.createGallery);
-router.put("/:id", nem.checkAuth, GalleryCtrl.updateGallery);
-router.delete("/:id", nem.checkAuth, GalleryCtrl.deleteGallery);
+router.post("/", checkAuth, GalleryCtrl.createGallery);
+router.put("/:id", checkAuth, GalleryCtrl.updateGallery);
+router.delete("/:id", checkAuth, GalleryCtrl.deleteGallery);
 
 module.exports = router;

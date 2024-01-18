@@ -3,7 +3,6 @@
 const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
-const nem         = require("nemjs");
 
 require("dotenv").config();
 
@@ -29,10 +28,11 @@ const Image   = db.image;
  * @return {object} A message indicating that the gallery data is invalid.
  */
 exports.checkGalleryData = (name, author, res) => {
+  const { checkRange } = require("../middleware/checkers");
   const { CHECK_NAME, STRING_MAX, STRING_MIN } = process.env;
 
-  const IS_NAME_CHECKED   = nem.checkRange(name, STRING_MIN, STRING_MAX);
-  const IS_AUTHOR_CHECKED = nem.checkRange(author, STRING_MIN, STRING_MAX);
+  const IS_NAME_CHECKED   = checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_AUTHOR_CHECKED = checkRange(author, STRING_MIN, STRING_MAX);
 
   if (!IS_NAME_CHECKED || !IS_AUTHOR_CHECKED) {
     return res.status(403).json({ message: CHECK_NAME });
@@ -72,7 +72,6 @@ exports.listGalleries = async (req, res) => {
     res.status(200).json(galleries);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: GALLERIES_NOT_FOUND });
   }
 }
@@ -95,7 +94,6 @@ exports.readGallery = async (req, res) => {
     res.status(200).json(gallery);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: GALLERY_NOT_FOUND });
   }
 }
@@ -113,13 +111,14 @@ exports.readGallery = async (req, res) => {
  * @throws {Error} If the gallery was not created.
  */
 exports.createGallery = async (req, res, next) => {
+  const { getPosterName } = require("../middleware/getters");
   const { GALLERY_CREATED, GALLERY_NOT_CREATED } = process.env;
 
   form.parse(req, async (err, fields) => {
     if (err) { next(err); return }
 
     const { author, name } = fields;
-    const cover = nem.getPosterName(name);
+    const cover = getPosterName(name);
 
     try {
       this.checkGalleryData(name, author, res);
@@ -138,7 +137,6 @@ exports.createGallery = async (req, res, next) => {
       res.status(201).json({ message: GALLERY_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: GALLERY_NOT_CREATED });
     }
   })
@@ -180,7 +178,6 @@ exports.updateGallery = async (req, res, next) => {
       res.status(200).json({ message: GALLERY_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: GALLERY_NOT_UPDATED });
     }
   })
@@ -217,7 +214,6 @@ exports.deleteGallery = async (req, res) => {
     res.status(204).json({ message: GALLERY_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: GALLERY_NOT_DELETED });
   }
 }
