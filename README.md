@@ -15,7 +15,7 @@ API with Node, Express, NemJS & SQL
 
 ## Overview
 
-Nens is an API made with Node, Express & MySQL, where you can find an "homemade" package complementary, NemJS, for JWT, Nodemailer, Sharp & back securities, as the backend services  
+Nens is an API made with Node, Express & MySQL, where you can find an some packages complementary, like JWT, Nodemailer, Sharp & back securities  
 
 ## Summary
 
@@ -63,11 +63,8 @@ Install the backend dependencies :
 
 ## Configuration
 
-Concat the .env.example of NemJS with the .env.example of Nens :  
-`$ grunt`
-
-Configure the .env.compile by replacing the values *(like DB, Mailer & Token)* :  
-`.env.compile` *(then rename it .env)*  
+Configure the .env.example by replacing the values *(like DB, Mailer & Token)* :  
+`.env.example` *(then rename it .env)*  
 
 Your personal .env will be hidden in .gitignore automatically  
 
@@ -110,6 +107,3 @@ Available API Files :
 
 Available Documentation :  
 -  [**API**](https://github.com/philippebeck/nens/blob/main/swagger.yaml)  
-
-Available Readme :  
--  [**NemJS**](https://github.com/philippebeck/nemjs)  
