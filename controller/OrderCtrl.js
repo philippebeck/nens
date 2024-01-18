@@ -76,7 +76,6 @@ exports.listOrders = async (req, res) => {
     res.status(200).json(orders);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: ORDERS_NOT_FOUND });
   }
 };
@@ -98,7 +97,6 @@ exports.listUserOrders = async (req, res) => {
     res.status(200).json(orders);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: ORDERS_NOT_FOUND });
   }
 };
@@ -138,7 +136,6 @@ exports.createOrder = async (req, res, next) => {
       res.status(202).json({ message: `${ORDER_CREATED} & ${ORDER_MESSAGE}` });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: ORDER_NOT_CREATED });
     }
   })
@@ -184,7 +181,6 @@ exports.deleteOrder = async (req, res) => {
     res.status(204).json({ message: ORDER_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: ORDER_NOT_DELETED });
   }
 };

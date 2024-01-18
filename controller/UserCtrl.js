@@ -203,7 +203,6 @@ exports.listUsers = async (req, res) => {
     res.status(200).json(usersList);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: USERS_NOT_FOUND });
   }
 }
@@ -285,7 +284,6 @@ exports.updateUser = async (req, res, next) => {
       res.status(200).json({ message: USER_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: USER_NOT_UPDATED });
     }
   })
@@ -317,7 +315,6 @@ exports.deleteUser = async (req, res) => {
     res.status(204).json({ message: USER_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: USER_NOT_FOUND });
   }
 }

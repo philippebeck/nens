@@ -71,7 +71,6 @@ exports.listLinks = async (req, res) => {
     res.status(200).json(links);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: LINKS_NOT_FOUND });
   }
 };
@@ -108,7 +107,6 @@ exports.createLink = async (req, res, next) => {
       res.status(201).json({ message: LINK_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: LINK_NOT_CREATED });
     }
   })
@@ -150,7 +148,6 @@ exports.updateLink = async (req, res, next) => {
       res.status(200).json({ message: LINK_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: LINK_NOT_UPDATED });
     }
   })
@@ -174,7 +171,6 @@ exports.deleteLink = async (req, res) => {
     res.status(204).json({ message: LINK_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: LINK_NOT_DELETED });
   }
 };

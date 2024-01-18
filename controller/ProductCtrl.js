@@ -101,7 +101,6 @@ exports.listProducts = async (req, res) => {
     res.status(200).json(products);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: PRODUCTS_NOT_FOUND });
   }
 };
@@ -123,7 +122,6 @@ exports.readProduct = async (req, res) => {
     res.status(200).json(product);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: PRODUCT_NOT_FOUND });
   }
 }
@@ -170,7 +168,6 @@ exports.createProduct = async (req, res, next) => {
       res.status(201).json({ message: PRODUCT_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: PRODUCT_NOT_CREATED });
     }
   })
@@ -225,7 +222,6 @@ exports.updateProduct = async (req, res, next) => {
       res.status(200).json({ message: PRODUCT_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: PRODUCT_NOT_UPDATED });
     }
   })
@@ -258,7 +254,6 @@ exports.deleteProduct = async (req, res) => {
     res.status(204).json({ message: PRODUCT_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: PRODUCT_NOT_DELETED });
   }
 };

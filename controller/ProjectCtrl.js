@@ -102,7 +102,6 @@ exports.listProjects = async (req, res) => {
     res.status(200).json(projects);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: PROJECTS_NOT_FOUND });
   }
 }
@@ -149,7 +148,6 @@ exports.createProject = async (req, res, next) => {
       res.status(201).json({ message: PROJECT_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: PROJECT_NOT_CREATED });
     }
   })
@@ -204,7 +202,6 @@ exports.updateProject = async (req, res, next) => {
       res.status(200).json({ message: PROJECT_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: PROJECT_NOT_UPDATED });
     }
   })
@@ -237,7 +234,6 @@ exports.deleteProject = async (req, res) => {
     res.status(204).json({ message: PROJECT_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: PROJECT_NOT_DELETED });
   }
 };

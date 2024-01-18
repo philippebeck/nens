@@ -72,7 +72,6 @@ exports.listGalleries = async (req, res) => {
     res.status(200).json(galleries);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: GALLERIES_NOT_FOUND });
   }
 }
@@ -95,7 +94,6 @@ exports.readGallery = async (req, res) => {
     res.status(200).json(gallery);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: GALLERY_NOT_FOUND });
   }
 }
@@ -139,7 +137,6 @@ exports.createGallery = async (req, res, next) => {
       res.status(201).json({ message: GALLERY_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: GALLERY_NOT_CREATED });
     }
   })
@@ -181,7 +178,6 @@ exports.updateGallery = async (req, res, next) => {
       res.status(200).json({ message: GALLERY_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: GALLERY_NOT_UPDATED });
     }
   })
@@ -218,7 +214,6 @@ exports.deleteGallery = async (req, res) => {
     res.status(204).json({ message: GALLERY_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: GALLERY_NOT_DELETED });
   }
 }

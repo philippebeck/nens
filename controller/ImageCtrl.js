@@ -86,7 +86,6 @@ exports.listImages = async (req, res) => {
     res.status(200).json(images);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: IMAGES_NOT_FOUND });
   }
 }
@@ -113,7 +112,6 @@ exports.listGalleryImages = async (req, res) => {
     res.status(200).json(images);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: IMAGES_NOT_FOUND });
   }
 };
@@ -167,7 +165,6 @@ exports.createImage = async (req, res, next) => {
       res.status(201).json({ message: IMAGE_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: IMAGE_NOT_CREATED });
     }
   })
@@ -226,7 +223,6 @@ exports.updateImage = async (req, res, next) => {
       res.status(200).json({ message: IMAGE_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: IMAGE_NOT_UPDATED });
     }
   })
@@ -259,7 +255,6 @@ exports.deleteImage = async (req, res) => {
     res.status(204).json({ message: IMAGE_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: IMAGE_NOT_DELETED });
   }
 };

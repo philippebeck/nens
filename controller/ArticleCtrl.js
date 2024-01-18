@@ -102,7 +102,6 @@ exports.listArticles = async (req, res) => {
     res.status(200).json(articles);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: ARTICLES_NOT_FOUND });
   }
 }
@@ -124,7 +123,6 @@ exports.readArticle = async (req, res) => {
     res.status(200).json(article);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: ARTICLE_NOT_FOUND });
   }
 }
@@ -171,7 +169,6 @@ exports.createArticle = async (req, res, next) => {
       res.status(201).json({ message: ARTICLE_CREATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: ARTICLE_NOT_CREATED });
     }
   })
@@ -226,7 +223,6 @@ exports.updateArticle = async (req, res, next) => {
       res.status(200).json({ message: ARTICLE_UPDATED });
 
     } catch (error) {
-      console.error(error);
       res.status(400).json({ message: ARTICLE_NOT_UPDATED });
     }
   })
@@ -259,7 +255,6 @@ exports.deleteArticle = async (req, res) => {
     res.status(204).json({ message: ARTICLE_DELETED });
 
   } catch (error) {
-    console.error(error);
     res.status(400).json({ message: ARTICLE_NOT_DELETED });
   }
 };

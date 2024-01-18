@@ -37,7 +37,6 @@ exports.readAvatar = async (req, res) => {
     res.status(200).json(avatar);
 
   } catch (error) {
-    console.error(error);
     res.status(404).json({ message: USER_NOT_FOUND });
   }
 }
@@ -94,7 +93,6 @@ exports.loginUser = async (req, res, next) => {
       await setAuth(pass, user, res);
 
     } catch (error) {
-      console.error(error);
       res.status(401).json({ message: AUTH_LOGIN });
     }
   })
@@ -146,7 +144,6 @@ exports.forgotPass = async (req, res, next) => {
       } else if (err.name === 'SequelizeValidationError') {
         res.status(400).json({ message: USER_NOT_UPDATED });
       } else {
-        console.error(err);
         res.status(400).json({ message: USER_NOT_PASS });
       }
     }
