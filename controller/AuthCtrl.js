@@ -1,10 +1,10 @@
 "use strict";
 
 const bcrypt      = require("bcrypt");
-const db          = require("../model");
 const formidable  = require("formidable");
-const nem         = require("nemjs");
 const Recaptcha   = require("google-recaptcha");
+
+const db = require("../model");
 
 require("dotenv").config();
 
@@ -76,7 +76,8 @@ exports.checkRecaptcha = (req, res, next) => {
  * @throws {Error} If the user is not found in the database.
  */
 exports.loginUser = async (req, res, next) => {
-  const { AUTH_LOGIN } = process.env;
+  const { setAuth }     = require("../middleware/setters");
+  const { AUTH_LOGIN }  = process.env;
 
   form.parse(req, async (err, fields) => {
     if (err) { next(err); return }
@@ -90,7 +91,7 @@ exports.loginUser = async (req, res, next) => {
         return res.status(404).json({ message: USER_NOT_FOUND });
       }
 
-      nem.setAuth(pass, user, res);
+      await setAuth(pass, user, res);
 
     } catch (error) {
       console.error(error);
@@ -110,19 +111,22 @@ exports.loginUser = async (req, res, next) => {
  * @throws {Error} If the user is not found in the database.
  */
 exports.forgotPass = async (req, res, next) => {
+  const { checkEmail } = require("../middleware/checkers");
+  const { getMailer, getMessage, getPassword } = require("../middleware/getters");
+
   const { AUTH_MESSAGE, CHECK_EMAIL, DISPO_EMAIL_REF, USER_NOT_PASS, USER_NOT_UPDATED } = process.env;
 
   form.parse(req, async (err, fields) => {
     if (err) { next(err); return }
 
     const { email, html } = fields;
-    const pass  = nem.getPassword();
+    const pass  = getPassword();
     fields.html = `<p>${html}</p><b>${pass}</b>`;
 
-    if (!nem.checkEmail(email)) return res.status(403).json({ message: CHECK_EMAIL });
+    if (!checkEmail(email)) return res.status(403).json({ message: CHECK_EMAIL });
 
-    const mailer  = nem.getMailer();
-    const mail    = nem.getMessage(fields);
+    const mailer  = getMailer();
+    const mail    = getMessage(fields);
 
     try {
       const user = await User.findOne({ where: { email: email }});

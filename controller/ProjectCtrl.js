@@ -1,9 +1,10 @@
 "use strict";
 
-const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
-const nem         = require("nemjs");
+
+const { getName } = require("../middleware/getters");
+const db          = require("../model");
 
 require("dotenv").config();
 
@@ -31,14 +32,16 @@ const Project = db.project;
  * @return {object} The response object with an error message if the project is not correct.
  */
 exports.checkProjectData = (name, description, alt, url, cat, res) => {
+  const { checkRange, checkUrl } = require("../middleware/checkers");
+
   const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, CHECK_URL, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
-  const IS_NAME_CHECKED = nem.checkRange(name, STRING_MIN, STRING_MAX);
-  const IS_TEXT_CHECKED = nem.checkRange(description, TEXT_MIN, TEXT_MAX);
-  const IS_ALT_CHECKED  = nem.checkRange(alt, STRING_MIN, STRING_MAX);
+  const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_TEXT_CHECKED = checkRange(description, TEXT_MIN, TEXT_MAX);
+  const IS_ALT_CHECKED  = checkRange(alt, STRING_MIN, STRING_MAX);
 
-  const IS_URL_CHECKED  = url ? nem.checkUrl("https://" + url) : true;
-  const IS_CAT_CHECKED  = nem.checkRange(cat, STRING_MIN, STRING_MAX);
+  const IS_URL_CHECKED  = url ? checkUrl("https://" + url) : true;
+  const IS_CAT_CHECKED  = checkRange(cat, STRING_MIN, STRING_MAX);
 
   if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !IS_URL_CHECKED || !IS_CAT_CHECKED) {
     return res.status(403).json({ 
@@ -72,12 +75,14 @@ exports.checkProjectUnique = (name, description, project, res) => {
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = async (input, output) => {
+exports.setImages = async (input, output) => {
+  const { setImage, setThumbnail } = require("../middleware/setters");
+
   const INPUT   = `projects/${input}`;
   const OUTPUT  = `projects/${output}`;
 
-  await nem.setImage(INPUT, OUTPUT);
-  await nem.setThumbnail(INPUT, OUTPUT);
+  await setImage(INPUT, OUTPUT);
+  await setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -133,10 +138,10 @@ exports.createProject = async (req, res, next) => {
         this.checkProjectUnique(name, description, project, res);
       }
 
-      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
+      const IMG = `${getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
-        await this.setImage(image.newFilename, IMG);
+        await this.setImages(image.newFilename, IMG);
         await fs.promises.unlink(PROJECTS_IMG + image.newFilename);
       }
 
@@ -189,9 +194,9 @@ exports.updateProject = async (req, res, next) => {
         await fs.promises.unlink(PROJECTS_IMG + img);
         await fs.promises.unlink(PROJECTS_THUMB + img);
 
-        img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
+        img = `${getName(name)}-${Date.now()}.${IMG_EXT}`;
 
-        await this.setImage(image.newFilename, img);
+        await this.setImages(image.newFilename, img);
         await fs.promises.unlink(PROJECTS_IMG + image.newFilename);
       }
 

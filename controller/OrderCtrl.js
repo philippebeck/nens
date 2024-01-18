@@ -1,15 +1,13 @@
 "use strict";
 
-const db          = require("../model");
 const formidable  = require("formidable");
-const nem         = require("nemjs");
+const db          = require("../model");
 
 require("dotenv").config();
 
 const { ORDERS_NOT_FOUND } = process.env;
 
 const form  = formidable();
-
 const Order = db.order;
 const User  = db.user;
 
@@ -116,6 +114,8 @@ exports.listUserOrders = async (req, res) => {
  * @throws {Error} If an error occurs while creating the order.
  */
 exports.createOrder = async (req, res, next) => {
+  const { getMailer, getMessage } = require("../middleware/getters");
+
   const { ORDER_CREATED, ORDER_MESSAGE, ORDER_NOT_CREATED, USER_NOT_FOUND } = process.env;
 
   form.parse(req, async (err, fields) => {
@@ -131,8 +131,8 @@ exports.createOrder = async (req, res, next) => {
       if (!user) return res.status(404).json({ message: USER_NOT_FOUND });
 
       message.email = user.email;
-      const mailer  = nem.getMailer();
-      const mail    = nem.getMessage(message);
+      const mailer  = getMailer();
+      const mail    = getMessage(message);
 
       await mailer.sendMail(mail);
       res.status(202).json({ message: `${ORDER_CREATED} & ${ORDER_MESSAGE}` });

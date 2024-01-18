@@ -1,9 +1,10 @@
 "use strict";
 
-const db          = require("../model");
 const formidable  = require("formidable");
 const fs          = require("fs");
-const nem         = require("nemjs");
+
+const { getName } = require("../middleware/getters");
+const db          = require("../model");
 
 require("dotenv").config();
 
@@ -31,14 +32,16 @@ const Article = db.article;
  * @return {object} The response object with an error message if the article is not correct.
  */
 exports.checkArticleData = (name, text, alt, url, cat, res) => {
+  const { checkRange, checkUrl } = require("../middleware/checkers");
+
   const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, CHECK_URL, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
-  const IS_NAME_CHECKED = nem.checkRange(name, STRING_MIN, STRING_MAX);
-  const IS_TEXT_CHECKED = nem.checkRange(text, TEXT_MIN, TEXT_MAX);
-  const IS_ALT_CHECKED  = nem.checkRange(alt, STRING_MIN, STRING_MAX);
+  const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_TEXT_CHECKED = checkRange(text, TEXT_MIN, TEXT_MAX);
+  const IS_ALT_CHECKED  = checkRange(alt, STRING_MIN, STRING_MAX);
 
-  const IS_URL_CHECKED  = url ? nem.checkUrl("https://" + url) : true;
-  const IS_CAT_CHECKED  = nem.checkRange(cat, STRING_MIN, STRING_MAX);
+  const IS_URL_CHECKED  = url ? checkUrl("https://" + url) : true;
+  const IS_CAT_CHECKED  = checkRange(cat, STRING_MIN, STRING_MAX);
 
   if (!IS_NAME_CHECKED || !IS_TEXT_CHECKED || !IS_ALT_CHECKED || !IS_URL_CHECKED || !IS_CAT_CHECKED) {
     return res.status(403).json({ 
@@ -66,18 +69,20 @@ exports.checkArticleUnique = (name, text, article, res) => {
 }
 
 /**
- * ? SET IMAGE
- * * Sets the image for an article.
+ * ? SET IMAGES
+ * * Sets the images for an article.
  * 
  * @param {string} input - The name of the input image.
  * @param {string} output - The name of the output image.
  */
-exports.setImage = async (input, output) => {
+exports.setImages = async (input, output) => {
+  const { setImage, setThumbnail } = require("../middleware/setters");
+
   const INPUT   = `articles/${input}`;
   const OUTPUT  = `articles/${output}`;
 
-  await nem.setImage(INPUT, OUTPUT);
-  await nem.setThumbnail(INPUT, OUTPUT);
+  await setImage(INPUT, OUTPUT);
+  await setThumbnail(INPUT, OUTPUT);
 }
 
 //! ******************** PUBLIC ********************
@@ -155,10 +160,10 @@ exports.createArticle = async (req, res, next) => {
         this.checkArticleUnique(name, text, article, res);
       }
 
-      const IMG = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
+      const IMG = `${getName(name)}-${Date.now()}.${IMG_EXT}`;
 
       if (image && image.newFilename) {
-        await this.setImage(image.newFilename, IMG);
+        await this.setImages(image.newFilename, IMG);
         await fs.promises.unlink(ARTICLES_IMG + image.newFilename);
       }
 
@@ -211,9 +216,9 @@ exports.updateArticle = async (req, res, next) => {
         await fs.promises.unlink(ARTICLES_IMG + img);
         await fs.promises.unlink(ARTICLES_THUMB + img);
 
-        img = `${nem.getName(name)}-${Date.now()}.${IMG_EXT}`;
+        img = `${getName(name)}-${Date.now()}.${IMG_EXT}`;
 
-        await this.setImage(image.newFilename, img);
+        await this.setImages(image.newFilename, img);
         await fs.promises.unlink(ARTICLES_IMG + image.newFilename);
       }
 
