@@ -2,17 +2,18 @@
 
 const express   = require("express");
 const router    = express.Router();
-const nem       = require("nemjs");
-const UserCtrl  = require("../controller/UserCtrl");
+
+const UserCtrl      = require("../controller/UserCtrl");
+const { checkAuth } = require("../middleware/checkers");
 
 /* Public */
 router.post("/", UserCtrl.createUser);
 router.post("/message", UserCtrl.sendMessage);
 
 /* Private */
-router.get("/", nem.checkAuth, UserCtrl.listUsers);
-router.get("/:id", nem.checkAuth, UserCtrl.readUser);
-router.put("/:id", nem.checkAuth, UserCtrl.updateUser);
-router.delete("/:id", nem.checkAuth, UserCtrl.deleteUser);
+router.get("/", checkAuth, UserCtrl.listUsers);
+router.get("/:id", checkAuth, UserCtrl.readUser);
+router.put("/:id", checkAuth, UserCtrl.updateUser);
+router.delete("/:id", checkAuth, UserCtrl.deleteUser);
 
 module.exports = router;

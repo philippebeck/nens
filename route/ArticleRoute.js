@@ -1,17 +1,18 @@
 "use strict";
 
-const express     = require("express");
-const router      = express.Router();
-const nem         = require("nemjs");
-const ArticleCtrl = require("../controller/ArticleCtrl");
+const express = require("express");
+const router  = express.Router();
+
+const ArticleCtrl   = require("../controller/ArticleCtrl");
+const { checkAuth } = require("../middleware/checkers");
 
 /* Public */
 router.get("/", ArticleCtrl.listArticles);
 router.get("/:id", ArticleCtrl.readArticle);
 
 /* Private */
-router.post("/", nem.checkAuth, ArticleCtrl.createArticle);
-router.put("/:id", nem.checkAuth, ArticleCtrl.updateArticle);
-router.delete("/:id", nem.checkAuth, ArticleCtrl.deleteArticle);
+router.post("/", checkAuth, ArticleCtrl.createArticle);
+router.put("/:id", checkAuth, ArticleCtrl.updateArticle);
+router.delete("/:id", checkAuth, ArticleCtrl.deleteArticle);
 
 module.exports = router;
