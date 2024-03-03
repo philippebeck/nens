@@ -6,6 +6,8 @@ const fs          = require("fs");
 
 require("dotenv").config();
 
+const { checkRange, getPosterName } = require("../app/middlewares");
+
 const { GALLERIES_NOT_FOUND, IMG_URL, THUMB_URL } = process.env;
 
 const GALLERIES_IMG   = `${IMG_URL}galleries/`;
@@ -28,7 +30,6 @@ const Image   = db.image;
  * @return {object} A message indicating that the gallery data is invalid.
  */
 exports.checkGalleryData = (name, author, res) => {
-  const { checkRange } = require("../middleware/checkers");
   const { CHECK_NAME, STRING_MAX, STRING_MIN } = process.env;
 
   const IS_NAME_CHECKED   = checkRange(name, STRING_MIN, STRING_MAX);
@@ -111,7 +112,6 @@ exports.readGallery = async (req, res) => {
  * @throws {Error} If the gallery was not created.
  */
 exports.createGallery = async (req, res, next) => {
-  const { getPosterName } = require("../middleware/getters");
   const { GALLERY_CREATED, GALLERY_NOT_CREATED } = process.env;
 
   form.parse(req, async (err, fields) => {

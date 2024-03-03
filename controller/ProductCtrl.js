@@ -2,12 +2,11 @@
 
 const formidable  = require("formidable");
 const fs          = require("fs");
-
-const { getName } = require("../middleware/getters");
 const db          = require("../model");
 
 require("dotenv").config();
 
+const { checkRange, getName, setImage, setThumbnail } = require("../app/middlewares");
 const {IMG_EXT, IMG_URL, PRODUCT_NOT_FOUND, PRODUCTS_NOT_FOUND, THUMB_URL } = process.env;
 
 const PRODUCTS_IMG    = `${IMG_URL}products/`;
@@ -32,8 +31,6 @@ const Product = db.product;
  * @return {object} The response object with a JSON message if there are errors.
  */
 exports.checkProductData = (name, description, alt, price, cat, res) => {
-  const { checkRange } = require("../middleware/checkers");
-
   const { CHECK_CAT, CHECK_NAME, CHECK_PRICE, CHECK_TEXT, PRICE_MAX, PRICE_MIN, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
   const IS_NAME_CHECKED   = checkRange(name, STRING_MIN, STRING_MAX);
@@ -75,8 +72,6 @@ exports.checkProductUnique = (name, description, product, res) => {
  * @param {string} output - The name of the output image.
  */
 exports.setImages = async (input, output) => {
-  const { setImage, setThumbnail } = require("../middleware/setters");
-
   const INPUT   = `products/${input}`;
   const OUTPUT  = `products/${output}`;
 

@@ -2,12 +2,11 @@
 
 const formidable  = require("formidable");
 const fs          = require("fs");
-
-const { getName } = require("../middleware/getters");
 const db          = require("../model");
 
 require("dotenv").config();
 
+const { checkRange, getName, setImage, setThumbnail } = require("../app/middlewares");
 const { IMAGES_NOT_FOUND, IMG_URL, THUMB_URL } = process.env;
 
 const GALLERIES_IMG   = `${IMG_URL}galleries/`;
@@ -29,7 +28,6 @@ const Image   = db.image;
  * @return {object} The JSON response.
  */
 exports.checkImageData = (description, res) => {
-  const { checkRange } = require("../middleware/checkers");
   const { CHECK_NAME, STRING_MIN, TEXT_MAX } = process.env;
 
   if (!checkRange(description, STRING_MIN, TEXT_MAX)) {
@@ -62,7 +60,6 @@ exports.checkImageUnique = (name, image, res) => {
  * @param {string} output - The name of the output image.
  */
 exports.setImages = async (input, output) => {
-  const { setImage, setThumbnail } = require("../middleware/setters");
   const INPUT   = `galleries/${input}`;
   const OUTPUT  = `galleries/${output}`;
 

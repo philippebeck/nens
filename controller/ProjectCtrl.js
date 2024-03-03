@@ -2,12 +2,11 @@
 
 const formidable  = require("formidable");
 const fs          = require("fs");
-
-const { getName } = require("../middleware/getters");
 const db          = require("../model");
 
 require("dotenv").config();
 
+const { checkRange, checkUrl, getName, setImage, setThumbnail } = require("../app/middlewares");
 const { PROJECT_NOT_FOUND, PROJECTS_NOT_FOUND, IMG_EXT, IMG_URL, THUMB_URL } = process.env;
 
 const PROJECTS_IMG    = `${IMG_URL}projects/`;
@@ -32,8 +31,6 @@ const Project = db.project;
  * @return {object} The response object with an error message if the project is not correct.
  */
 exports.checkProjectData = (name, description, alt, url, cat, res) => {
-  const { checkRange, checkUrl } = require("../middleware/checkers");
-
   const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, CHECK_URL, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
   const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);
@@ -76,8 +73,6 @@ exports.checkProjectUnique = (name, description, project, res) => {
  * @param {string} output - The name of the output image.
  */
 exports.setImages = async (input, output) => {
-  const { setImage, setThumbnail } = require("../middleware/setters");
-
   const INPUT   = `projects/${input}`;
   const OUTPUT  = `projects/${output}`;
 
