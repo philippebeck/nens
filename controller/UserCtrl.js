@@ -3,12 +3,11 @@
 const bcrypt      = require("bcrypt");
 const formidable  = require("formidable");
 const fs          = require("fs");
-
-const { getName } = require("../middleware/getters");
 const db          = require("../model");
 
 require("dotenv").config();
 
+const { checkEmail, checkRange, checkPass, getMailer, getMessage, getName, setThumbnail } = require("../app/middlewares");
 const { IMG_EXT, IMG_URL, THUMB_URL, USER_NOT_FOUND } = process.env;
 
 const USERS_IMG   = `${IMG_URL}users/`;
@@ -31,13 +30,11 @@ const User = db.user;
  * @return {object} - JSON response with an error message if any validation fails.
  */
 exports.checkUserData = (name, email, role, res) => {
-  const { checkEmail, checkRange } = require("../middleware/checkers");
-
   const { CHECK_EMAIL, CHECK_NAME, CHECK_ROLE, STRING_MAX, STRING_MIN } = process.env;
 
-  const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);
-  const IS_EMAIL_CHECKED = checkEmail(email);
-  const IS_ROLE_CHECKED = checkRange(role, STRING_MIN, STRING_MAX);
+  const IS_NAME_CHECKED   = checkRange(name, STRING_MIN, STRING_MAX);
+  const IS_EMAIL_CHECKED  = checkEmail(email);
+  const IS_ROLE_CHECKED   = checkRange(role, STRING_MIN, STRING_MAX);
 
   if (!IS_NAME_CHECKED || !IS_EMAIL_CHECKED || !IS_ROLE_CHECKED) {
     return res.status(403).json({ message: CHECK_NAME || CHECK_EMAIL || CHECK_ROLE });
@@ -53,7 +50,6 @@ exports.checkUserData = (name, email, role, res) => {
  * @return {object} - The response object with an error message if the password is invalid.
  */
 exports.checkUserPass = (pass, res) => {
-  const { checkPass } = require("../middleware/checkers");
   const { CHECK_PASS } = process.env;
 
   if (!checkPass(pass)) return res.status(403).json({ message: CHECK_PASS });
@@ -85,8 +81,6 @@ exports.checkUserUnique = (name, email, user, res) => {
  * @param {string} output - The name of the output image.
  */
 exports.setImage = async (input, output) => {
-  const { setThumbnail } = require("../middleware/setters");
-
   const INPUT   = `users/${input}`;
   const OUTPUT  = `users/${output}`;
 
@@ -152,8 +146,6 @@ exports.createUser = async (req, res, next) => {
  * @param {Function} next - the next middleware function
  */
 exports.sendMessage = (req, res, next) => {
-  const { getMailer, getMessage } = require("../middleware/getters");
-
   const { USER_MESSAGE } = process.env;
   const mailer = getMailer();
 

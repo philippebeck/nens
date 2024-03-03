@@ -2,12 +2,11 @@
 
 const formidable  = require("formidable");
 const fs          = require("fs");
-
-const { getName } = require("../middleware/getters");
 const db          = require("../model");
 
 require("dotenv").config();
 
+const { checkRange, checkUrl, getName, setImage, setThumbnail } = require("../app/middlewares");
 const { ARTICLE_NOT_FOUND, ARTICLES_NOT_FOUND, IMG_EXT, IMG_URL, THUMB_URL } = process.env;
 
 const ARTICLES_IMG    = `${IMG_URL}articles/`;
@@ -32,8 +31,6 @@ const Article = db.article;
  * @return {object} The response object with an error message if the article is not correct.
  */
 exports.checkArticleData = (name, text, alt, url, cat, res) => {
-  const { checkRange, checkUrl } = require("../middleware/checkers");
-
   const { CHECK_CAT, CHECK_NAME, CHECK_TEXT, CHECK_URL, STRING_MAX, STRING_MIN, TEXT_MAX, TEXT_MIN } = process.env;
 
   const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);
@@ -76,8 +73,6 @@ exports.checkArticleUnique = (name, text, article, res) => {
  * @param {string} output - The name of the output image.
  */
 exports.setImages = async (input, output) => {
-  const { setImage, setThumbnail } = require("../middleware/setters");
-
   const INPUT   = `articles/${input}`;
   const OUTPUT  = `articles/${output}`;
 

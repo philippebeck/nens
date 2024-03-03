@@ -3,11 +3,11 @@
 const bcrypt      = require("bcrypt");
 const formidable  = require("formidable");
 const Recaptcha   = require("google-recaptcha");
-
-const db = require("../model");
+const db          = require("../model");
 
 require("dotenv").config();
 
+const { checkEmail, getMailer, getMessage, getPassword, setAuth } = require("../app/middlewares");
 const { USER_NOT_FOUND } = process.env;
 
 const form      = formidable();
@@ -75,7 +75,6 @@ exports.checkRecaptcha = (req, res, next) => {
  * @throws {Error} If the user is not found in the database.
  */
 exports.loginUser = async (req, res, next) => {
-  const { setAuth }     = require("../middleware/setters");
   const { AUTH_LOGIN }  = process.env;
 
   form.parse(req, async (err, fields) => {
@@ -109,9 +108,6 @@ exports.loginUser = async (req, res, next) => {
  * @throws {Error} If the user is not found in the database.
  */
 exports.forgotPass = async (req, res, next) => {
-  const { checkEmail } = require("../middleware/checkers");
-  const { getMailer, getMessage, getPassword } = require("../middleware/getters");
-
   const { AUTH_MESSAGE, CHECK_EMAIL, DISPO_EMAIL_REF, USER_NOT_PASS, USER_NOT_UPDATED } = process.env;
 
   form.parse(req, async (err, fields) => {

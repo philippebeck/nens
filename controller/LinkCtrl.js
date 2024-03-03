@@ -5,6 +5,7 @@ const db          = require("../model");
 
 require("dotenv").config();
 
+const { checkRange, checkUrl } = require("../app/middlewares");
 const { LINKS_NOT_FOUND } = process.env;
 
 const form = formidable();
@@ -23,8 +24,6 @@ const Link = db.link;
  * @return {object} The error message if any validation fails.
  */
 exports.checkLinkData = (name, url, cat, res) => {
-  const { checkRange, checkUrl } = require("../middleware/checkers");
-
   const { CHECK_CAT, CHECK_NAME, CHECK_URL, STRING_MAX, STRING_MIN } = process.env;
 
   const IS_NAME_CHECKED = checkRange(name, STRING_MIN, STRING_MAX);

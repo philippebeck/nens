@@ -1,4 +1,6 @@
 .env
+.vscode/
+app/DBData.sql
 coverage/
-data/DBPrivate.sql
+img/
 node_modules/

@@ -4,7 +4,7 @@ const express = require("express");
 const router  = express.Router();
 
 const ArticleCtrl   = require("../controller/ArticleCtrl");
-const { checkAuth } = require("../middleware/checkers");
+const { checkAuth } = require("../app/middlewares");
 
 /* Public */
 router.get("/", ArticleCtrl.listArticles);

@@ -4,7 +4,7 @@ const express   = require("express");
 const router    = express.Router();
 
 const OrderCtrl     = require("../controller/OrderCtrl");
-const { checkAuth } = require("../middleware/checkers");
+const { checkAuth } = require("../app/middlewares");
 
 /* Private */
 router.get("/", checkAuth, OrderCtrl.listOrders);

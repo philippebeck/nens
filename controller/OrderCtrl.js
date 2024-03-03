@@ -5,6 +5,7 @@ const db          = require("../model");
 
 require("dotenv").config();
 
+const { getMailer, getMessage } = require("../app/middlewares");
 const { ORDERS_NOT_FOUND } = process.env;
 
 const form  = formidable();
@@ -112,8 +113,6 @@ exports.listUserOrders = async (req, res) => {
  * @throws {Error} If an error occurs while creating the order.
  */
 exports.createOrder = async (req, res, next) => {
-  const { getMailer, getMessage } = require("../middleware/getters");
-
   const { ORDER_CREATED, ORDER_MESSAGE, ORDER_NOT_CREATED, USER_NOT_FOUND } = process.env;
 
   form.parse(req, async (err, fields) => {

@@ -4,7 +4,7 @@ const express     = require("express");
 const router      = express.Router();
 
 const ImageCtrl     = require("../controller/ImageCtrl");
-const { checkAuth } = require("../middleware/checkers");
+const { checkAuth } = require("../app/middlewares");
 
 
 /* Public */
