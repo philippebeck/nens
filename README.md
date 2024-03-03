@@ -73,12 +73,9 @@ Your personal .env will be hidden in .gitignore automatically
 ## DataBase
 
 Import the database tables :  
-`$ mysql -u root -p < data/DBTables.sql` or with a UI like phpMyAdmin  
+`$ mysql -u root -p < app/DBTables.sql` or with a UI like phpMyAdmin  
 
-Replace data from DBPublic.sql, add your own data, especially for users & products, then import this file :  
-`$ mysql -u root -p < data/DBPublic.sql` or with a UI like phpMyAdmin  
-
-Personally, I have another SQL file for private data (users & products), hidden in .gitignore  
+Personally, I have another SQL file for data insertion, hidden in .gitignore  
 
 ---
 
