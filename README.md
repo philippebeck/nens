@@ -1,6 +1,6 @@
 # Nens 
 
-Backend Framework with Node, Express, NemJS & SQL
+Backend Framework with Node, Express & SQL
 
 [![NPM Version](https://badgen.net/npm/v/nens)](https://www.npmjs.com/package/nens)
 
