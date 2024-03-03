@@ -4,7 +4,7 @@ const express   = require("express");
 const router    = express.Router();
 
 const UserCtrl      = require("../controller/UserCtrl");
-const { checkAuth } = require("../middleware/checkers");
+const { checkAuth } = require("../app/middlewares");
 
 /* Public */
 router.post("/", UserCtrl.createUser);

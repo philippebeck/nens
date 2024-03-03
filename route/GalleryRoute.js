@@ -4,7 +4,7 @@ const express     = require("express");
 const router      = express.Router();
 
 const GalleryCtrl   = require("../controller/GalleryCtrl");
-const { checkAuth } = require("../middleware/checkers");
+const { checkAuth } = require("../app/middlewares");
 
 /* Public */
 router.get("/", GalleryCtrl.listGalleries);
