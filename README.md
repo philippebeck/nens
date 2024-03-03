@@ -1,6 +1,6 @@
 # Nens 
 
-API with Node, Express, NemJS & SQL
+Backend Framework with Node, Express, NemJS & SQL
 
 [![NPM Version](https://badgen.net/npm/v/nens)](https://www.npmjs.com/package/nens)
 
@@ -15,7 +15,7 @@ API with Node, Express, NemJS & SQL
 
 ## Overview
 
-Nens is an API made with Node, Express & MySQL, where you can find an some packages complementary, like JWT, Nodemailer, Sharp & back securities  
+Nens is a Backend Framework made with Node, Express & MySQL, where you can find an some packages complementary, like JWT, Nodemailer, Sharp & back securities  
 
 ## Summary
 
